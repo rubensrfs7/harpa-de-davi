@@ -1,0 +1,7 @@
+{
+  "name": "Escalas do Harpa de Davi",
+  "description": "Gerenciador de escalas musicais para igrejas com geração automática e equitativa.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
