@@ -30,6 +30,8 @@ export interface ScheduleItem {
   musicians: Member[];
   singers: Member[];
   songs?: string[];
+  // Record<MemberID, boolean> -> true = presente, false = falta
+  attendance?: Record<string, boolean>; 
 }
 
 export interface SubstitutionLog {

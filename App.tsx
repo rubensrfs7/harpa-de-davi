@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wand2, Trash2, Moon, Sun, LayoutDashboard, Calendar as CalendarIcon, Users, Music2, LogOut, Globe, Check, Eraser } from 'lucide-react';
+import { Wand2, Trash2, Moon, Sun, LayoutDashboard, Calendar as CalendarIcon, Users, Music2, LogOut, Globe, Check, Eraser, UserCheck } from 'lucide-react';
 import { Member, ScheduleItem, SubstitutionLog, Song } from './types.ts';
 import MemberForm from './components/MemberForm.tsx';
 import MemberList from './components/MemberList.tsx';
@@ -9,10 +9,11 @@ import Repertoire from './components/Repertoire.tsx';
 import DateTimePicker from './components/DateTimePicker.tsx';
 import Login from './components/Login.tsx';
 import PublicCalendar from './components/PublicCalendar.tsx';
+import AttendanceList from './components/AttendanceList.tsx';
 import { generateFullSchedule, regenerateDay } from './services/scheduler.ts';
 import { supabase } from './lib/supabase.ts';
 
-type View = 'scheduler' | 'dashboard' | 'members' | 'repertoire' | 'public_calendar';
+type View = 'scheduler' | 'dashboard' | 'members' | 'repertoire' | 'public_calendar' | 'attendance';
 
 const HarpIcon: React.FC<{ size?: number; className?: string; strokeWidth?: number }> = ({ size = 24, className = "", strokeWidth = 2 }) => (
   <svg 
@@ -124,7 +125,8 @@ const App: React.FC = () => {
                 ...item,
                 musicians: (item.musician_ids || []).map((id: string) => membersRes.data.find(m => m.id === id)).filter(Boolean),
                 singers: (item.singer_ids || []).map((id: string) => membersRes.data.find(m => m.id === id)).filter(Boolean),
-                songs: cleanSongs
+                songs: cleanSongs,
+                attendance: item.attendance_record || undefined // Mapeia o JSONB do banco para o frontend
              };
           });
 
@@ -225,11 +227,15 @@ const App: React.FC = () => {
       const safeMusicians = updatedItem.musicians.map(m => m.id).filter(id => id && id.length > 0);
       const safeSingers = updatedItem.singers.map(s => s.id).filter(id => id && id.length > 0);
       const safeSongs = (updatedItem.songs || []).filter(id => id && id.length > 0);
+      
+      // Enviamos attendance_record para o Supabase (JSONB)
+      const attendanceRecord = updatedItem.attendance || {};
 
       const { error } = await supabase.from('schedules').update({
         musician_ids: safeMusicians,
         singer_ids: safeSingers,
-        song_ids: safeSongs
+        song_ids: safeSongs,
+        attendance_record: attendanceRecord 
       }).eq('id', updatedItem.id);
       
       if (error) throw error;
@@ -288,7 +294,8 @@ const App: React.FC = () => {
         date: new Date(item.date).toISOString(),
         musician_ids: item.musicians.map(m => m.id),
         singer_ids: item.singers.map(s => s.id),
-        song_ids: []
+        song_ids: [],
+        attendance_record: {}
       }));
 
       const { error } = await supabase.from('schedules').insert(dbData);
@@ -489,6 +496,7 @@ const App: React.FC = () => {
                 {[
                   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
                   { id: 'scheduler', label: 'Escalas', icon: CalendarIcon },
+                  { id: 'attendance', label: 'Presença', icon: UserCheck },
                   { id: 'members', label: 'Equipe', icon: Users },
                   { id: 'repertoire', label: 'Músicas', icon: Music2 }
                 ].map((item) => (
@@ -616,6 +624,8 @@ const App: React.FC = () => {
               onUpdateScheduleItem={handleUpdateScheduleItem} 
             />
           </div>
+        ) : view === 'attendance' ? (
+           <AttendanceList schedule={schedule} onUpdateSchedule={handleUpdateScheduleItem} />
         ) : view === 'members' ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="lg:col-span-1">
@@ -652,10 +662,11 @@ const App: React.FC = () => {
       {/* Mobile Tab Navigation */}
       {!isPublicLinkMode && isAuthenticated && (
         <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
-           <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-700/50 shadow-2xl p-2 grid grid-cols-4 gap-1">
+           <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-700/50 shadow-2xl p-2 grid grid-cols-5 gap-1">
                 {[
                     { id: 'dashboard', icon: LayoutDashboard, label: 'Dash' },
                     { id: 'scheduler', icon: CalendarIcon, label: 'Escalas' },
+                    { id: 'attendance', icon: UserCheck, label: 'Presença' },
                     { id: 'members', icon: Users, label: 'Equipe' },
                     { id: 'repertoire', icon: Music2, label: 'Músicas' }
                 ].map((item) => (
@@ -668,8 +679,8 @@ const App: React.FC = () => {
                           : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                     >
-                        <item.icon size={22} />
-                        {view !== item.id && <span className="text-[9px] font-bold uppercase tracking-wide">{item.label}</span>}
+                        <item.icon size={20} />
+                        {view !== item.id && <span className="text-[8px] font-bold uppercase tracking-wide">{item.label}</span>}
                     </button>
                 ))}
            </div>
