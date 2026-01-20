@@ -597,7 +597,7 @@ const App: React.FC = () => {
                 onRemoveSong={handleRemoveSong} 
             />
         ) : (
-            <PublicCalendar schedule={schedule} songs={songs} />
+            <PublicCalendar schedule={schedule} songs={songs} members={members} />
         )}
       </main>
       
