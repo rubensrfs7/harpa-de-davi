@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, MoreVertical, Calendar } from 'lucide-react';
+import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle } from 'lucide-react';
 import { ScheduleItem, Member, Song } from '../types';
 
 interface ScheduleProps {
@@ -29,13 +28,19 @@ const getInitials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2)
 
 const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onDeleteScheduleItem, onClear, onUpdateScheduleItem, readOnly = false }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editState, setEditState] = useState<{ musicians: string[], singers: string[] }>({ musicians: [], singers: [] });
+  const [editState, setEditState] = useState<{ musicians: string[], singers: string[], songs: string[] }>({ musicians: [], singers: [], songs: [] });
 
   const startEditing = (item: ScheduleItem) => {
     setEditingId(item.id);
+    
+    // AUTO-CORREÇÃO: Filtra apenas músicas que existem no banco de dados atual
+    // Isso impede que IDs antigos/deletados apareçam como "Música não encontrada"
+    const validSongs = (item.songs || []).filter(id => allSongs.some(s => s.id === id));
+
     setEditState({
       musicians: item.musicians.map(m => m.id),
-      singers: item.singers.map(s => s.id)
+      singers: item.singers.map(s => s.id),
+      songs: validSongs
     });
   };
 
@@ -46,7 +51,8 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
     onUpdateScheduleItem({
       ...item,
       musicians: updatedMusicians,
-      singers: updatedSingers
+      singers: updatedSingers,
+      songs: editState.songs
     });
     setEditingId(null);
   };
@@ -166,7 +172,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
 
                 {/* Right Side: Content */}
                 <div className="flex-1 p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                         {/* Musicians Column */}
                         <div className="space-y-5">
                             <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -265,6 +271,99 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                 )}
                             </div>
                         </div>
+
+                         {/* Songs Column */}
+                         <div className="space-y-5 lg:col-span-1 md:col-span-2">
+                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                                <div className="p-2 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-lg">
+                                    <Music2 size={18} />
+                                </div>
+                                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Músicas</h4>
+                            </div>
+
+                            <div className="space-y-4">
+                                {isEditing ? (
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Adicionar Louvor</label>
+                                        
+                                        {allSongs.length === 0 ? (
+                                            <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 rounded-lg text-xs font-bold mb-3">
+                                                <AlertCircle size={16} />
+                                                <span>Nenhuma música no acervo.</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-2 mb-3">
+                                                <select 
+                                                    className="flex-1 bg-white dark:bg-slate-900 border-none rounded-lg text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-pink-500"
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        if(val && !editState.songs.includes(val)) {
+                                                            setEditState(prev => ({...prev, songs: [...prev.songs, val]}));
+                                                            e.target.value = ""; // Reset select
+                                                        }
+                                                    }}
+                                                >
+                                                    <option value="">+ Selecione uma música</option>
+                                                    {allSongs
+                                                        .filter(s => !editState.songs.includes(s.id))
+                                                        .sort((a, b) => a.title.localeCompare(b.title))
+                                                        .map(s => (
+                                                        <option key={s.id} value={s.id}>
+                                                            {s.title} — {s.artist} {s.key ? `(${s.key})` : ''}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                        
+                                        <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                                            {editState.songs.map((songId, idx) => {
+                                                const song = allSongs.find(s => s.id === songId);
+                                                // Se a música não existir (e.g. deletada durante edição), não renderiza nada para evitar "Música não encontrada"
+                                                if (!song) return null; 
+                                                
+                                                return (
+                                                    <div key={songId} className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                         <div className="min-w-0">
+                                                             <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{song.title}</p>
+                                                             <p className="text-[10px] text-slate-400 truncate">
+                                                                {song.artist} {song.key ? `• ${song.key}` : ''}
+                                                             </p>
+                                                         </div>
+                                                         <button 
+                                                            onClick={() => setEditState(prev => ({...prev, songs: prev.songs.filter(id => id !== songId)}))} 
+                                                            className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                            title="Remover da escala"
+                                                         >
+                                                             <Trash2 size={14} />
+                                                         </button>
+                                                    </div>
+                                                )
+                                            })}
+                                            {editState.songs.length === 0 && allSongs.length > 0 && (
+                                                <p className="text-center text-xs text-slate-400 py-2">Nenhuma música selecionada.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {item.songs && item.songs.length > 0 ? item.songs.map(songId => {
+                                            const song = allSongs.find(s => s.id === songId);
+                                            if (!song) return null;
+                                            return (
+                                                <div key={songId} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-100 dark:border-slate-700/30 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors">
+                                                    <div>
+                                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{song.title}</p>
+                                                        <p className="text-[10px] text-slate-400">{song.artist} {song.key ? `• ${song.key}` : ''}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }) : <p className="text-sm text-slate-400 italic">Nenhum louvor definido.</p>}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

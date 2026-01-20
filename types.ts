@@ -17,9 +17,11 @@ export interface Member {
 export interface Song {
   id: string;
   title: string;
-  artist: string;
+  artist: string; // Artista Original
   lyricsLink?: string;
   youtubeLink?: string;
+  key?: string; // Tonalidade (Ex: C, G, Am)
+  singerId?: string; // ID do membro da equipe que canta
 }
 
 export interface ScheduleItem {

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Trash2, Music, Mic, Edit2, Drum, CalendarClock, UserX, Ban } from 'lucide-react';
 import { Member } from '../types';
@@ -124,8 +123,8 @@ const MemberList: React.FC<MemberListProps> = ({ members, onRemove, onEdit }) =>
   );
 
   return (
-    <div className="max-h-[650px] overflow-y-auto custom-scrollbar p-1 space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="p-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {members.map((member) => (
           <MemberCard key={member.id} member={member} onRemove={onRemove} onEdit={onEdit} />
         ))}

@@ -74,30 +74,61 @@ const App: React.FC = () => {
     }
   }, [isDarkMode]);
 
+  // Função auxiliar para evitar [object Object]
+  const formatError = (error: any): string => {
+    if (!error) return 'Erro desconhecido';
+    if (typeof error === 'string') return error;
+    if (error.message) return error.message;
+    if (error.error_description) return error.error_description;
+    return JSON.stringify(error);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const [membersRes, songsRes, scheduleRes, logsRes] = await Promise.all([
           supabase.from('members').select('*'),
-          supabase.from('songs').select('*'),
+          supabase.from('songs').select('*').order('title'),
           supabase.from('schedules').select('*').order('date', { ascending: true }),
           supabase.from('substitution_logs').select('*')
         ]);
 
         if (membersRes.data) setMembers(membersRes.data);
-        if (songsRes.data) setSongs(songsRes.data);
+        
+        let validSongIds = new Set<string>();
+
+        // MAPEAMENTO ESTRITO: Banco (snake_case) -> App (camelCase)
+        if (songsRes.data) {
+          const formattedSongs: Song[] = songsRes.data.map((s: any) => ({
+            id: s.id,
+            title: s.title,
+            artist: s.artist,
+            lyricsLink: s.lyrics_link,   
+            youtubeLink: s.youtube_link, 
+            key: s.musical_key, // Atenção: Coluna 'musical_key'
+            singerId: s.singer_id        
+          }));
+          setSongs(formattedSongs);
+          formattedSongs.forEach(s => validSongIds.add(s.id));
+        }
+
         if (logsRes.data) setSubstitutionLogs(logsRes.data);
         
         if (scheduleRes.data && membersRes.data) {
-          const inflatedSchedule = scheduleRes.data.map((item: any) => ({
-            ...item,
-            musicians: (item.musician_ids || []).map((id: string) => membersRes.data.find(m => m.id === id)).filter(Boolean),
-            singers: (item.singer_ids || []).map((id: string) => membersRes.data.find(m => m.id === id)).filter(Boolean),
-            songs: item.song_ids || []
-          }));
+          const inflatedSchedule = scheduleRes.data.map((item: any) => {
+             // LIMPEZA AUTOMÁTICA: Remove IDs de músicas que não existem mais na lista de músicas carregadas
+             const cleanSongs = (item.song_ids || []).filter((id: string) => validSongIds.has(id));
+
+             return {
+                ...item,
+                musicians: (item.musician_ids || []).map((id: string) => membersRes.data.find(m => m.id === id)).filter(Boolean),
+                singers: (item.singer_ids || []).map((id: string) => membersRes.data.find(m => m.id === id)).filter(Boolean),
+                songs: cleanSongs
+             };
+          });
           setSchedule(inflatedSchedule);
-          setSelectedDates(inflatedSchedule.map(s => s.date));
+          setSelectedDates(inflatedSchedule.map((s: any) => s.date));
         }
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
@@ -131,19 +162,25 @@ const App: React.FC = () => {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  // --- HANDLERS COM TRATAMENTO DE ERRO APRIMORADO ---
+
   const handleDeleteScheduleItem = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja excluir permanentemente este culto?')) return;
     const previousSchedule = [...schedule];
     const previousSelectedDates = [...selectedDates];
-    const itemToDelete = schedule.find(s => s.id === id);
-    setIsSyncing(true);
+    
+    // UI Otimista
     setSchedule(prev => prev.filter(s => s.id !== id));
+    const itemToDelete = schedule.find(s => s.id === id);
     if (itemToDelete) setSelectedDates(prev => prev.filter(d => d !== itemToDelete.date));
+    
+    setIsSyncing(true);
     try {
       const { error } = await supabase.from('schedules').delete().eq('id', id);
       if (error) throw error;
     } catch (err: any) {
-      alert(`ERRO AO EXCLUIR: ${err.message}`);
+      alert(`ERRO AO EXCLUIR: ${formatError(err)}`);
+      // Reverter
       setSchedule(previousSchedule);
       setSelectedDates(previousSelectedDates);
     } finally {
@@ -155,14 +192,16 @@ const App: React.FC = () => {
     if (!window.confirm('ATENÇÃO: Isso apagará TODAS as escalas geradas.\nDeseja continuar?')) return;
     const previousSchedule = [...schedule];
     const previousSelectedDates = [...selectedDates];
-    setIsSyncing(true);
+    
     setSchedule([]);
     setSelectedDates([]);
+    setIsSyncing(true);
+    
     try {
       const { error } = await supabase.from('schedules').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       if (error) throw error;
     } catch (err: any) {
-      alert(`ERRO AO LIMPAR TUDO: ${err.message}`);
+      alert(`ERRO AO LIMPAR TUDO: ${formatError(err)}`);
       setSchedule(previousSchedule);
       setSelectedDates(previousSelectedDates);
     } finally {
@@ -174,13 +213,23 @@ const App: React.FC = () => {
     setIsSyncing(true);
     try {
       setSchedule(prev => prev.map(s => s.id === updatedItem.id ? updatedItem : s));
+      
+      // FIX CRÍTICO: Filtrar strings vazias ou nulas para evitar erro "invalid input syntax for type uuid"
+      const safeMusicians = updatedItem.musicians.map(m => m.id).filter(id => id && id.length > 0);
+      const safeSingers = updatedItem.singers.map(s => s.id).filter(id => id && id.length > 0);
+      const safeSongs = (updatedItem.songs || []).filter(id => id && id.length > 0);
+
       const { error } = await supabase.from('schedules').update({
-        musician_ids: updatedItem.musicians.map(m => m.id),
-        singer_ids: updatedItem.singers.map(s => s.id)
+        musician_ids: safeMusicians,
+        singer_ids: safeSingers,
+        song_ids: safeSongs
       }).eq('id', updatedItem.id);
+      
       if (error) throw error;
     } catch (err) {
       console.error("Erro ao atualizar:", err);
+      // Reverte visualmente se falhar (opcional, mas recomendado)
+      alert(`Erro ao atualizar escala: ${formatError(err)}`);
     } finally {
       setIsSyncing(false);
     }
@@ -208,11 +257,13 @@ const App: React.FC = () => {
       const { error } = await supabase.from('schedules').insert(dbData);
       if (error) throw error;
     } catch (err: any) {
-        alert(`Erro ao salvar escala: ${err.message}`);
+        alert(`Erro ao salvar escala: ${formatError(err)}`);
     } finally {
       setIsSyncing(false);
     }
   };
+
+  // --- MEMBROS ---
 
   const handleAddMember = async (member: Member) => {
     setIsSyncing(true);
@@ -220,7 +271,9 @@ const App: React.FC = () => {
       const { error } = await supabase.from('members').insert([member]);
       if (error) throw error;
       setMembers(prev => [...prev, member]);
-    } catch (err) { console.error(err); } finally { setIsSyncing(false); }
+    } catch (err) { 
+        alert(`Erro ao adicionar membro: ${formatError(err)}`); 
+    } finally { setIsSyncing(false); }
   };
 
   const handleUpdateMember = async (member: Member) => {
@@ -228,40 +281,136 @@ const App: React.FC = () => {
     try {
       const { error } = await supabase.from('members').update(member).eq('id', member.id);
       if (error) throw error;
-      setMembers(prev => [...prev, member]);
+      setMembers(prev => prev.map(m => m.id === member.id ? member : m));
       setEditingMember(null);
-    } catch (err) { console.error(err); } finally { setIsSyncing(false); }
+    } catch (err) { 
+        alert(`Erro ao atualizar membro: ${formatError(err)}`); 
+    } finally { setIsSyncing(false); }
   };
 
   const handleRemoveMember = async (id: string) => {
     if (window.confirm('Excluir este integrante?')) {
+      const previousMembers = [...members];
+      setMembers(prev => prev.filter(m => m.id !== id));
       setIsSyncing(true);
       try {
         const { error } = await supabase.from('members').delete().eq('id', id);
         if (error) throw error;
-        setMembers(prev => prev.filter(m => m.id !== id));
-      } catch (err) { console.error(err); } finally { setIsSyncing(false); }
+      } catch (err) { 
+          alert(`Erro ao remover membro: ${formatError(err)}`); 
+          setMembers(previousMembers);
+      } finally { setIsSyncing(false); }
     }
   };
+
+  // --- MÚSICAS (CRUD PADRONIZADO E BLINDADO) ---
 
   const handleAddSong = async (song: Song) => {
     setIsSyncing(true);
     try {
-      const { error } = await supabase.from('songs').insert([song]);
+      // FIX: Garantir que singer_id não seja string vazia
+      const safeSingerId = (song.singerId && song.singerId.trim() !== '') ? song.singerId : null;
+
+      const dbSong = {
+        title: song.title,
+        artist: song.artist,
+        lyrics_link: song.lyricsLink || null,
+        youtube_link: song.youtubeLink || null,
+        musical_key: song.key || null,
+        singer_id: safeSingerId
+      };
+      
+      const { data, error } = await supabase.from('songs').insert([dbSong]).select().single();
+      
       if (error) throw error;
-      setSongs(prev => [...prev, song]);
-    } catch (err) { console.error(err); } finally { setIsSyncing(false); }
+
+      if (data) {
+          const newSong: Song = {
+             id: data.id,
+             title: data.title,
+             artist: data.artist,
+             lyricsLink: data.lyrics_link,
+             youtubeLink: data.youtube_link,
+             key: data.musical_key,
+             singerId: data.singer_id
+          };
+          setSongs(prev => [...prev, newSong].sort((a, b) => a.title.localeCompare(b.title)));
+      }
+    } catch (err) { 
+        console.error("Erro insert song:", err);
+        alert(`Erro ao adicionar música: ${formatError(err)}`); 
+    } finally { setIsSyncing(false); }
+  };
+
+  const handleUpdateSong = async (updatedSong: Song) => {
+    setIsSyncing(true);
+    try {
+      const safeSingerId = (updatedSong.singerId && updatedSong.singerId.trim() !== '') ? updatedSong.singerId : null;
+
+      const dbSongPayload = {
+        title: updatedSong.title,
+        artist: updatedSong.artist,
+        lyrics_link: updatedSong.lyricsLink || null,
+        youtube_link: updatedSong.youtubeLink || null,
+        musical_key: updatedSong.key || null,
+        singer_id: safeSingerId
+      };
+
+      const { error } = await supabase
+        .from('songs')
+        .update(dbSongPayload)
+        .eq('id', updatedSong.id);
+      
+      if (error) throw error;
+
+      setSongs(prev => prev.map(s => s.id === updatedSong.id ? updatedSong : s));
+    } catch (err) { 
+        console.error("Erro update song:", err);
+        alert(`Erro ao atualizar música: ${formatError(err)}`); 
+    } finally { setIsSyncing(false); }
   };
 
   const handleRemoveSong = async (id: string) => {
-    if (window.confirm('Excluir esta música?')) {
-      setIsSyncing(true);
-      try {
-        const { error } = await supabase.from('songs').delete().eq('id', id);
-        if (error) throw error;
-        setSongs(prev => prev.filter(s => s.id !== id));
-      } catch (err) { console.error(err); } finally { setIsSyncing(false); }
-    }
+    if (!window.confirm('Excluir música? Esta ação removerá a música de todas as escalas existentes.')) return;
+
+    const previousSongs = [...songs];
+    const previousSchedule = [...schedule]; 
+
+    // 1. Atualização Otimista
+    setSongs(prev => prev.filter(s => s.id !== id));
+    setSchedule(prev => prev.map(s => ({
+        ...s,
+        songs: s.songs?.filter(sid => sid !== id) || []
+    })));
+
+    setIsSyncing(true);
+
+    try {
+      // 2. Limpeza manual no banco das escalas que contém essa música
+      // Recupera apenas as escalas que têm a música para otimizar
+      const { data: affectedSchedules } = await supabase
+          .from('schedules')
+          .select('id, song_ids')
+          .contains('song_ids', [id]); // Sintaxe para array contains
+
+      if (affectedSchedules && affectedSchedules.length > 0) {
+          const updates = affectedSchedules.map(item => {
+              const cleanIds = item.song_ids.filter((sid: string) => sid !== id);
+              return supabase.from('schedules').update({ song_ids: cleanIds }).eq('id', item.id);
+          });
+          await Promise.all(updates);
+      }
+
+      // 3. Deleta a música
+      const { error } = await supabase.from('songs').delete().eq('id', id);
+      if (error) throw error;
+
+    } catch (err) { 
+        console.error("Erro delete song:", err);
+        alert(`Erro ao excluir música: ${formatError(err)}`); 
+        setSongs(previousSongs);
+        setSchedule(previousSchedule);
+    } finally { setIsSyncing(false); }
   };
 
   if (isLoading) return (
@@ -283,9 +432,9 @@ const App: React.FC = () => {
       <div className="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] bg-gradient-to-br from-indigo-400/20 to-purple-500/20 rounded-full blur-[120px] pointer-events-none animate-blob"></div>
       <div className="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-cyan-400/20 to-blue-500/20 rounded-full blur-[120px] pointer-events-none animate-blob animation-delay-2000"></div>
 
-      {/* Floating Navbar */}
-      <div className="sticky top-4 z-40 px-4 md:px-0 mb-8">
-        <nav className="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-full px-4 py-3 shadow-xl shadow-indigo-500/5 transition-all">
+      {/* Floating Navbar Aligned */}
+      <div className="sticky top-4 z-40 w-full max-w-7xl mx-auto px-4 md:px-6 mb-8">
+        <nav className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-full px-4 py-3 shadow-xl shadow-indigo-500/5 transition-all">
           <div className="flex items-center justify-between">
             {/* Logo Area */}
             <div className="flex items-center gap-3 pl-2">
@@ -364,7 +513,7 @@ const App: React.FC = () => {
         ) : view === 'scheduler' ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Action Bar */}
-            <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2rem] border border-white/40 dark:border-slate-700/40 shadow-xl shadow-slate-200/40 dark:shadow-none">
+            <div className="relative z-30 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white/40 dark:border-slate-700/40 shadow-xl shadow-slate-200/40 dark:shadow-none">
               <div className="flex flex-col md:flex-row gap-6 items-end">
                 <div className="flex-1 w-full space-y-3">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Adicionar Culto</label>
@@ -440,7 +589,13 @@ const App: React.FC = () => {
             </div>
           </div>
         ) : view === 'repertoire' ? (
-            <Repertoire songs={songs} onAddSong={handleAddSong} onRemoveSong={handleRemoveSong} />
+            <Repertoire 
+                songs={songs} 
+                members={members}
+                onAddSong={handleAddSong} 
+                onUpdateSong={handleUpdateSong} 
+                onRemoveSong={handleRemoveSong} 
+            />
         ) : (
             <PublicCalendar schedule={schedule} songs={songs} />
         )}
