@@ -1,17 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Wand2, Trash2, Moon, Sun, LayoutDashboard, Calendar as CalendarIcon, Users, Music2, LogOut, Globe, Check } from 'lucide-react';
-import { Member, ScheduleItem, SubstitutionLog, Song } from './types';
-import MemberForm from './components/MemberForm';
-import MemberList from './components/MemberList';
-import Schedule from './components/Schedule';
-import Dashboard from './components/Dashboard';
-import Repertoire from './components/Repertoire';
-import DateTimePicker from './components/DateTimePicker';
-import Login from './components/Login';
-import PublicCalendar from './components/PublicCalendar';
-import { generateFullSchedule, regenerateDay } from './services/scheduler';
-import { supabase } from './lib/supabase';
+import { Member, ScheduleItem, SubstitutionLog, Song } from './types.ts';
+import MemberForm from './components/MemberForm.tsx';
+import MemberList from './components/MemberList.tsx';
+import Schedule from './components/Schedule.tsx';
+import Dashboard from './components/Dashboard.tsx';
+import Repertoire from './components/Repertoire.tsx';
+import DateTimePicker from './components/DateTimePicker.tsx';
+import Login from './components/Login.tsx';
+import PublicCalendar from './components/PublicCalendar.tsx';
+import { generateFullSchedule, regenerateDay } from './services/scheduler.ts';
+import { supabase } from './lib/supabase.ts';
 
 type View = 'scheduler' | 'dashboard' | 'members' | 'repertoire' | 'public_calendar';
 

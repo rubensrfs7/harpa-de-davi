@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff, Loader2, AlertCircle, Music2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase.ts';
 
 interface LoginProps {
   onLogin: (success: boolean) => void;
