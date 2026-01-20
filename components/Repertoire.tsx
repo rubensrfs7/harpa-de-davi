@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Plus, Music2, Youtube, FileText, Trash2, Search, ExternalLink, Mic2 } from 'lucide-react';
+import { Plus, Music2, Youtube, FileText, Trash2, Search, Mic2 } from 'lucide-react';
 import { Song } from '../types';
 
 interface RepertoireProps {
@@ -40,90 +41,90 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, onAddSong, onRemoveSong 
   );
 
   return (
-    <div className="animate-in slide-in-from-right-4 fade-in duration-500">
-       <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-2xl">
-                <Music2 size={24} />
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+       <div className="flex items-center gap-4 mb-8">
+            <div className="p-4 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-[2rem] shadow-xl shadow-pink-500/20 transform -rotate-3">
+                <Music2 size={28} />
             </div>
             <div>
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Repertório Digital</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Gerencie as músicas, letras e versões</p>
+                <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Repertório</h2>
+                <p className="text-slate-500 dark:text-slate-400 font-medium">Gestão de músicas e links</p>
             </div>
         </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Form Column */}
         <div className="lg:col-span-4">
-          <div className="bg-white dark:bg-slate-900/50 p-6 rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-800/60 transition-all hover:shadow-md sticky top-28">
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-5 flex items-center gap-2">
-              <span className="p-1.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg"><Plus size={16} /></span>
+          <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-[2rem] shadow-xl shadow-slate-200/40 dark:shadow-none border border-white/50 dark:border-slate-700/50 sticky top-28">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+              <span className="p-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg"><Plus size={16} /></span>
               Nova Música
             </h3>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Nome da Música</label>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Título</label>
                 <div className="relative">
-                    <Music2 className="absolute left-3 top-3 text-slate-400" size={18} />
+                    <Music2 className="absolute left-4 top-3.5 text-slate-400" size={18} />
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-0 rounded-xl focus:ring-2 focus:ring-pink-500/20 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
-                        placeholder="Ex: Porque Ele Vive"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold placeholder:text-slate-400 outline-none transition-all"
+                        placeholder="Nome da música"
                         required
                     />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Cantor / Banda</label>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Artista</label>
                 <div className="relative">
-                    <Mic2 className="absolute left-3 top-3 text-slate-400" size={18} />
+                    <Mic2 className="absolute left-4 top-3.5 text-slate-400" size={18} />
                     <input
                         type="text"
                         value={artist}
                         onChange={(e) => setArtist(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-0 rounded-xl focus:ring-2 focus:ring-pink-500/20 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
-                        placeholder="Ex: Harpa Cristã"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold placeholder:text-slate-400 outline-none transition-all"
+                        placeholder="Cantor ou Banda"
                         required
                     />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Link da Letra</label>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Link Letra</label>
                 <div className="relative">
-                    <FileText className="absolute left-3 top-3 text-slate-400" size={18} />
+                    <FileText className="absolute left-4 top-3.5 text-slate-400" size={18} />
                     <input
                         type="url"
                         value={lyricsLink}
                         onChange={(e) => setLyricsLink(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-0 rounded-xl focus:ring-2 focus:ring-pink-500/20 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
-                        placeholder="https://letras.mus.br/..."
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
+                        placeholder="https://..."
                     />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Link do YouTube (Versão)</label>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Link Vídeo</label>
                 <div className="relative">
-                    <Youtube className="absolute left-3 top-3 text-slate-400" size={18} />
+                    <Youtube className="absolute left-4 top-3.5 text-slate-400" size={18} />
                     <input
                         type="url"
                         value={youtubeLink}
                         onChange={(e) => setYoutubeLink(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-0 rounded-xl focus:ring-2 focus:ring-pink-500/20 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
-                        placeholder="https://youtube.com/..."
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
+                        placeholder="https://..."
                     />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-slate-900 dark:bg-pink-600 hover:bg-slate-800 dark:hover:bg-pink-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-slate-900/10 dark:shadow-pink-500/20 active:scale-[0.98] mt-2"
+                className="w-full bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95 mt-2"
               >
-                Salvar Música
+                Salvar no Acervo
               </button>
             </form>
           </div>
@@ -131,66 +132,67 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, onAddSong, onRemoveSong 
 
         {/* List Column */}
         <div className="lg:col-span-8">
-             <div className="bg-white dark:bg-slate-900/50 rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-800/60 p-6 min-h-[500px]">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200">Biblioteca ({songs.length})</h3>
-                    <div className="relative w-full max-w-xs">
-                        <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+             <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 min-h-[500px]">
+                <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+                    <div className="flex items-center gap-2">
+                       <span className="text-2xl font-black text-slate-800 dark:text-white">{songs.length}</span>
+                       <span className="text-sm font-bold text-slate-400 uppercase">Músicas cadastradas</span>
+                    </div>
+                    <div className="relative w-full sm:max-w-xs group">
+                        <Search className="absolute left-4 top-3 text-slate-400 group-focus-within:text-pink-500 transition-colors" size={18} />
                         <input 
                             type="text" 
-                            placeholder="Buscar música..." 
+                            placeholder="Pesquisar no acervo..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-transparent rounded-xl text-sm focus:bg-white dark:focus:bg-slate-700 focus:ring-2 focus:ring-pink-500/20 outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-pink-500/20 outline-none transition-all shadow-sm"
                         />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {filteredSongs.length === 0 ? (
-                        <div className="col-span-full py-10 text-center text-slate-400">
+                        <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
                             Nenhuma música encontrada.
                         </div>
                     ) : (
                         filteredSongs.map(song => (
-                            <div key={song.id} className="group relative bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-pink-200 dark:hover:border-pink-900/50 transition-all hover:shadow-md">
-                                <div className="flex justify-between items-start mb-2">
-                                    <div className="pr-6">
-                                        <h4 className="font-bold text-slate-800 dark:text-white line-clamp-1" title={song.title}>{song.title}</h4>
-                                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{song.artist}</p>
+                            <div key={song.id} className="group relative bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-pink-300 dark:hover:border-pink-500/50 hover:shadow-lg hover:shadow-pink-500/5 transition-all duration-300">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="pr-8">
+                                        <h4 className="font-bold text-slate-800 dark:text-white line-clamp-1 text-lg" title={song.title}>{song.title}</h4>
+                                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{song.artist}</p>
                                     </div>
                                     <button 
                                         onClick={() => onRemoveSong(song.id)}
-                                        className="text-slate-300 hover:text-red-500 transition-colors"
+                                        className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                                     >
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
                                 
-                                <div className="flex gap-2 mt-3">
-                                    {song.lyricsLink && (
+                                <div className="flex gap-2 mt-auto">
+                                    {song.lyricsLink ? (
                                         <a 
                                             href={song.lyricsLink} 
                                             target="_blank" 
                                             rel="noopener noreferrer"
-                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 hover:bg-orange-100 transition-colors"
                                         >
-                                            <FileText size={12} /> Letra
+                                            <FileText size={14} /> Letra
                                         </a>
-                                    )}
-                                    {song.youtubeLink && (
+                                    ) : <div className="flex-1"></div>}
+                                    
+                                    {song.youtubeLink ? (
                                         <a 
                                             href={song.youtubeLink} 
                                             target="_blank" 
                                             rel="noopener noreferrer"
-                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-xl bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 transition-colors"
                                         >
-                                            <Youtube size={12} /> Versão
+                                            <Youtube size={14} /> Vídeo
                                         </a>
-                                    )}
-                                    {!song.lyricsLink && !song.youtubeLink && (
-                                        <span className="text-[10px] text-slate-300 italic py-1.5">Sem links cadastrados</span>
-                                    )}
+                                    ) : <div className="flex-1"></div>}
                                 </div>
                             </div>
                         ))

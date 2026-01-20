@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Wand2, Trash2, Moon, Sun, LayoutDashboard, Calendar as CalendarIcon, Users, Music2, LogOut, CloudCheck, CloudOff, Loader2, AlertCircle, Globe, Copy, Check } from 'lucide-react';
+import { Wand2, Trash2, Moon, Sun, LayoutDashboard, Calendar as CalendarIcon, Users, Music2, LogOut, Globe, Check } from 'lucide-react';
 import { Member, ScheduleItem, SubstitutionLog, Song } from './types';
 import MemberForm from './components/MemberForm';
 import MemberList from './components/MemberList';
@@ -41,7 +41,6 @@ const App: React.FC = () => {
     return sessionStorage.getItem('harp_auth') === 'true';
   });
   
-  // Verifica se é uma visualização pública (link compartilhado)
   const [isPublicLinkMode, setIsPublicLinkMode] = useState(false);
   const [view, setView] = useState<View>('scheduler');
   
@@ -61,9 +60,7 @@ const App: React.FC = () => {
     return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
   });
 
-  // Efeito para checar URL Hash e Modo Escuro
   useEffect(() => {
-    // Check for public link
     if (window.location.hash === '#public') {
       setIsPublicLinkMode(true);
       setView('public_calendar');
@@ -122,7 +119,6 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem('harp_auth');
-    // Remove hash if exists to return to login cleanly
     if (window.location.hash === '#public') {
       history.pushState("", document.title, window.location.pathname + window.location.search);
       setIsPublicLinkMode(false);
@@ -136,7 +132,6 @@ const App: React.FC = () => {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  // ... (Funções de deletar, limpar, atualizar, regenerar, etc. mantidas iguais) ...
   const handleDeleteScheduleItem = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja excluir permanentemente este culto?')) return;
     const previousSchedule = [...schedule];
@@ -270,104 +265,142 @@ const App: React.FC = () => {
     }
   };
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1120]"><Loader2 className="animate-spin text-indigo-600" size={48} /></div>;
+  if (isLoading) return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-[#0f172a] gap-4">
+          <div className="relative">
+              <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 animate-pulse"></div>
+              <HarpIcon size={64} className="text-indigo-600 dark:text-indigo-400 relative z-10 animate-float" />
+          </div>
+          <p className="text-slate-500 font-medium text-sm animate-pulse">Carregando dados...</p>
+      </div>
+  );
   
-  // Se não estiver autenticado E não for modo público, mostra Login
   if (!isAuthenticated && !isPublicLinkMode) return <Login onLogin={handleLogin} isDarkMode={isDarkMode} />;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120] pb-20 relative overflow-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0f172a] pb-24 md:pb-12 relative overflow-hidden font-sans selection:bg-indigo-500 selection:text-white">
       
-      {/* Ambient background glow (Desktop/Mobile) */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+      {/* Background Ambience */}
+      <div className="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] bg-gradient-to-br from-indigo-400/20 to-purple-500/20 rounded-full blur-[120px] pointer-events-none animate-blob"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-cyan-400/20 to-blue-500/20 rounded-full blur-[120px] pointer-events-none animate-blob animation-delay-2000"></div>
 
-      <nav className="sticky top-0 z-40 bg-white/80 dark:bg-[#0B1120]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/50 px-4 md:px-8 py-3 md:py-4 mb-6 md:mb-8 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="p-1.5 md:p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-500/30"><HarpIcon size={20} className="md:w-6 md:h-6" /></div>
-            <div>
-              <h1 className="text-base md:text-lg font-black text-slate-900 dark:text-white leading-none">Harpa de Davi</h1>
-              <p className="hidden md:block text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Gestão Musical</p>
+      {/* Floating Navbar */}
+      <div className="sticky top-4 z-40 px-4 md:px-0 mb-8">
+        <nav className="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-full px-4 py-3 shadow-xl shadow-indigo-500/5 transition-all">
+          <div className="flex items-center justify-between">
+            {/* Logo Area */}
+            <div className="flex items-center gap-3 pl-2">
+              <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+                 <HarpIcon size={20} />
+              </div>
+              <div className="hidden md:block">
+                <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-none tracking-tight">Harpa de Davi</h1>
+              </div>
+            </div>
+            
+            {/* Desktop Navigation */}
+            {!isPublicLinkMode && (
+              <div className="hidden md:flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-full border border-slate-200/50 dark:border-slate-700/50">
+                {[
+                  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                  { id: 'scheduler', label: 'Escalas', icon: CalendarIcon },
+                  { id: 'members', label: 'Equipe', icon: Users },
+                  { id: 'repertoire', label: 'Músicas', icon: Music2 }
+                ].map((item) => (
+                  <button 
+                    key={item.id} 
+                    onClick={() => setView(item.id as any)} 
+                    className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${
+                      view === item.id 
+                      ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' 
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/50'
+                    }`}
+                  >
+                    <item.icon size={14} />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {/* Actions Area */}
+            <div className="flex items-center gap-2 pr-1">
+               {!isPublicLinkMode && (
+                  <button 
+                    onClick={handleCopyPublicLink} 
+                    className={`p-2.5 rounded-full transition-all border ${
+                      copiedLink 
+                      ? 'bg-green-100 text-green-600 border-green-200' 
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-transparent hover:bg-indigo-50 hover:text-indigo-600'
+                    }`}
+                    title="Copiar Link Público"
+                  >
+                    {copiedLink ? <Check size={18} /> : <Globe size={18} />}
+                  </button>
+               )}
+
+               <button 
+                  onClick={() => setIsDarkMode(!isDarkMode)} 
+                  className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+               >
+                 {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+               </button>
+               
+               {isAuthenticated && (
+                 <button 
+                    onClick={handleLogout} 
+                    className="p-2.5 bg-red-50 dark:bg-red-900/20 rounded-full text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                 >
+                   <LogOut size={18} />
+                 </button>
+               )}
             </div>
           </div>
-          
-          <div className="flex items-center gap-2 md:gap-4">
-             {/* Esconde navegação de admin se estiver em modo público */}
-             {!isPublicLinkMode && (
-               <div className="hidden md:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
-                  {['dashboard', 'scheduler', 'members', 'repertoire'].map((id) => (
-                    <button key={id} onClick={() => setView(id as any)} className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase transition-all ${view === id ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
-                      {id === 'dashboard' ? 'Dashboard' : id === 'scheduler' ? 'Escalas' : id === 'members' ? 'Equipe' : 'Músicas'}
-                    </button>
-                  ))}
-               </div>
-             )}
-             
-             <div className="flex items-center gap-2">
-                {!isPublicLinkMode && (
-                   <button 
-                      onClick={handleCopyPublicLink} 
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${copiedLink ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-500'}`}
-                      title="Copiar Link Público"
-                   >
-                     {copiedLink ? <Check size={16} /> : <Globe size={16} />}
-                     <span className="hidden md:inline">{copiedLink ? 'Copiado!' : 'Link Público'}</span>
-                   </button>
-                )}
+        </nav>
+      </div>
 
-                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 md:p-3 bg-slate-100 dark:bg-slate-800/50 rounded-2xl text-slate-600 dark:text-slate-400 hover:scale-105 transition-all">
-                  {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-                </button>
-                
-                {isAuthenticated && (
-                  <button onClick={handleLogout} className="p-2 md:p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl text-red-500 hover:bg-red-100 transition-all" title="Sair">
-                    <LogOut size={18} />
-                  </button>
-                )}
-             </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         {view === 'dashboard' ? (
            <Dashboard members={members} schedule={schedule} logs={substitutionLogs} songs={songs} />
         ) : view === 'scheduler' ? (
-          <div className="space-y-6">
-            <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm">
-              <div className="flex flex-col md:flex-row gap-4 items-end">
-                <div className="flex-1 space-y-2 w-full">
-                  <label className="text-xs font-bold text-slate-500 uppercase ml-1">Adicionar Culto</label>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Action Bar */}
+            <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2rem] border border-white/40 dark:border-slate-700/40 shadow-xl shadow-slate-200/40 dark:shadow-none">
+              <div className="flex flex-col md:flex-row gap-6 items-end">
+                <div className="flex-1 w-full space-y-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Adicionar Culto</label>
                   <DateTimePicker value={newDateInput} onChange={setNewDateInput} />
                 </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    <button onClick={() => { if (newDateInput) { setSelectedDates(prev => [...new Set([...prev, newDateInput])].sort()); setNewDateInput(''); } }} className="flex-1 md:flex-none bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20">
-                    <CalendarIcon size={18} /> Agendar
+                <div className="flex gap-3 w-full md:w-auto">
+                    <button 
+                      onClick={() => { if (newDateInput) { setSelectedDates(prev => [...new Set([...prev, newDateInput])].sort()); setNewDateInput(''); } }} 
+                      className="flex-1 md:flex-none h-[52px] px-8 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 active:scale-95"
+                    >
+                      <CalendarIcon size={20} /> Agendar
                     </button>
-                    <button onClick={handleGenerateSchedule} className="flex-1 md:flex-none bg-slate-900 dark:bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-lg active:scale-95">
-                    <Wand2 size={18} /> <span className="hidden md:inline">Gerar Automático</span><span className="md:hidden">Gerar</span>
+                    <button 
+                      onClick={handleGenerateSchedule} 
+                      className="flex-1 md:flex-none h-[52px] px-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg active:scale-95"
+                    >
+                      <Wand2 size={20} /> <span className="hidden md:inline">Gerar Escala</span><span className="md:hidden">Gerar</span>
                     </button>
                 </div>
               </div>
 
               {selectedDates.length > 0 && (
-                <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2">
+                <div className="mt-6 flex flex-wrap gap-2 pt-5 border-t border-slate-100 dark:border-slate-800">
                   {selectedDates.map(dateStr => {
                     const dateObj = new Date(dateStr);
-                    const dateFormatted = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                    const timeFormatted = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
                     return (
-                      <span key={dateStr} className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-bold border border-indigo-100 dark:border-indigo-800/50">
-                        <span className="opacity-70">{dateFormatted}</span>
-                        <span className="w-1 h-1 bg-indigo-400 rounded-full"></span>
-                        <span>{timeFormatted}</span>
+                      <span key={dateStr} className="inline-flex items-center gap-3 pl-4 pr-2 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl text-sm font-bold border border-indigo-100 dark:border-indigo-800">
+                        {dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} 
+                        <span className="opacity-50">•</span> 
+                        {dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         <button
                           onClick={() => setSelectedDates(prev => prev.filter(d => d !== dateStr))}
-                          className="ml-1 p-1 hover:bg-white dark:hover:bg-indigo-900 rounded-md transition-colors text-indigo-400 hover:text-red-500"
+                          className="ml-1 p-1 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors text-indigo-400 hover:text-red-500"
                         >
-                          <Trash2 size={12} />
+                          <Trash2 size={14} />
                         </button>
                       </span>
                     );
@@ -388,13 +421,17 @@ const App: React.FC = () => {
             />
           </div>
         ) : view === 'members' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <MemberForm 
-              onAdd={handleAddMember} 
-              onUpdate={handleUpdateMember} 
-              editingMember={editingMember} 
-              onCancelEdit={() => setEditingMember(null)} 
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="lg:col-span-1">
+              <div className="sticky top-28">
+                <MemberForm 
+                  onAdd={handleAddMember} 
+                  onUpdate={handleUpdateMember} 
+                  editingMember={editingMember} 
+                  onCancelEdit={() => setEditingMember(null)} 
+                />
+              </div>
+            </div>
             <div className="lg:col-span-2">
               <MemberList 
                 members={members} 
@@ -406,15 +443,14 @@ const App: React.FC = () => {
         ) : view === 'repertoire' ? (
             <Repertoire songs={songs} onAddSong={handleAddSong} onRemoveSong={handleRemoveSong} />
         ) : (
-            // VISÃO PÚBLICA (CALENDÁRIO)
             <PublicCalendar schedule={schedule} songs={songs} />
         )}
       </main>
       
-      {/* Mobile Tab Bar (Only when Admin and logged in) */}
+      {/* Mobile Tab Navigation */}
       {!isPublicLinkMode && isAuthenticated && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-[#0B1120]/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 p-2 z-50">
-            <div className="grid grid-cols-4 gap-1">
+        <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+           <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-700/50 shadow-2xl p-2 grid grid-cols-4 gap-1">
                 {[
                     { id: 'dashboard', icon: LayoutDashboard, label: 'Dash' },
                     { id: 'scheduler', icon: CalendarIcon, label: 'Escalas' },
@@ -424,13 +460,17 @@ const App: React.FC = () => {
                     <button 
                         key={item.id} 
                         onClick={() => setView(item.id as any)}
-                        className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${view === item.id ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400'}`}
+                        className={`flex flex-col items-center justify-center gap-1 h-16 rounded-[1.5rem] transition-all duration-300 ${
+                          view === item.id 
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 translate-y-[-8px]' 
+                          : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
                     >
-                        <item.icon size={20} />
-                        <span className="text-[10px] font-bold uppercase">{item.label}</span>
+                        <item.icon size={22} />
+                        {view !== item.id && <span className="text-[9px] font-bold uppercase tracking-wide">{item.label}</span>}
                     </button>
                 ))}
-            </div>
+           </div>
         </div>
       )}
     </div>

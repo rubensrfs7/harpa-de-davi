@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { RefreshCw, Music, Mic, Trash2, CalendarDays, Clock, Music2, Youtube, Share2, Link as LinkIcon, Check, Edit3, X, Save } from 'lucide-react';
+import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, MoreVertical, Calendar } from 'lucide-react';
 import { ScheduleItem, Member, Song } from '../types';
 
 interface ScheduleProps {
@@ -20,14 +20,14 @@ const formatDateTime = (dateString: string) => {
   return {
     day: date.getDate(),
     month: date.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase(),
-    weekday: date.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase(),
+    weekday: date.toLocaleDateString('pt-BR', { weekday: 'long' }),
     time: date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
   };
 };
 
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
-const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onRegenerateDay, onDeleteScheduleItem, onClear, onUpdateScheduleItem, readOnly = false }) => {
+const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onDeleteScheduleItem, onClear, onUpdateScheduleItem, readOnly = false }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editState, setEditState] = useState<{ musicians: string[], singers: string[] }>({ musicians: [], singers: [] });
 
@@ -65,14 +65,12 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onR
 
   const handleShare = (item: ScheduleItem) => {
     const dateInfo = formatDateTime(item.date);
-    
-    // Definição segura de emojis via Unicode para evitar erros de encoding
-    const eHarp = '\uD83C\uDFBC';   // 🎼
-    const eCal = '\uD83D\uDCC5';    // 📅
-    const eClock = '\u23F0';        // ⏰
-    const ePiano = '\uD83C\uDFB9';  // 🎹
-    const eMic = '\uD83C\uDFA4';    // 🎤
-    const eNotes = '\uD83C\uDFB6';  // 🎶
+    const eHarp = '\uD83C\uDFBC';
+    const eCal = '\uD83D\uDCC5';
+    const eClock = '\u23F0';
+    const ePiano = '\uD83C\uDFB9';
+    const eMic = '\uD83C\uDFA4';
+    const eNotes = '\uD83C\uDFB6';
     
     let text = `*ESCALA HARPA DE DAVI* ${eHarp}\n\n`;
     text += `${eCal} *Data:* ${dateInfo.weekday}, ${dateInfo.day} de ${dateInfo.month}\n`;
@@ -81,22 +79,15 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onR
     text += `*${ePiano} EQUIPE DE MÚSICA:*\n`;
     if (item.musicians.length > 0) {
       item.musicians.forEach(m => {
-        const instruments = m.instruments?.join(', ') || 'Instrumentista';
-        text += `• ${m.name} (${instruments})\n`;
+        text += `• ${m.name} (${m.instruments?.join(', ') || 'Instrumentista'})\n`;
       });
-    } else {
-      text += `_Nenhum músico definido_\n`;
-    }
+    } else { text += `_Nenhum músico definido_\n`; }
     text += `\n`;
 
     text += `*${eMic} EQUIPE DE VOCAL:*\n`;
     if (item.singers.length > 0) {
-      item.singers.forEach(s => {
-        text += `• ${s.name}\n`;
-      });
-    } else {
-      text += `_Nenhum vocal definido_\n`;
-    }
+      item.singers.forEach(s => text += `• ${s.name}\n`);
+    } else { text += `_Nenhum vocal definido_\n`; }
     text += `\n`;
 
     text += `*${eNotes} LOUVORES:*\n`;
@@ -105,19 +96,18 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onR
          const song = allSongs.find(s => s.id === songId);
          if (song) text += `• ${song.title} - ${song.artist}\n`;
        });
-    } else {
-       text += `_A definir_\n`;
-    }
+    } else { text += `_A definir_\n`; }
 
-    // Utilizar api.whatsapp.com garante melhor compatibilidade com web/desktop
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   if (schedule.length === 0) return (
-    <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-      <CalendarDays size={48} className="mx-auto text-slate-300 mb-4" />
-      <p className="text-slate-500 font-medium">Nenhuma escala gerada ainda.</p>
+    <div className="py-24 text-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-800">
+      <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+         <CalendarDays size={40} className="text-slate-400" />
+      </div>
+      <p className="text-lg font-bold text-slate-700 dark:text-slate-300">Nenhuma escala programada</p>
+      <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Adicione datas ou gere automaticamente para começar.</p>
     </div>
   );
 
@@ -125,8 +115,8 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onR
     <div className="space-y-6">
       {!readOnly && (
         <div className="flex justify-end no-print">
-          <button onClick={onClear} className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/10 rounded-xl hover:bg-red-100 transition-colors">
-            <Trash2 size={14} /> Limpar Todas as Escalas
+          <button onClick={onClear} className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/10 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+            <Trash2 size={16} /> Limpar Tudo
           </button>
         </div>
       )}
@@ -136,107 +126,147 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onR
         const isEditing = editingId === item.id;
         
         return (
-          <div key={item.id} className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row overflow-hidden shadow-sm hover:shadow-lg transition-all">
+          <div key={item.id} className="group relative bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none hover:shadow-2xl transition-all duration-300 overflow-hidden">
             
-            {/* Sidebar (Data e Ações) */}
-            <div className="md:w-36 bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-row md:flex-col items-center justify-between md:justify-center gap-4 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800">
-              <div className="text-center">
-                <p className="text-[10px] font-black text-indigo-500 tracking-widest">{dateInfo.month}</p>
-                <p className="text-4xl font-black text-slate-800 dark:text-white my-1">{dateInfo.day}</p>
-                <p className="text-[10px] font-bold text-slate-400">{dateInfo.weekday}</p>
-              </div>
+            {/* Top Date Bar */}
+            <div className="h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
 
-              <div className="flex flex-col gap-2 no-print">
-                <div className="bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[10px] font-black text-slate-500 flex items-center justify-center gap-1.5 shadow-sm">
-                  <Clock size={12} /> {dateInfo.time}
-                </div>
-                
-                {!readOnly && (
-                  <div className="flex gap-2 justify-center">
-                    <button onClick={() => handleShare(item)} className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors" title="Compartilhar no WhatsApp"><Share2 size={16} /></button>
-                    {isEditing ? (
-                      <button onClick={() => handleSave(item)} className="p-2 bg-indigo-600 text-white rounded-lg shadow-lg hover:bg-indigo-700 transition-colors"><Save size={16} /></button>
-                    ) : (
-                      <button onClick={() => startEditing(item)} className="p-2 bg-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-200 transition-colors"><Edit3 size={16} /></button>
-                    )}
-                    <button onClick={() => onDeleteScheduleItem(item.id)} className="p-2 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 transition-all active:scale-90"><Trash2 size={16} /></button>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className="flex flex-col md:flex-row">
+                {/* Left Side: Date & Time Info */}
+                <div className="md:w-48 bg-slate-50 dark:bg-slate-800/30 p-8 flex flex-col justify-center items-center text-center border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800">
+                    <span className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">{dateInfo.month}</span>
+                    <span className="text-5xl font-black text-slate-800 dark:text-white mb-2">{dateInfo.day}</span>
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400 capitalize mb-4">{dateInfo.weekday}</span>
+                    
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700">
+                        <Clock size={14} className="text-slate-400" />
+                        <span className="text-xs font-black text-slate-600 dark:text-slate-300">{dateInfo.time}</span>
+                    </div>
 
-            {/* Conteúdo da Escala */}
-            <div className="flex-1 p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-              
-              {/* Músicos */}
-              <div className="space-y-4">
-                <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">
-                  <Music size={14} className="text-indigo-500" /> Músicos Instrumentistas
-                </h4>
-                <div className="space-y-3">
-                  {isEditing ? (
-                    ['Teclado', 'Baixo', 'Bateria', 'Guitarra', 'Violão'].map((inst, idx) => (
-                      <div key={inst} className="flex flex-col gap-1">
-                        <label className="text-[9px] font-bold text-slate-400 uppercase">{inst}</label>
-                        <select 
-                          value={editState.musicians[idx] || ''} 
-                          onChange={(e) => updateMusician(idx, e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-slate-800 border-0 rounded-lg text-xs font-bold p-2 outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        >
-                          <option value="">Nenhum</option>
-                          {allMembers.filter(m => m.role === 'musician' && m.instruments?.includes(inst)).map(m => (
-                            <option key={m.id} value={m.id}>{m.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    ))
-                  ) : (
-                    item.musicians.map(m => (
-                      <div key={m.id} className="flex items-center gap-3">
-                        {m.photoUrl ? <img src={m.photoUrl} className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-slate-700" /> : <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center text-[10px] font-black">{getInitials(m.name)}</div>}
-                        <div>
-                          <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-none">{m.name}</p>
-                          <p className="text-[9px] font-bold text-indigo-500 uppercase mt-1">{m.instruments?.join(', ')}</p>
+                    {!readOnly && (
+                        <div className="flex gap-2 mt-6">
+                            <button onClick={() => handleShare(item)} className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-green-500 rounded-xl shadow-sm hover:shadow-md transition-all" title="Compartilhar">
+                                <Share2 size={18} />
+                            </button>
+                            {isEditing ? (
+                                <button onClick={() => handleSave(item)} className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-500/30 transition-all">
+                                    <Save size={18} />
+                                </button>
+                            ) : (
+                                <button onClick={() => startEditing(item)} className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-500 rounded-xl shadow-sm hover:shadow-md transition-all" title="Editar">
+                                    <Edit3 size={18} />
+                                </button>
+                            )}
+                            <button onClick={() => onDeleteScheduleItem(item.id)} className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-red-500 rounded-xl shadow-sm hover:shadow-md transition-all" title="Excluir">
+                                <Trash2 size={18} />
+                            </button>
                         </div>
-                      </div>
-                    ))
-                  )}
+                    )}
                 </div>
-              </div>
 
-              {/* Vocais */}
-              <div className="space-y-4">
-                <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">
-                  <Mic size={14} className="text-purple-500" /> Equipe de Louvor Vocal
-                </h4>
-                <div className="space-y-3">
-                  {isEditing ? (
-                    [0, 1, 2].map((idx) => (
-                      <div key={idx} className="flex flex-col gap-1">
-                        <label className="text-[9px] font-bold text-slate-400 uppercase">Vocal {idx + 1}</label>
-                        <select 
-                          value={editState.singers[idx] || ''} 
-                          onChange={(e) => updateSinger(idx, e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-slate-800 border-0 rounded-lg text-xs font-bold p-2 outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        >
-                          <option value="">Nenhum</option>
-                          {allMembers.filter(m => m.role === 'singer').map(m => (
-                            <option key={m.id} value={m.id}>{m.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    ))
-                  ) : (
-                    item.singers.map(s => (
-                      <div key={s.id} className="flex items-center gap-3">
-                        {s.photoUrl ? <img src={s.photoUrl} className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-slate-700" /> : <div className="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center text-[10px] font-black">{getInitials(s.name)}</div>}
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{s.name}</p>
-                      </div>
-                    ))
-                  )}
+                {/* Right Side: Content */}
+                <div className="flex-1 p-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        {/* Musicians Column */}
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-lg">
+                                    <Music size={18} />
+                                </div>
+                                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Instrumentistas</h4>
+                            </div>
+
+                            <div className="space-y-4">
+                                {isEditing ? (
+                                    ['Teclado', 'Baixo', 'Bateria', 'Guitarra', 'Violão'].map((inst, idx) => (
+                                        <div key={inst} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5">{inst}</label>
+                                            <select 
+                                                value={editState.musicians[idx] || ''} 
+                                                onChange={(e) => updateMusician(idx, e.target.value)}
+                                                className="w-full bg-white dark:bg-slate-900 border-none rounded-lg text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-indigo-500"
+                                            >
+                                                <option value="">-- Selecione --</option>
+                                                {allMembers.filter(m => m.role === 'musician' && m.instruments?.includes(inst)).map(m => (
+                                                    <option key={m.id} value={m.id}>{m.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ))
+                                ) : (
+                                    item.musicians.length > 0 ? item.musicians.map(m => (
+                                        <div key={m.id} className="flex items-center gap-4 group/item">
+                                            <div className="relative">
+                                                {m.photoUrl ? (
+                                                    <img src={m.photoUrl} className="w-12 h-12 rounded-2xl object-cover shadow-sm" />
+                                                ) : (
+                                                    <div className="w-12 h-12 rounded-2xl bg-indigo-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-indigo-500/20">
+                                                        {getInitials(m.name)}
+                                                    </div>
+                                                )}
+                                                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-800 text-[9px] font-black text-slate-500 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                    {m.instruments?.[0]?.substring(0,3).toUpperCase()}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-800 dark:text-white">{m.name}</p>
+                                                <p className="text-xs text-slate-400 mt-0.5 group-hover/item:text-indigo-500 transition-colors">{m.instruments?.join(', ')}</p>
+                                            </div>
+                                        </div>
+                                    )) : <p className="text-sm text-slate-400 italic">Nenhum músico escalado.</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Singers Column */}
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg">
+                                    <Mic size={18} />
+                                </div>
+                                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Vocais</h4>
+                            </div>
+
+                            <div className="space-y-4">
+                                {isEditing ? (
+                                    [0, 1, 2].map((idx) => (
+                                        <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5">Vocal {idx + 1}</label>
+                                            <select 
+                                                value={editState.singers[idx] || ''} 
+                                                onChange={(e) => updateSinger(idx, e.target.value)}
+                                                className="w-full bg-white dark:bg-slate-900 border-none rounded-lg text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-purple-500"
+                                            >
+                                                <option value="">-- Selecione --</option>
+                                                {allMembers.filter(m => m.role === 'singer').map(m => (
+                                                    <option key={m.id} value={m.id}>{m.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ))
+                                ) : (
+                                    item.singers.length > 0 ? item.singers.map(s => (
+                                        <div key={s.id} className="flex items-center gap-4 group/item">
+                                            <div className="relative">
+                                                {s.photoUrl ? (
+                                                    <img src={s.photoUrl} className="w-12 h-12 rounded-2xl object-cover shadow-sm" />
+                                                ) : (
+                                                    <div className="w-12 h-12 rounded-2xl bg-purple-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-purple-500/20">
+                                                        {getInitials(s.name)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-800 dark:text-white">{s.name}</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">Equipe de Louvor</p>
+                                            </div>
+                                        </div>
+                                    )) : <p className="text-sm text-slate-400 italic">Nenhum vocal escalado.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-
             </div>
           </div>
         );

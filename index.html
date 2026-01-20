@@ -14,8 +14,9 @@
               sans: ['Inter', 'sans-serif'],
             },
             animation: {
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'blob': 'blob 7s infinite',
+              'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'blob': 'blob 10s infinite',
+              'float': 'float 6s ease-in-out infinite',
             },
             keyframes: {
               blob: {
@@ -23,13 +24,17 @@
                 '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
                 '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
                 '100%': { transform: 'translate(0px, 0px) scale(1)' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
               }
             }
           }
         }
       }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- HTML2PDF Library for Client-side PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -48,91 +53,10 @@
           scrollbar-width: none;  /* Firefox */
       }
       
-      /* ESTILOS EXCLUSIVOS PARA O PDF - PRESERVA O FORMATO DE CARD */
-      .pdf-export-mode {
-        background-color: #0b0f1a !important; /* Fundo escuro externo */
-        padding: 20px !important;
-        width: 800px !important; /* Largura ideal para caber no A4 sem cortes */
-        margin: 0 auto !important;
-      }
-
-      /* Estilo forçado do Card no PDF */
-      .pdf-export-mode .group {
-        background-color: #161c2d !important; /* Azul escuro profundo (conforme imagem) */
-        border: 1px solid #1e293b !important;
-        border-radius: 24px !important;
-        margin-bottom: 20px !important;
-        box-shadow: none !important;
-        display: flex !important;
-        flex-direction: row !important;
-        overflow: hidden !important;
-      }
-
-      /* Coluna da esquerda (Data) no PDF */
-      .pdf-export-mode .md\:w-32 {
-        background-color: #242d3d !important; /* Um pouco mais claro que o card */
-        border-right: 1px solid #1e293b !important;
-        width: 120px !important;
-        min-width: 120px !important;
-      }
-
-      /* Cada item de músico/cantor no PDF */
-      .pdf-export-mode .group\/item {
-        background-color: #242d3d !important; /* Fundo dos cards internos */
-        border: 1px solid #2d3748 !important;
-        border-radius: 16px !important;
-      }
-
-      /* Textos no PDF */
-      .pdf-export-mode .text-slate-800,
-      .pdf-export-mode .dark\:text-slate-100,
-      .pdf-export-mode .text-slate-700,
-      .pdf-export-mode .font-bold,
-      .pdf-export-mode h3, .pdf-export-mode h4 {
-        color: #ffffff !important;
-      }
-
-      .pdf-export-mode .text-slate-500,
-      .pdf-export-mode .text-slate-400 {
-        color: #a0aec0 !important;
-      }
-
-      /* Cores de destaque no PDF */
-      .pdf-export-mode .text-amber-600, 
-      .pdf-export-mode .text-amber-400,
-      .pdf-export-mode .italic {
-        color: #f6ad55 !important; /* Laranja suave */
-      }
-
-      .pdf-export-mode .bg-indigo-100 { background-color: #2c3e50 !important; color: #a3bffa !important; }
-      .pdf-export-mode .bg-purple-100 { background-color: #3b2a50 !important; color: #d6bcfa !important; }
-      .pdf-export-mode .bg-pink-100 { background-color: #502a3b !important; color: #fbb6ce !important; }
-
-      /* Ajuste de fotos no PDF */
-      .pdf-export-mode img {
-        border: 2px solid #ffffff !important;
-        display: block !important;
-        visibility: visible !important;
-      }
-
-      .pdf-export-mode .no-print {
-        display: none !important;
-      }
-
-      /* Prevenir quebras de página no meio de um card */
-      .page-break {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-
-      @media print {
-        .no-print {
-          display: none !important;
-        }
-      }
-      
+      /* Scrollbar modernizada */
       .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
+        height: 6px;
       }
       .custom-scrollbar::-webkit-scrollbar-track {
         background: transparent;
@@ -142,7 +66,73 @@
         border-radius: 20px;
       }
       .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #475569;
+        background-color: #334155;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #94a3b8;
+      }
+
+      /* ESTILOS EXCLUSIVOS PARA O PDF */
+      .pdf-export-mode {
+        background-color: #0b0f1a !important;
+        padding: 20px !important;
+        width: 800px !important;
+        margin: 0 auto !important;
+      }
+      .pdf-export-mode .group {
+        background-color: #161c2d !important;
+        border: 1px solid #1e293b !important;
+        border-radius: 24px !important;
+        margin-bottom: 20px !important;
+        box-shadow: none !important;
+        display: flex !important;
+        flex-direction: row !important;
+        overflow: hidden !important;
+      }
+      .pdf-export-mode .md\:w-32 {
+        background-color: #242d3d !important;
+        border-right: 1px solid #1e293b !important;
+        width: 120px !important;
+        min-width: 120px !important;
+      }
+      .pdf-export-mode .group\/item {
+        background-color: #242d3d !important;
+        border: 1px solid #2d3748 !important;
+        border-radius: 16px !important;
+      }
+      .pdf-export-mode .text-slate-800,
+      .pdf-export-mode .dark\:text-slate-100,
+      .pdf-export-mode .text-slate-700,
+      .pdf-export-mode .font-bold,
+      .pdf-export-mode h3, .pdf-export-mode h4 {
+        color: #ffffff !important;
+      }
+      .pdf-export-mode .text-slate-500,
+      .pdf-export-mode .text-slate-400 {
+        color: #a0aec0 !important;
+      }
+      .pdf-export-mode .text-amber-600, 
+      .pdf-export-mode .text-amber-400,
+      .pdf-export-mode .italic {
+        color: #f6ad55 !important;
+      }
+      .pdf-export-mode .bg-indigo-100 { background-color: #2c3e50 !important; color: #a3bffa !important; }
+      .pdf-export-mode .bg-purple-100 { background-color: #3b2a50 !important; color: #d6bcfa !important; }
+      .pdf-export-mode .bg-pink-100 { background-color: #502a3b !important; color: #fbb6ce !important; }
+      .pdf-export-mode img {
+        border: 2px solid #ffffff !important;
+        display: block !important;
+        visibility: visible !important;
+      }
+      .pdf-export-mode .no-print {
+        display: none !important;
+      }
+      .page-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      @media print {
+        .no-print { display: none !important; }
       }
     </style>
   <script type="importmap">
@@ -156,7 +146,7 @@
 }
 </script>
 </head>
-  <body class="bg-slate-50 text-slate-900 dark:bg-[#0B1120] dark:text-slate-100 transition-colors duration-300 overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+  <body class="bg-gray-50 text-slate-900 dark:bg-[#0f172a] dark:text-slate-100 transition-colors duration-500 overflow-x-hidden selection:bg-indigo-500 selection:text-white">
     <div id="root"></div>
   </body>
 </html>
