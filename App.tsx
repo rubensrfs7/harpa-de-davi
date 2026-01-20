@@ -234,7 +234,7 @@ const App: React.FC = () => {
     try {
       const { error } = await supabase.from('members').update(member).eq('id', member.id);
       if (error) throw error;
-      setMembers(prev => prev.map(m => m.id === member.id ? member : m));
+      setMembers(prev => [...prev, member]);
       setEditingMember(null);
     } catch (err) { console.error(err); } finally { setIsSyncing(false); }
   };
@@ -270,24 +270,29 @@ const App: React.FC = () => {
     }
   };
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="animate-spin text-indigo-600" size={48} /></div>;
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1120]"><Loader2 className="animate-spin text-indigo-600" size={48} /></div>;
   
   // Se não estiver autenticado E não for modo público, mostra Login
   if (!isAuthenticated && !isPublicLinkMode) return <Login onLogin={handleLogin} isDarkMode={isDarkMode} />;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <nav className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 mb-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120] pb-20 relative overflow-hidden">
+      
+      {/* Ambient background glow (Desktop/Mobile) */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+      <nav className="sticky top-0 z-40 bg-white/80 dark:bg-[#0B1120]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/50 px-4 md:px-8 py-3 md:py-4 mb-6 md:mb-8 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-600 rounded-xl text-white"><HarpIcon size={24} /></div>
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-500/30"><HarpIcon size={20} className="md:w-6 md:h-6" /></div>
             <div>
-              <h1 className="text-lg font-black text-slate-900 dark:text-white leading-none">Harpa de Davi</h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Gestão Musical</p>
+              <h1 className="text-base md:text-lg font-black text-slate-900 dark:text-white leading-none">Harpa de Davi</h1>
+              <p className="hidden md:block text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Gestão Musical</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
              {/* Esconde navegação de admin se estiver em modo público */}
              {!isPublicLinkMode && (
                <div className="hidden md:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
@@ -303,21 +308,21 @@ const App: React.FC = () => {
                 {!isPublicLinkMode && (
                    <button 
                       onClick={handleCopyPublicLink} 
-                      className={`hidden md:flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${copiedLink ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-500'}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${copiedLink ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-500'}`}
                       title="Copiar Link Público"
                    >
                      {copiedLink ? <Check size={16} /> : <Globe size={16} />}
-                     {copiedLink ? 'Copiado!' : 'Link Público'}
+                     <span className="hidden md:inline">{copiedLink ? 'Copiado!' : 'Link Público'}</span>
                    </button>
                 )}
 
-                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-400 hover:scale-110 transition-all">
-                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 md:p-3 bg-slate-100 dark:bg-slate-800/50 rounded-2xl text-slate-600 dark:text-slate-400 hover:scale-105 transition-all">
+                  {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
                 </button>
                 
                 {isAuthenticated && (
-                  <button onClick={handleLogout} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl text-red-500 hover:bg-red-100 transition-all" title="Sair">
-                    <LogOut size={20} />
+                  <button onClick={handleLogout} className="p-2 md:p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl text-red-500 hover:bg-red-100 transition-all" title="Sair">
+                    <LogOut size={18} />
                   </button>
                 )}
              </div>
@@ -325,23 +330,25 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-8">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         {view === 'dashboard' ? (
            <Dashboard members={members} schedule={schedule} logs={substitutionLogs} songs={songs} />
         ) : view === 'scheduler' ? (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm">
               <div className="flex flex-col md:flex-row gap-4 items-end">
-                <div className="flex-1 space-y-2">
+                <div className="flex-1 space-y-2 w-full">
                   <label className="text-xs font-bold text-slate-500 uppercase ml-1">Adicionar Culto</label>
                   <DateTimePicker value={newDateInput} onChange={setNewDateInput} />
                 </div>
-                <button onClick={() => { if (newDateInput) { setSelectedDates(prev => [...new Set([...prev, newDateInput])].sort()); setNewDateInput(''); } }} className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all">
-                  <CalendarIcon size={18} /> Agendar
-                </button>
-                <button onClick={handleGenerateSchedule} className="bg-slate-900 dark:bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 transition-all shadow-lg active:scale-95">
-                  <Wand2 size={18} /> Gerar Escala Automática
-                </button>
+                <div className="flex gap-2 w-full md:w-auto">
+                    <button onClick={() => { if (newDateInput) { setSelectedDates(prev => [...new Set([...prev, newDateInput])].sort()); setNewDateInput(''); } }} className="flex-1 md:flex-none bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20">
+                    <CalendarIcon size={18} /> Agendar
+                    </button>
+                    <button onClick={handleGenerateSchedule} className="flex-1 md:flex-none bg-slate-900 dark:bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-lg active:scale-95">
+                    <Wand2 size={18} /> <span className="hidden md:inline">Gerar Automático</span><span className="md:hidden">Gerar</span>
+                    </button>
+                </div>
               </div>
 
               {selectedDates.length > 0 && (
@@ -403,6 +410,29 @@ const App: React.FC = () => {
             <PublicCalendar schedule={schedule} songs={songs} />
         )}
       </main>
+      
+      {/* Mobile Tab Bar (Only when Admin and logged in) */}
+      {!isPublicLinkMode && isAuthenticated && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-[#0B1120]/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 p-2 z-50">
+            <div className="grid grid-cols-4 gap-1">
+                {[
+                    { id: 'dashboard', icon: LayoutDashboard, label: 'Dash' },
+                    { id: 'scheduler', icon: CalendarIcon, label: 'Escalas' },
+                    { id: 'members', icon: Users, label: 'Equipe' },
+                    { id: 'repertoire', icon: Music2, label: 'Músicas' }
+                ].map((item) => (
+                    <button 
+                        key={item.id} 
+                        onClick={() => setView(item.id as any)}
+                        className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${view === item.id ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400'}`}
+                    >
+                        <item.icon size={20} />
+                        <span className="text-[10px] font-bold uppercase">{item.label}</span>
+                    </button>
+                ))}
+            </div>
+        </div>
+      )}
     </div>
   );
 };
