@@ -177,16 +177,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
       
       {/* Header & Tabs */}
       <div className="px-4 md:px-0 space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-gradient-to-tr from-indigo-600 to-blue-600 rounded-2xl text-white shadow-lg shadow-indigo-500/20">
-            {activeTab === 'agenda' ? <CalendarIcon size={24} /> : <BookOpen size={24} />}
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">Harpa de Davi</h1>
-            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium">Portal da Equipe de Louvor</p>
-          </div>
-        </div>
-
+        
         {/* Tab Switcher */}
         <div className="bg-slate-200 dark:bg-slate-800/50 p-1.5 rounded-2xl flex relative">
            <button 

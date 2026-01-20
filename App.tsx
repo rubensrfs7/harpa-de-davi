@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wand2, Trash2, Moon, Sun, LayoutDashboard, Calendar as CalendarIcon, Users, Music2, LogOut, Globe, Check } from 'lucide-react';
+import { Wand2, Trash2, Moon, Sun, LayoutDashboard, Calendar as CalendarIcon, Users, Music2, LogOut, Globe, Check, Eraser } from 'lucide-react';
 import { Member, ScheduleItem, SubstitutionLog, Song } from './types.ts';
 import MemberForm from './components/MemberForm.tsx';
 import MemberList from './components/MemberList.tsx';
@@ -44,7 +44,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<View>('scheduler');
   
   const [members, setMembers] = useState<Member[]>([]);
-  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [selectedDates, setSelectedDates] = useState<string[]>([]); // Apenas para NOVAS datas (Staging)
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [substitutionLogs, setSubstitutionLogs] = useState<SubstitutionLog[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
@@ -127,8 +127,23 @@ const App: React.FC = () => {
                 songs: cleanSongs
              };
           });
-          setSchedule(inflatedSchedule);
-          setSelectedDates(inflatedSchedule.map((s: any) => s.date));
+
+          // CORREÇÃO DE DUPLICIDADE VISUAL: Filtra itens com exatamente a mesma data/hora para a visualização
+          // Mantém apenas o primeiro item encontrado para cada timestamp
+          const uniqueMap = new Map();
+          const uniqueSchedule: ScheduleItem[] = [];
+          
+          inflatedSchedule.forEach((item: ScheduleItem) => {
+             const timeKey = new Date(item.date).getTime();
+             if (!uniqueMap.has(timeKey)) {
+                 uniqueMap.set(timeKey, true);
+                 uniqueSchedule.push(item);
+             }
+          });
+
+          setSchedule(uniqueSchedule);
+          // NÃO PREENCHEMOS selectedDates AQUI. 
+          // selectedDates serve apenas para a "Fila de Geração" de novos cultos.
         }
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
@@ -167,12 +182,9 @@ const App: React.FC = () => {
   const handleDeleteScheduleItem = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja excluir permanentemente este culto?')) return;
     const previousSchedule = [...schedule];
-    const previousSelectedDates = [...selectedDates];
     
     // UI Otimista
     setSchedule(prev => prev.filter(s => s.id !== id));
-    const itemToDelete = schedule.find(s => s.id === id);
-    if (itemToDelete) setSelectedDates(prev => prev.filter(d => d !== itemToDelete.date));
     
     setIsSyncing(true);
     try {
@@ -182,19 +194,16 @@ const App: React.FC = () => {
       alert(`ERRO AO EXCLUIR: ${formatError(err)}`);
       // Reverter
       setSchedule(previousSchedule);
-      setSelectedDates(previousSelectedDates);
     } finally {
       setIsSyncing(false);
     }
   };
 
   const handleClearAllSchedules = async () => {
-    if (!window.confirm('ATENÇÃO: Isso apagará TODAS as escalas geradas.\nDeseja continuar?')) return;
+    if (!window.confirm('ATENÇÃO: Isso apagará TODAS as escalas geradas do banco de dados.\nDeseja continuar?')) return;
     const previousSchedule = [...schedule];
-    const previousSelectedDates = [...selectedDates];
     
     setSchedule([]);
-    setSelectedDates([]);
     setIsSyncing(true);
     
     try {
@@ -203,7 +212,6 @@ const App: React.FC = () => {
     } catch (err: any) {
       alert(`ERRO AO LIMPAR TUDO: ${formatError(err)}`);
       setSchedule(previousSchedule);
-      setSelectedDates(previousSelectedDates);
     } finally {
       setIsSyncing(false);
     }
@@ -214,7 +222,6 @@ const App: React.FC = () => {
     try {
       setSchedule(prev => prev.map(s => s.id === updatedItem.id ? updatedItem : s));
       
-      // FIX CRÍTICO: Filtrar strings vazias ou nulas para evitar erro "invalid input syntax for type uuid"
       const safeMusicians = updatedItem.musicians.map(m => m.id).filter(id => id && id.length > 0);
       const safeSingers = updatedItem.singers.map(s => s.id).filter(id => id && id.length > 0);
       const safeSongs = (updatedItem.songs || []).filter(id => id && id.length > 0);
@@ -228,7 +235,6 @@ const App: React.FC = () => {
       if (error) throw error;
     } catch (err) {
       console.error("Erro ao atualizar:", err);
-      // Reverte visualmente se falhar (opcional, mas recomendado)
       alert(`Erro ao atualizar escala: ${formatError(err)}`);
     } finally {
       setIsSyncing(false);
@@ -241,21 +247,57 @@ const App: React.FC = () => {
   };
 
   const handleGenerateSchedule = async () => {
-    if (selectedDates.length === 0) { alert("Selecione pelo menos uma data."); return; }
+    if (selectedDates.length === 0) { alert("Selecione pelo menos uma data para agendar."); return; }
     if (members.length === 0) { alert("Cadastre membros antes de gerar a escala."); return; }
+    
+    // --- CORREÇÃO DE DUPLICIDADE ---
+    // Verifica quais datas selecionadas já existem na escala atual (comparando timestamps)
+    const existingTimestamps = new Set(schedule.map(s => new Date(s.date).getTime()));
+    
+    // Filtra apenas as datas que são realmente novas
+    const uniqueDatesToGenerate = selectedDates.filter(dateStr => {
+        const timestamp = new Date(dateStr).getTime();
+        return !existingTimestamps.has(timestamp);
+    });
+
+    // Se todas as datas já existirem, avisa o usuário e para
+    if (uniqueDatesToGenerate.length === 0) {
+        alert("Todas as datas selecionadas já possuem uma escala agendada. Nenhuma duplicata foi criada.");
+        setSelectedDates([]);
+        return;
+    }
+
+    // Se algumas já existiam, avisa e pede confirmação para prosseguir com as restantes
+    if (uniqueDatesToGenerate.length < selectedDates.length) {
+        const duplicatesCount = selectedDates.length - uniqueDatesToGenerate.length;
+        if (!window.confirm(`Atenção: ${duplicatesCount} data(s) selecionada(s) já existem na escala e serão ignoradas. Deseja gerar apenas as ${uniqueDatesToGenerate.length} novas datas?`)) {
+            return;
+        }
+    }
+
     setIsSyncing(true);
     try {
-      const newSchedule = generateFullSchedule(selectedDates, members);
-      setSchedule(newSchedule);
-      const dbData = newSchedule.map(item => ({
+      // Gera escalas apenas para as NOVAS datas únicas
+      const newScheduleItems = generateFullSchedule(uniqueDatesToGenerate, members);
+      
+      // Adiciona ao estado existente (Append)
+      setSchedule(prev => [...prev, ...newScheduleItems].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+      
+      const dbData = newScheduleItems.map(item => ({
         id: item.id,
         date: new Date(item.date).toISOString(),
         musician_ids: item.musicians.map(m => m.id),
         singer_ids: item.singers.map(s => s.id),
         song_ids: []
       }));
+
       const { error } = await supabase.from('schedules').insert(dbData);
       if (error) throw error;
+      
+      // Limpa a área de "Selected Dates" após gerar com sucesso
+      setSelectedDates([]);
+      alert(`${newScheduleItems.length} novos cultos gerados com sucesso!`);
+
     } catch (err: any) {
         alert(`Erro ao salvar escala: ${formatError(err)}`);
     } finally {
@@ -308,7 +350,6 @@ const App: React.FC = () => {
   const handleAddSong = async (song: Song) => {
     setIsSyncing(true);
     try {
-      // FIX: Garantir que singer_id não seja string vazia
       const safeSingerId = (song.singerId && song.singerId.trim() !== '') ? song.singerId : null;
 
       const dbSong = {
@@ -376,7 +417,6 @@ const App: React.FC = () => {
     const previousSongs = [...songs];
     const previousSchedule = [...schedule]; 
 
-    // 1. Atualização Otimista
     setSongs(prev => prev.filter(s => s.id !== id));
     setSchedule(prev => prev.map(s => ({
         ...s,
@@ -386,12 +426,10 @@ const App: React.FC = () => {
     setIsSyncing(true);
 
     try {
-      // 2. Limpeza manual no banco das escalas que contém essa música
-      // Recupera apenas as escalas que têm a música para otimizar
       const { data: affectedSchedules } = await supabase
           .from('schedules')
           .select('id, song_ids')
-          .contains('song_ids', [id]); // Sintaxe para array contains
+          .contains('song_ids', [id]);
 
       if (affectedSchedules && affectedSchedules.length > 0) {
           const updates = affectedSchedules.map(item => {
@@ -401,7 +439,6 @@ const App: React.FC = () => {
           await Promise.all(updates);
       }
 
-      // 3. Deleta a música
       const { error } = await supabase.from('songs').delete().eq('id', id);
       if (error) throw error;
 
@@ -536,23 +573,34 @@ const App: React.FC = () => {
               </div>
 
               {selectedDates.length > 0 && (
-                <div className="mt-6 flex flex-wrap gap-2 pt-5 border-t border-slate-100 dark:border-slate-800">
-                  {selectedDates.map(dateStr => {
-                    const dateObj = new Date(dateStr);
-                    return (
-                      <span key={dateStr} className="inline-flex items-center gap-3 pl-4 pr-2 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl text-sm font-bold border border-indigo-100 dark:border-indigo-800">
-                        {dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} 
-                        <span className="opacity-50">•</span> 
-                        {dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        <button
-                          onClick={() => setSelectedDates(prev => prev.filter(d => d !== dateStr))}
-                          className="ml-1 p-1 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors text-indigo-400 hover:text-red-500"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </span>
-                    );
-                  })}
+                <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex justify-between items-center mb-3">
+                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Datas para gerar</p>
+                     <button 
+                        onClick={() => setSelectedDates([])}
+                        className="text-[10px] font-bold text-red-400 hover:text-red-500 flex items-center gap-1 hover:underline"
+                     >
+                        <Eraser size={12} /> Limpar Seleção
+                     </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedDates.map(dateStr => {
+                      const dateObj = new Date(dateStr);
+                      return (
+                        <span key={dateStr} className="inline-flex items-center gap-3 pl-4 pr-2 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl text-sm font-bold border border-indigo-100 dark:border-indigo-800">
+                          {dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} 
+                          <span className="opacity-50">•</span> 
+                          {dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          <button
+                            onClick={() => setSelectedDates(prev => prev.filter(d => d !== dateStr))}
+                            className="ml-1 p-1 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors text-indigo-400 hover:text-red-500"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
