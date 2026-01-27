@@ -350,11 +350,27 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                 <div className="flex flex-wrap gap-1.5">
                                     {item.songs.slice(0, 3).map(songId => {
                                         const song = songs.find(s => s.id === songId);
-                                        return song ? (
+                                        if (!song) return null;
+                                        
+                                        if (song.youtubeLink) {
+                                            return (
+                                                <a 
+                                                    key={songId} 
+                                                    href={song.youtubeLink} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    title={`Ouvir: ${song.title}`}
+                                                    className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg font-bold truncate max-w-[150px] hover:text-indigo-500 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/30 transition-colors"
+                                                >
+                                                    {song.title}
+                                                </a>
+                                            )
+                                        }
+                                        return (
                                             <span key={songId} className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg font-bold truncate max-w-[150px]">
                                                 {song.title}
                                             </span>
-                                        ) : null;
+                                        );
                                     })}
                                     {item.songs.length > 3 && (
                                         <span className="text-[10px] px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-lg font-bold">

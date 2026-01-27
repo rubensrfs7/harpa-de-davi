@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle, ChevronLeft, ChevronRight, X, Eye } from 'lucide-react';
+import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle, ChevronLeft, ChevronRight, X, Eye, ExternalLink } from 'lucide-react';
 import { ScheduleItem, Member, Song } from '../types';
 
 interface ScheduleProps {
@@ -120,7 +120,12 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
     if (item.songs && item.songs.length > 0) {
        item.songs.forEach(songId => {
          const song = allSongs.find(s => s.id === songId);
-         if (song) text += `• ${song.title} - ${song.artist}\n`;
+         if (song) {
+             text += `• ${song.title} - ${song.artist}\n`;
+             if (song.youtubeLink) {
+                 text += `  ${song.youtubeLink}\n`;
+             }
+         }
        });
     } else { text += `_A definir_\n`; }
 
@@ -472,6 +477,28 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                         {viewItem.songs && viewItem.songs.length > 0 ? viewItem.songs.map(songId => {
                                                             const song = allSongs.find(s => s.id === songId);
                                                             if (!song) return null;
+                                                            
+                                                            // Se tem link, renderiza como <a>
+                                                            if (song.youtubeLink) {
+                                                                return (
+                                                                    <a 
+                                                                        key={songId} 
+                                                                        href={song.youtubeLink} 
+                                                                        target="_blank" 
+                                                                        rel="noopener noreferrer" 
+                                                                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-100 dark:border-slate-700/30 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-200 dark:hover:border-indigo-800 transition-all group"
+                                                                    >
+                                                                        <div>
+                                                                            <p className="text-xs font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 flex items-center gap-2">
+                                                                                {song.title} <ExternalLink size={10} />
+                                                                            </p>
+                                                                            <p className="text-[10px] text-slate-400">{song.artist} {song.key ? `• ${song.key}` : ''}</p>
+                                                                        </div>
+                                                                    </a>
+                                                                );
+                                                            }
+
+                                                            // Se não tem link, renderiza div normal
                                                             return (
                                                                 <div key={songId} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-100 dark:border-slate-700/30 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors">
                                                                     <div>
