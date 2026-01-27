@@ -236,7 +236,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
        <div className="flex items-center gap-4 mb-8">
-            <div className="p-4 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-xl shadow-xl shadow-pink-500/20 transform -rotate-3">
+            <div className="p-4 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-xl shadow-xl shadow-pink-500/20">
                 <Music2 size={28} />
             </div>
             <div>
@@ -402,8 +402,9 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {filteredSongs.length === 0 ? (
-                        <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                            Nenhuma música encontrada.
+                        <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                            <Music2 className="mx-auto mb-2 opacity-20" size={48} />
+                            <p className="text-sm font-medium">Nenhuma música encontrada.</p>
                         </div>
                     ) : (
                         filteredSongs.map(song => {

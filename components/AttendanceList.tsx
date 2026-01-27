@@ -80,7 +80,7 @@ const AttendanceList: React.FC<AttendanceListProps> = ({ schedule, onUpdateSched
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-            <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl shadow-xl shadow-green-500/20 transform rotate-2">
+            <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl shadow-xl shadow-green-500/20">
                 <UserCheck size={28} />
             </div>
             <div>

@@ -92,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
       
       {/* Header */}
       <div className="flex items-center gap-5">
-        <div className="p-4 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl shadow-xl shadow-indigo-500/20 transform rotate-[-5deg]">
+        <div className="p-4 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl shadow-xl shadow-indigo-500/20">
             <BarChart3 size={32} />
         </div>
         <div>
