@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle, ChevronLeft, ChevronRight, X, Eye, ExternalLink } from 'lucide-react';
+import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle, ChevronLeft, ChevronRight, X, Eye, ExternalLink, ChevronDown, Check, Search, Plus } from 'lucide-react';
 import { ScheduleItem, Member, Song } from '../types';
 
 interface ScheduleProps {
@@ -31,6 +31,216 @@ const formatDateTime = (dateString: string) => {
 };
 
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+
+// --- COMPONENTE CUSTOM SELECT PARA MEMBROS ---
+interface MemberSelectProps {
+  label: string;
+  value: string;
+  options: Member[];
+  onChange: (value: string) => void;
+  icon?: React.ReactNode;
+}
+
+const MemberSelect: React.FC<MemberSelectProps> = ({ label, value, options, onChange, icon }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const selectedMember = options.find(m => m.id === value);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative w-full" ref={containerRef}>
+      <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5">{label}</label>
+      
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        className={`
+          flex items-center justify-between w-full p-2.5 bg-slate-50 dark:bg-slate-800/50 
+          border rounded-lg cursor-pointer transition-all
+          ${isOpen 
+            ? 'border-indigo-500 ring-2 ring-indigo-500/10 bg-white dark:bg-slate-800' 
+            : 'border-slate-100 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700'
+          }
+        `}
+      >
+        <div className="flex items-center gap-3 overflow-hidden">
+           {selectedMember ? (
+             <>
+                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex-shrink-0 overflow-hidden border border-slate-200 dark:border-slate-600">
+                   {selectedMember.photoUrl ? (
+                     <img src={selectedMember.photoUrl} alt="" className="w-full h-full object-cover" />
+                   ) : (
+                     <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-500">
+                        {getInitials(selectedMember.name)}
+                     </div>
+                   )}
+                </div>
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">
+                  {selectedMember.name}
+                </span>
+             </>
+           ) : (
+             <span className="text-sm font-medium text-slate-400 px-1">-- Selecione --</span>
+           )}
+        </div>
+        <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </div>
+
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-100">
+           <div 
+              className="p-2 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer text-slate-400 text-sm font-medium border-b border-slate-50 dark:border-slate-700/50"
+              onClick={() => { onChange(''); setIsOpen(false); }}
+           >
+             -- Remover Seleção --
+           </div>
+           {options.length === 0 ? (
+             <div className="p-3 text-center text-xs text-slate-400 italic">Nenhum membro disponível.</div>
+           ) : (
+             options.map(member => (
+               <div 
+                 key={member.id}
+                 onClick={() => { onChange(member.id); setIsOpen(false); }}
+                 className={`
+                    flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors
+                    ${member.id === value ? 'bg-indigo-50 dark:bg-indigo-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}
+                 `}
+               >
+                  <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex-shrink-0 overflow-hidden border border-slate-200 dark:border-slate-600">
+                      {member.photoUrl ? (
+                        <img src={member.photoUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-500">
+                          {getInitials(member.name)}
+                        </div>
+                      )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-bold truncate ${member.id === value ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'}`}>
+                      {member.name}
+                    </p>
+                  </div>
+                  {member.id === value && <Check size={14} className="text-indigo-600 dark:text-indigo-400" />}
+               </div>
+             ))
+           )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- COMPONENTE SEARCHABLE SONG SELECT ---
+interface SongSelectProps {
+  songs: Song[];
+  excludeIds: string[];
+  onSelect: (songId: string) => void;
+}
+
+const SongSelect: React.FC<SongSelectProps> = ({ songs, excludeIds, onSelect }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const filteredSongs = songs
+    .filter(s => !excludeIds.includes(s.id))
+    .filter(s => 
+      s.title.toLowerCase().includes(search.toLowerCase()) || 
+      s.artist.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative w-full" ref={containerRef}>
+      <div className="relative">
+        <input 
+          type="text"
+          placeholder="Buscar ou adicionar música..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setIsOpen(true); }}
+          onFocus={() => setIsOpen(true)}
+          className={`
+            w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 
+            border rounded-lg text-sm font-medium
+            focus:outline-none transition-all
+            ${isOpen 
+              ? 'border-pink-500 ring-2 ring-pink-500/20' 
+              : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+            }
+            text-slate-800 dark:text-white placeholder:text-slate-400
+          `}
+        />
+        <div className="absolute left-3 top-2.5 text-slate-400 pointer-events-none">
+          <Search size={16} />
+        </div>
+        {isOpen && (
+          <div className="absolute top-2.5 right-3 cursor-pointer text-slate-400 hover:text-slate-600" onClick={() => setIsOpen(false)}>
+             <ChevronDown size={16} />
+          </div>
+        )}
+      </div>
+
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-lg shadow-2xl max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-100">
+          {filteredSongs.length === 0 ? (
+            <div className="p-4 text-center">
+               <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Nenhuma música encontrada.</p>
+               <p className="text-[10px] text-slate-400 mt-1">Vá em "Músicas" para cadastrar novas.</p>
+            </div>
+          ) : (
+            <div className="py-1">
+              {filteredSongs.map(song => (
+                <div 
+                  key={song.id}
+                  onClick={() => {
+                    onSelect(song.id);
+                    setSearch('');
+                    setIsOpen(false);
+                  }}
+                  className="px-3 py-2.5 hover:bg-pink-50 dark:hover:bg-pink-900/10 cursor-pointer border-b border-slate-50 dark:border-slate-800/50 last:border-0 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors truncate">
+                        {song.title}
+                      </p>
+                      <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide truncate">
+                        {song.artist}
+                        {song.key && <span className="ml-1.5 text-slate-300 dark:text-slate-600">• {song.key}</span>}
+                      </p>
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Plus size={16} className="text-pink-500" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onDeleteScheduleItem, onClear, onUpdateScheduleItem, readOnly = false }) => {
   // Estado para controlar qual item está aberto no Modal
@@ -313,19 +523,13 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                             <div className="space-y-4">
                                                 {isEditing ? (
                                                     ['Teclado', 'Baixo', 'Bateria', 'Guitarra', 'Violão'].map((inst, idx) => (
-                                                        <div key={inst} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50">
-                                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5">{inst}</label>
-                                                            <select 
-                                                                value={editState.musicians[idx] || ''} 
-                                                                onChange={(e) => updateMusician(idx, e.target.value)}
-                                                                className="w-full bg-white dark:bg-slate-900 border-none rounded-md text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-indigo-500"
-                                                            >
-                                                                <option value="">-- Selecione --</option>
-                                                                {allMembers.filter(m => m.role === 'musician' && m.instruments?.includes(inst)).map(m => (
-                                                                    <option key={m.id} value={m.id}>{m.name}</option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
+                                                        <MemberSelect
+                                                            key={inst}
+                                                            label={inst}
+                                                            value={editState.musicians[idx] || ''}
+                                                            options={allMembers.filter(m => m.role === 'musician' && m.instruments?.includes(inst))}
+                                                            onChange={(newVal) => updateMusician(idx, newVal)}
+                                                        />
                                                     ))
                                                 ) : (
                                                     viewItem.musicians.length > 0 ? viewItem.musicians.map(m => (
@@ -364,19 +568,13 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                             <div className="space-y-4">
                                                 {isEditing ? (
                                                     [0, 1, 2].map((idx) => (
-                                                        <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50">
-                                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5">Vocal {idx + 1}</label>
-                                                            <select 
-                                                                value={editState.singers[idx] || ''} 
-                                                                onChange={(e) => updateSinger(idx, e.target.value)}
-                                                                className="w-full bg-white dark:bg-slate-900 border-none rounded-md text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-purple-500"
-                                                            >
-                                                                <option value="">-- Selecione --</option>
-                                                                {allMembers.filter(m => m.role === 'singer').map(m => (
-                                                                    <option key={m.id} value={m.id}>{m.name}</option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
+                                                        <MemberSelect
+                                                            key={idx}
+                                                            label={`Vocal ${idx + 1}`}
+                                                            value={editState.singers[idx] || ''}
+                                                            options={allMembers.filter(m => m.role === 'singer')}
+                                                            onChange={(newVal) => updateSinger(idx, newVal)}
+                                                        />
                                                     ))
                                                 ) : (
                                                     viewItem.singers.length > 0 ? viewItem.singers.map(s => (
@@ -421,26 +619,13 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                             </div>
                                                         ) : (
                                                             <div className="flex gap-2 mb-3">
-                                                                <select 
-                                                                    className="flex-1 bg-white dark:bg-slate-900 border-none rounded-md text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-pink-500"
-                                                                    onChange={(e) => {
-                                                                        const val = e.target.value;
-                                                                        if(val && !editState.songs.includes(val)) {
-                                                                            setEditState(prev => ({...prev, songs: [...prev.songs, val]}));
-                                                                            e.target.value = ""; // Reset select
-                                                                        }
+                                                                <SongSelect 
+                                                                    songs={allSongs}
+                                                                    excludeIds={editState.songs}
+                                                                    onSelect={(id) => {
+                                                                        setEditState(prev => ({...prev, songs: [...prev.songs, id]}));
                                                                     }}
-                                                                >
-                                                                    <option value="">+ Selecione uma música</option>
-                                                                    {allSongs
-                                                                        .filter(s => !editState.songs.includes(s.id))
-                                                                        .sort((a, b) => a.title.localeCompare(b.title))
-                                                                        .map(s => (
-                                                                        <option key={s.id} value={s.id}>
-                                                                            {s.title} — {s.artist} {s.key ? `(${s.key})` : ''}
-                                                                        </option>
-                                                                    ))}
-                                                                </select>
+                                                                />
                                                             </div>
                                                         )}
                                                         
