@@ -503,7 +503,7 @@ const App: React.FC = () => {
             
             {/* Desktop Navigation */}
             {!isPublicLinkMode && (
-              <div className="hidden md:flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
+              <div className="hidden md:flex items-center gap-1">
                 {[
                   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
                   { id: 'scheduler', label: 'Escalas', icon: CalendarIcon },
