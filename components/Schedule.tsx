@@ -141,12 +141,12 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
   return (
     <div className="space-y-6">
       {!readOnly && (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 no-print bg-white/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 no-print bg-white/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
           {/* Navegador de Mês */}
           <div className="flex items-center gap-4">
               <button 
                   onClick={() => changeMonth(-1)}
-                  className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                   <ChevronLeft size={20} />
               </button>
@@ -155,13 +155,13 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
               </h3>
               <button 
                   onClick={() => changeMonth(1)}
-                  className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                   <ChevronRight size={20} />
               </button>
           </div>
 
-          <button onClick={onClear} className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/10 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+          <button onClick={onClear} className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
             <Trash2 size={16} /> Limpar Tudo (Banco de Dados)
           </button>
         </div>
@@ -169,7 +169,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
 
       {/* GRID DE CARDS COMPACTOS */}
       {filteredSchedule.length === 0 ? (
-        <div className="py-24 text-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-800">
+        <div className="py-24 text-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-800">
           <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
              <CalendarDays size={40} className="text-slate-400" />
           </div>
@@ -185,7 +185,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                     <div 
                         key={item.id} 
                         onClick={() => setViewItem(item)}
-                        className="group relative bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between h-48"
+                        className="group relative bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-lg border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between h-48"
                     >
                         {/* Compact Header */}
                         <div className="p-4 flex flex-col items-center justify-center h-full text-center">
@@ -198,7 +198,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 capitalize mb-2">
                                 {dateInfo.weekday.split('-')[0]}
                             </span>
-                            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-md">
                                 <Clock size={12} className="text-slate-400" />
                                 <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{dateInfo.time}</span>
                             </div>
@@ -208,21 +208,21 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                         <div className="absolute inset-x-0 bottom-0 p-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-t border-slate-100 dark:border-slate-800 translate-y-full group-hover:translate-y-0 transition-transform duration-200 flex justify-around">
                              <button 
                                 onClick={(e) => { e.stopPropagation(); startEditing(item); }} 
-                                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-md transition-colors"
                                 title="Editar"
                              >
                                 <Edit3 size={16} />
                              </button>
                              <button 
                                 onClick={(e) => { e.stopPropagation(); handleShare(item); }} 
-                                className="p-2 text-slate-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                                className="p-2 text-slate-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-md transition-colors"
                                 title="Compartilhar"
                              >
                                 <Share2 size={16} />
                              </button>
                              <button 
                                 onClick={(e) => { e.stopPropagation(); onDeleteScheduleItem(item.id); }} 
-                                className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
                                 title="Excluir"
                              >
                                 <Trash2 size={16} />
@@ -239,7 +239,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" onClick={closeModal}></div>
               
-              <div className="relative w-full max-w-4xl bg-white dark:bg-[#0f172a] rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300 border border-slate-200 dark:border-slate-700">
+              <div className="relative w-full max-w-4xl bg-white dark:bg-[#0f172a] rounded-xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300 border border-slate-200 dark:border-slate-700">
                   
                   {/* Modal Header */}
                   <div className="sticky top-0 z-10 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
@@ -251,7 +251,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                              </h2>
                           </div>
                       </div>
-                      <button onClick={closeModal} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:bg-slate-200 transition-colors">
+                      <button onClick={closeModal} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 hover:bg-slate-200 transition-colors">
                           <X size={20} />
                       </button>
                   </div>
@@ -266,10 +266,10 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                             <div className="flex flex-col md:flex-row gap-8">
                                 {/* Left Side: Date & Time Info */}
                                 <div className="md:w-48 flex flex-col items-center text-center">
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl w-full border border-slate-100 dark:border-slate-800">
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl w-full border border-slate-100 dark:border-slate-800">
                                         <span className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">{dateInfo.month}</span>
                                         <span className="text-5xl font-black text-slate-800 dark:text-white mb-2 block">{dateInfo.day}</span>
-                                        <div className="inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700 w-full">
+                                        <div className="inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-100 dark:border-slate-700 w-full">
                                             <Clock size={14} className="text-slate-400" />
                                             <span className="text-xs font-black text-slate-600 dark:text-slate-300">{dateInfo.time}</span>
                                         </div>
@@ -278,15 +278,15 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                     {!readOnly && (
                                         <div className="flex flex-col gap-2 mt-6 w-full">
                                             {isEditing ? (
-                                                <button onClick={() => handleSave(viewItem)} className="w-full py-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-500/30 transition-all font-bold flex items-center justify-center gap-2">
+                                                <button onClick={() => handleSave(viewItem)} className="w-full py-3 bg-indigo-600 text-white rounded-lg shadow-lg shadow-indigo-500/30 transition-all font-bold flex items-center justify-center gap-2">
                                                     <Save size={18} /> Salvar
                                                 </button>
                                             ) : (
-                                                <button onClick={() => startEditing(viewItem)} className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all font-bold flex items-center justify-center gap-2">
+                                                <button onClick={() => startEditing(viewItem)} className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-all font-bold flex items-center justify-center gap-2">
                                                     <Edit3 size={18} /> Editar
                                                 </button>
                                             )}
-                                            <button onClick={() => handleShare(viewItem)} className="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-green-600 rounded-xl transition-all font-bold flex items-center justify-center gap-2">
+                                            <button onClick={() => handleShare(viewItem)} className="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-green-600 rounded-lg transition-all font-bold flex items-center justify-center gap-2">
                                                 <Share2 size={18} /> Whatsapp
                                             </button>
                                         </div>
@@ -308,12 +308,12 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                             <div className="space-y-4">
                                                 {isEditing ? (
                                                     ['Teclado', 'Baixo', 'Bateria', 'Guitarra', 'Violão'].map((inst, idx) => (
-                                                        <div key={inst} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                                        <div key={inst} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50">
                                                             <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5">{inst}</label>
                                                             <select 
                                                                 value={editState.musicians[idx] || ''} 
                                                                 onChange={(e) => updateMusician(idx, e.target.value)}
-                                                                className="w-full bg-white dark:bg-slate-900 border-none rounded-lg text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-indigo-500"
+                                                                className="w-full bg-white dark:bg-slate-900 border-none rounded-md text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-indigo-500"
                                                             >
                                                                 <option value="">-- Selecione --</option>
                                                                 {allMembers.filter(m => m.role === 'musician' && m.instruments?.includes(inst)).map(m => (
@@ -327,9 +327,9 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                         <div key={m.id} className="flex items-center gap-4 group/item">
                                                             <div className="relative">
                                                                 {m.photoUrl ? (
-                                                                    <img src={m.photoUrl} className="w-12 h-12 rounded-2xl object-cover shadow-sm" />
+                                                                    <img src={m.photoUrl} className="w-12 h-12 rounded-lg object-cover shadow-sm" />
                                                                 ) : (
-                                                                    <div className="w-12 h-12 rounded-2xl bg-indigo-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-indigo-500/20">
+                                                                    <div className="w-12 h-12 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-indigo-500/20">
                                                                         {getInitials(m.name)}
                                                                     </div>
                                                                 )}
@@ -359,12 +359,12 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                             <div className="space-y-4">
                                                 {isEditing ? (
                                                     [0, 1, 2].map((idx) => (
-                                                        <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                                        <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50">
                                                             <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5">Vocal {idx + 1}</label>
                                                             <select 
                                                                 value={editState.singers[idx] || ''} 
                                                                 onChange={(e) => updateSinger(idx, e.target.value)}
-                                                                className="w-full bg-white dark:bg-slate-900 border-none rounded-lg text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-purple-500"
+                                                                className="w-full bg-white dark:bg-slate-900 border-none rounded-md text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-purple-500"
                                                             >
                                                                 <option value="">-- Selecione --</option>
                                                                 {allMembers.filter(m => m.role === 'singer').map(m => (
@@ -378,9 +378,9 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                         <div key={s.id} className="flex items-center gap-4 group/item">
                                                             <div className="relative">
                                                                 {s.photoUrl ? (
-                                                                    <img src={s.photoUrl} className="w-12 h-12 rounded-2xl object-cover shadow-sm" />
+                                                                    <img src={s.photoUrl} className="w-12 h-12 rounded-lg object-cover shadow-sm" />
                                                                 ) : (
-                                                                    <div className="w-12 h-12 rounded-2xl bg-purple-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-purple-500/20">
+                                                                    <div className="w-12 h-12 rounded-lg bg-purple-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-purple-500/20">
                                                                         {getInitials(s.name)}
                                                                     </div>
                                                                 )}
@@ -406,7 +406,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
 
                                             <div className="space-y-4">
                                                 {isEditing ? (
-                                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-100 dark:border-slate-700/50">
                                                         <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Adicionar Louvor</label>
                                                         
                                                         {allSongs.length === 0 ? (
@@ -417,7 +417,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                         ) : (
                                                             <div className="flex gap-2 mb-3">
                                                                 <select 
-                                                                    className="flex-1 bg-white dark:bg-slate-900 border-none rounded-lg text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-pink-500"
+                                                                    className="flex-1 bg-white dark:bg-slate-900 border-none rounded-md text-sm font-bold p-2 outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-pink-500"
                                                                     onChange={(e) => {
                                                                         const val = e.target.value;
                                                                         if(val && !editState.songs.includes(val)) {
@@ -445,7 +445,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                                 if (!song) return null; 
                                                                 
                                                                 return (
-                                                                    <div key={songId} className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                                    <div key={songId} className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-md border border-slate-100 dark:border-slate-700">
                                                                         <div className="min-w-0">
                                                                             <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{song.title}</p>
                                                                             <p className="text-[10px] text-slate-400 truncate">
@@ -454,7 +454,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                                         </div>
                                                                         <button 
                                                                             onClick={() => setEditState(prev => ({...prev, songs: prev.songs.filter(id => id !== songId)}))} 
-                                                                            className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                                            className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                                                                             title="Remover da escala"
                                                                         >
                                                                             <Trash2 size={14} />
@@ -473,7 +473,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                             const song = allSongs.find(s => s.id === songId);
                                                             if (!song) return null;
                                                             return (
-                                                                <div key={songId} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-100 dark:border-slate-700/30 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors">
+                                                                <div key={songId} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-100 dark:border-slate-700/30 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors">
                                                                     <div>
                                                                         <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{song.title}</p>
                                                                         <p className="text-[10px] text-slate-400">{song.artist} {song.key ? `• ${song.key}` : ''}</p>

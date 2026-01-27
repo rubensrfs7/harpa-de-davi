@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, ChevronDown } from 'lucide-react';
 
@@ -151,7 +150,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange }) => {
       <div 
         onClick={() => setIsOpen(!isOpen)}
         className={`
-            w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-0 rounded-xl 
+            w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-0 rounded-md 
             flex items-center justify-between cursor-pointer transition-all
             ${isOpen ? 'ring-2 ring-indigo-500/20 bg-white dark:bg-slate-700' : 'hover:bg-slate-100 dark:hover:bg-slate-700/80'}
         `}
@@ -169,13 +168,13 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange }) => {
 
       {/* Dropdown Popover */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-[300px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute top-full left-0 mt-2 w-[300px] bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
           
           {/* Header Month/Year */}
           <div className="flex items-center justify-between mb-4">
             <button 
                 onClick={() => changeMonth(-1)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-500 dark:text-slate-400 transition-colors"
             >
                 <ChevronLeft size={18} />
             </button>
@@ -184,7 +183,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange }) => {
             </span>
             <button 
                 onClick={() => changeMonth(1)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-500 dark:text-slate-400 transition-colors"
             >
                 <ChevronRight size={18} />
             </button>
@@ -217,7 +216,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange }) => {
                     type="time"
                     value={timeValue}
                     onChange={handleTimeChange}
-                    className="appearance-none bg-slate-900 dark:bg-slate-800 text-white font-bold text-lg px-4 py-2 rounded-xl border-none focus:ring-2 focus:ring-indigo-500/50 outline-none cursor-pointer text-center w-32 tracking-wider transition-transform active:scale-95 shadow-sm"
+                    className="appearance-none bg-slate-900 dark:bg-slate-800 text-white font-bold text-lg px-4 py-2 rounded-lg border-none focus:ring-2 focus:ring-indigo-500/50 outline-none cursor-pointer text-center w-32 tracking-wider transition-transform active:scale-95 shadow-sm"
                  />
              </div>
           </div>

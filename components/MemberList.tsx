@@ -52,11 +52,11 @@ const MemberCard: React.FC<{ member: Member; onRemove: (id: string) => void; onE
   const isSuspended = member.isSuspended;
   
   return (
-    <div className={`group relative flex items-center gap-4 p-4 bg-white dark:bg-slate-900/60 backdrop-blur-sm rounded-2xl border transition-all duration-300 hover:shadow-lg ${isSuspended ? 'border-red-200 dark:border-red-900/30 bg-red-50/50' : 'border-white/50 dark:border-slate-700/50 hover:border-indigo-200 dark:hover:border-indigo-900'}`}>
+    <div className={`group relative flex items-center gap-4 p-4 bg-white dark:bg-slate-900/60 backdrop-blur-sm rounded-lg border transition-all duration-300 hover:shadow-lg ${isSuspended ? 'border-red-200 dark:border-red-900/30 bg-red-50/50' : 'border-white/50 dark:border-slate-700/50 hover:border-indigo-200 dark:hover:border-indigo-900'}`}>
        
        {/* Avatar */}
        <div className="relative flex-shrink-0">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-sm font-black shadow-md overflow-hidden ${isSuspended ? 'grayscale opacity-70' : ''}`}>
+          <div className={`w-14 h-14 rounded-lg flex items-center justify-center text-sm font-black shadow-md overflow-hidden ${isSuspended ? 'grayscale opacity-70' : ''}`}>
               {member.photoUrl ? (
                  <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
               ) : (
@@ -116,7 +116,7 @@ const MemberCard: React.FC<{ member: Member; onRemove: (id: string) => void; onE
 
 const MemberList: React.FC<MemberListProps> = ({ members, onRemove, onEdit }) => {
   if (members.length === 0) return (
-    <div className="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
+    <div className="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
        <p className="text-sm font-medium">Sua equipe está vazia.</p>
        <p className="text-xs mt-1">Adicione músicos ou cantores.</p>
     </div>

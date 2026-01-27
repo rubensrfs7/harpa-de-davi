@@ -80,7 +80,7 @@ const AttendanceList: React.FC<AttendanceListProps> = ({ schedule, onUpdateSched
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-            <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-[2rem] shadow-xl shadow-green-500/20 transform rotate-2">
+            <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl shadow-xl shadow-green-500/20 transform rotate-2">
                 <UserCheck size={28} />
             </div>
             <div>
@@ -102,14 +102,14 @@ const AttendanceList: React.FC<AttendanceListProps> = ({ schedule, onUpdateSched
                 const isComplete = totalMembers > 0 && recordedCount === totalMembers;
 
                 return (
-                    <div key={item.id} className={`bg-white dark:bg-slate-900/60 backdrop-blur-md border transition-all duration-300 rounded-3xl overflow-hidden ${isExpanded ? 'border-green-500 shadow-xl ring-1 ring-green-500/20' : 'border-slate-200 dark:border-slate-800 hover:border-green-200 dark:hover:border-green-900'}`}>
+                    <div key={item.id} className={`bg-white dark:bg-slate-900/60 backdrop-blur-md border transition-all duration-300 rounded-xl overflow-hidden ${isExpanded ? 'border-green-500 shadow-xl ring-1 ring-green-500/20' : 'border-slate-200 dark:border-slate-800 hover:border-green-200 dark:hover:border-green-900'}`}>
                         {/* Card Header (Clickable) */}
                         <div 
                             onClick={() => setExpandedId(isExpanded ? null : item.id)}
                             className="p-6 cursor-pointer flex items-center justify-between"
                         >
                             <div className="flex items-center gap-4">
-                                <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl border ${dateInfo.isPast ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'}`}>
+                                <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-lg border ${dateInfo.isPast ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'}`}>
                                     <span className="text-[10px] font-black uppercase text-slate-500">{dateInfo.weekday.substring(0,3)}</span>
                                     <span className="text-xl font-black text-slate-800 dark:text-white">{dateInfo.day}</span>
                                 </div>
@@ -151,7 +151,7 @@ const AttendanceList: React.FC<AttendanceListProps> = ({ schedule, onUpdateSched
                                                 <button 
                                                     key={member.id}
                                                     onClick={() => handleToggleAttendance(item.id, member.id, status)}
-                                                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                                    className={`flex items-center justify-between p-3 rounded-md border transition-all ${
                                                         status === true 
                                                             ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' 
                                                             : status === false
@@ -189,7 +189,7 @@ const AttendanceList: React.FC<AttendanceListProps> = ({ schedule, onUpdateSched
                                 <div className="flex justify-end">
                                     <button 
                                         onClick={() => saveAttendance(item)}
-                                        className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg"
+                                        className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg"
                                     >
                                         <Save size={18} /> Salvar Lista
                                     </button>

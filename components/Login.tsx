@@ -80,7 +80,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         </div>
 
         <div className="relative z-10 flex flex-col items-center p-12 text-center">
-            <div className="mb-6 p-4 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl">
+            <div className="mb-6 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-2xl">
                 <HarpIcon size={64} className="text-white" />
             </div>
             <h1 className="text-5xl font-black text-white tracking-tight mb-4">
@@ -102,7 +102,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           
           <div className="text-center space-y-2">
             <div className="flex lg:hidden justify-center mb-4">
-               <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
+               <div className="p-3 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-500/30">
                   <HarpIcon size={32} />
                </div>
             </div>
@@ -134,7 +134,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-800 dark:text-white font-medium transition-all placeholder:text-slate-400 text-sm"
+                  className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-md focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-800 dark:text-white font-medium transition-all placeholder:text-slate-400 text-sm"
                   placeholder="seu@email.com"
                   required
                 />
@@ -151,7 +151,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-800 dark:text-white font-medium transition-all placeholder:text-slate-400 text-sm tracking-widest"
+                  className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-md focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-800 dark:text-white font-medium transition-all placeholder:text-slate-400 text-sm tracking-widest"
                   placeholder="••••••••"
                   required
                 />

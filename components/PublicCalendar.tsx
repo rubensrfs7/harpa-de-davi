@@ -36,7 +36,7 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
     };
 
     return (
-        <div className="group relative bg-[#0f172a] rounded-[2rem] border border-slate-800 hover:border-pink-500/50 transition-all duration-300 shadow-lg shadow-black/20 overflow-hidden h-[220px] flex flex-col justify-between isolate">
+        <div className="group relative bg-[#0f172a] rounded-xl border border-slate-800 hover:border-pink-500/50 transition-all duration-300 shadow-lg shadow-black/20 overflow-hidden h-[220px] flex flex-col justify-between isolate">
             {/* Background Image Layer */}
             {imgSrc ? (
                 <>
@@ -70,7 +70,7 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
                     <div className="flex items-center gap-3">
                         {/* Key Badge */}
                         {song.key && (
-                            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-pink-500 text-white font-black text-sm shadow-lg shadow-pink-500/30" title={`Tom: ${song.key}`}>
+                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-pink-500 text-white font-black text-sm shadow-lg shadow-pink-500/30" title={`Tom: ${song.key}`}>
                                 {song.key}
                             </div>
                         )}
@@ -99,7 +99,7 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
                                 href={song.lyricsLink} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl bg-black/60 backdrop-blur-sm text-orange-400 hover:bg-orange-900/40 hover:text-orange-300 transition-colors border border-orange-500/30 hover:border-orange-500/50"
+                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-black/60 backdrop-blur-sm text-orange-400 hover:bg-orange-900/40 hover:text-orange-300 transition-colors border border-orange-500/30 hover:border-orange-500/50"
                             >
                                 <FileText size={16} /> Letra
                             </a>
@@ -110,7 +110,7 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
                                 href={song.youtubeLink} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl bg-black/60 backdrop-blur-sm text-red-400 hover:bg-red-900/40 hover:text-red-300 transition-colors border border-red-500/30 hover:border-red-500/50"
+                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-black/60 backdrop-blur-sm text-red-400 hover:bg-red-900/40 hover:text-red-300 transition-colors border border-red-500/30 hover:border-red-500/50"
                             >
                                 <Youtube size={16} /> Vídeo
                             </a>
@@ -179,10 +179,10 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
       <div className="px-4 md:px-0 space-y-6">
         
         {/* Tab Switcher */}
-        <div className="bg-slate-200 dark:bg-slate-800/50 p-1.5 rounded-2xl flex relative">
+        <div className="bg-slate-200 dark:bg-slate-800/50 p-1.5 rounded-lg flex relative">
            <button 
              onClick={() => setActiveTab('agenda')}
-             className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+             className={`flex-1 py-3 rounded-md text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                activeTab === 'agenda' 
                ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm' 
                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
@@ -192,7 +192,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
            </button>
            <button 
              onClick={() => setActiveTab('repertoire')}
-             className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+             className={`flex-1 py-3 rounded-md text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                activeTab === 'repertoire' 
                ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-white shadow-sm' 
                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
@@ -215,13 +215,13 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
             <div className="flex gap-2">
                 <button 
                     onClick={() => changeMonth(-1)}
-                    className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                 >
                     <ChevronLeft size={20} />
                 </button>
                 <button 
                     onClick={() => changeMonth(1)}
-                    className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                 >
                     <ChevronRight size={20} />
                 </button>
@@ -237,7 +237,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
           </div>
 
           {filteredSchedule.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800 text-center mx-4 md:mx-0">
+            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center mx-4 md:mx-0">
               <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-full mb-4">
                  <MapPin size={32} className="text-slate-400" />
               </div>
@@ -260,7 +260,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                     className={`
                         group relative flex flex-col shrink-0 snap-center
                         w-[85vw] md:w-auto 
-                        bg-white dark:bg-slate-900 rounded-[2.5rem] border overflow-hidden transition-all duration-300
+                        bg-white dark:bg-slate-900 rounded-xl border overflow-hidden transition-all duration-300
                         ${isNext 
                             ? 'border-indigo-500 ring-4 ring-indigo-50 dark:ring-indigo-900/20 shadow-xl shadow-indigo-500/10' 
                             : 'border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none'
@@ -268,14 +268,14 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                     `}
                   >
                     {isNext && (
-                        <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest py-1.5 px-4 rounded-bl-2xl z-10 flex items-center gap-1 shadow-sm">
+                        <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest py-1.5 px-4 rounded-bl-xl z-10 flex items-center gap-1 shadow-sm">
                             <Sparkles size={10} className="text-yellow-300" /> Próximo
                         </div>
                     )}
 
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
                       <div className="flex items-center gap-4">
-                        <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl shadow-sm border ${isNext ? 'bg-indigo-600 border-indigo-500' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}>
+                        <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-lg shadow-sm border ${isNext ? 'bg-indigo-600 border-indigo-500' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}>
                           <span className={`text-[10px] font-black uppercase tracking-tighter ${isNext ? 'text-indigo-200' : 'text-indigo-500'}`}>{dateInfo.month}</span>
                           <span className={`text-2xl font-black leading-none ${isNext ? 'text-white' : 'text-slate-800 dark:text-white'}`}>{dateInfo.day}</span>
                         </div>
@@ -386,13 +386,13 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                     placeholder="Pesquisar música ou artista..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-pink-500/20 outline-none transition-all shadow-sm text-slate-800 dark:text-white"
+                    className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium focus:ring-2 focus:ring-pink-500/20 outline-none transition-all shadow-sm text-slate-800 dark:text-white"
                 />
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredSongs.length === 0 ? (
-                    <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-slate-50 dark:bg-slate-900/50">
+                    <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
                         <Music2 className="mx-auto mb-2 opacity-20" size={48} />
                         <p className="text-sm font-medium">Nenhuma música encontrada.</p>
                     </div>

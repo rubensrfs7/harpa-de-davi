@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, Music, Mic, Drum, Camera, X, CalendarClock, UserCheck, UserX, Save, Ban, Trash2, AlertTriangle } from 'lucide-react';
 import { Member, Role } from '../types';
@@ -145,7 +144,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
   };
 
   return (
-    <div className={`bg-white dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-[2rem] border transition-all ${editingMember ? 'border-indigo-500 ring-4 ring-indigo-500/10' : 'border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none'}`}>
+    <div className={`bg-white dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-xl border transition-all ${editingMember ? 'border-indigo-500 ring-4 ring-indigo-500/10' : 'border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none'}`}>
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
           {editingMember ? 'Editar Integrante' : 'Novo Integrante'}
@@ -162,7 +161,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
         <div className="flex justify-center mb-2">
           <div className="relative group">
             <div 
-              className={`w-28 h-28 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer shadow-lg ${
+              className={`w-28 h-28 rounded-lg flex items-center justify-center overflow-hidden transition-all cursor-pointer shadow-lg ${
                 photoUrl ? 'border-4 border-white dark:border-slate-700' : 'bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-indigo-400'
               }`}
               onClick={() => fileInputRef.current?.click()}
@@ -190,7 +189,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
         </div>
 
         {validationError && (
-          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold p-3 rounded-xl flex items-center gap-2">
+          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold p-3 rounded-lg flex items-center gap-2">
             <AlertTriangle size={16} />
             {validationError}
           </div>
@@ -202,7 +201,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition-all font-semibold text-slate-800 dark:text-white placeholder:text-slate-400 outline-none"
+            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-none rounded-md focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition-all font-semibold text-slate-800 dark:text-white placeholder:text-slate-400 outline-none"
             placeholder="Ex: João Silva"
           />
         </div>
@@ -211,7 +210,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
           <button
             type="button"
             onClick={() => { setRole('musician'); }}
-            className={`flex flex-col items-center gap-2 py-4 rounded-2xl border-2 transition-all ${
+            className={`flex flex-col items-center gap-2 py-4 rounded-lg border-2 transition-all ${
               role === 'musician' 
               ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm' 
               : 'bg-transparent border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-300'
@@ -223,7 +222,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
           <button
             type="button"
             onClick={() => { setRole('singer'); }}
-            className={`flex flex-col items-center gap-2 py-4 rounded-2xl border-2 transition-all ${
+            className={`flex flex-col items-center gap-2 py-4 rounded-lg border-2 transition-all ${
               role === 'singer' 
               ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-500 text-purple-600 dark:text-purple-400 shadow-sm' 
               : 'bg-transparent border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-300'
@@ -243,7 +242,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
                         key={inst.id}
                         type="button"
                         onClick={() => handleToggleInstrument(inst.id)}
-                        className={`flex flex-col items-center gap-2 py-3 rounded-xl border transition-all ${
+                        className={`flex flex-col items-center gap-2 py-3 rounded-md border transition-all ${
                             selectedInstruments.includes(inst.id)
                             ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/30'
                             : 'bg-slate-50 dark:bg-slate-800/50 border-transparent text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
@@ -258,7 +257,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
         )}
 
         <div className="space-y-4 pt-2">
-           <div className="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl space-y-4 border border-slate-100 dark:border-slate-800">
+           <div className="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-lg space-y-4 border border-slate-100 dark:border-slate-800">
                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Restrições & Status</label>
                
                {/* Toggle 1 */}
@@ -282,7 +281,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
 
                {/* Toggles Days */}
                <div className="grid grid-cols-2 gap-3">
-                  <div className={`flex items-center justify-between p-2 rounded-xl border ${noWednesdays ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-900/30' : 'border-transparent'}`}>
+                  <div className={`flex items-center justify-between p-2 rounded-lg border ${noWednesdays ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-900/30' : 'border-transparent'}`}>
                       <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">Sem Quarta</span>
                       <button
                         type="button"
@@ -292,7 +291,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
                         <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${noWednesdays ? 'left-4.5' : 'left-0.5'}`}></div>
                       </button>
                   </div>
-                  <div className={`flex items-center justify-between p-2 rounded-xl border ${noFridays ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-900/30' : 'border-transparent'}`}>
+                  <div className={`flex items-center justify-between p-2 rounded-lg border ${noFridays ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-900/30' : 'border-transparent'}`}>
                       <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">Sem Sexta</span>
                       <button
                         type="button"
@@ -325,7 +324,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ onAdd, onUpdate, editingMember,
 
         <button
           type="submit"
-          className={`w-full font-bold py-4 rounded-2xl transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${
+          className={`w-full font-bold py-4 rounded-lg transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${
               editingMember 
               ? 'bg-indigo-600 text-white shadow-indigo-500/30 hover:bg-indigo-700' 
               : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-slate-900/20 hover:bg-slate-800 dark:hover:bg-slate-200'

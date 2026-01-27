@@ -49,14 +49,14 @@ const SongCard: React.FC<{
     };
 
     return (
-        <div className="group relative bg-[#0f172a] rounded-[2rem] border border-slate-800 hover:border-pink-500/50 transition-all duration-300 shadow-lg shadow-black/20 overflow-hidden h-[220px] flex flex-col justify-between isolate">
+        <div className="group relative bg-[#0f172a] rounded-xl border border-slate-800 hover:border-pink-500/50 transition-all duration-300 shadow-lg shadow-black/20 overflow-hidden h-[220px] flex flex-col justify-between isolate">
             
             {/* Action Buttons (Top Right) - High Z-Index & Clickable */}
             <div className="absolute top-4 right-4 flex gap-2 z-30 pointer-events-auto">
                 <button 
                     type="button"
                     onClick={(e) => { e.stopPropagation(); onEdit(song); }}
-                    className="p-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-2xl text-slate-200 hover:text-white border border-white/10 transition-all shadow-lg hover:scale-105 active:scale-95"
+                    className="p-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-lg text-slate-200 hover:text-white border border-white/10 transition-all shadow-lg hover:scale-105 active:scale-95"
                     title="Editar"
                 >
                     <Edit size={18} />
@@ -64,7 +64,7 @@ const SongCard: React.FC<{
                 <button 
                     type="button"
                     onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
-                    className="p-2.5 bg-black/40 hover:bg-red-500/90 backdrop-blur-md rounded-2xl text-slate-200 hover:text-white border border-white/10 transition-all shadow-lg hover:scale-105 active:scale-95"
+                    className="p-2.5 bg-black/40 hover:bg-red-500/90 backdrop-blur-md rounded-lg text-slate-200 hover:text-white border border-white/10 transition-all shadow-lg hover:scale-105 active:scale-95"
                     title="Excluir (Deletar do Banco)"
                 >
                     <Trash2 size={18} />
@@ -104,7 +104,7 @@ const SongCard: React.FC<{
                     <div className="flex items-center gap-3">
                         {/* Key Badge */}
                         {song.key && (
-                            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-pink-500 text-white font-black text-sm shadow-lg shadow-pink-500/30" title={`Tom: ${song.key}`}>
+                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-pink-500 text-white font-black text-sm shadow-lg shadow-pink-500/30" title={`Tom: ${song.key}`}>
                                 {song.key}
                             </div>
                         )}
@@ -133,7 +133,7 @@ const SongCard: React.FC<{
                                 href={song.lyricsLink} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl bg-black/60 backdrop-blur-sm text-orange-400 hover:bg-orange-900/40 hover:text-orange-300 transition-colors border border-orange-500/30 hover:border-orange-500/50"
+                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-black/60 backdrop-blur-sm text-orange-400 hover:bg-orange-900/40 hover:text-orange-300 transition-colors border border-orange-500/30 hover:border-orange-500/50"
                             >
                                 <FileText size={16} /> Letra
                             </a>
@@ -144,7 +144,7 @@ const SongCard: React.FC<{
                                 href={song.youtubeLink} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl bg-black/60 backdrop-blur-sm text-red-400 hover:bg-red-900/40 hover:text-red-300 transition-colors border border-red-500/30 hover:border-red-500/50"
+                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-black/60 backdrop-blur-sm text-red-400 hover:bg-red-900/40 hover:text-red-300 transition-colors border border-red-500/30 hover:border-red-500/50"
                             >
                                 <Youtube size={16} /> Vídeo
                             </a>
@@ -236,7 +236,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
        <div className="flex items-center gap-4 mb-8">
-            <div className="p-4 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-[2rem] shadow-xl shadow-pink-500/20 transform -rotate-3">
+            <div className="p-4 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-xl shadow-xl shadow-pink-500/20 transform -rotate-3">
                 <Music2 size={28} />
             </div>
             <div>
@@ -248,7 +248,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Form Column */}
         <div className="lg:col-span-4">
-          <div id="song-form" className={`bg-white/80 dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-[2rem] shadow-xl shadow-slate-200/40 dark:shadow-none border transition-all sticky top-28 ${editingId ? 'border-pink-500 ring-4 ring-pink-500/10' : 'border-white/50 dark:border-slate-700/50'}`}>
+          <div id="song-form" className={`bg-white/80 dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-xl shadow-xl shadow-slate-200/40 dark:shadow-none border transition-all sticky top-28 ${editingId ? 'border-pink-500 ring-4 ring-pink-500/10' : 'border-white/50 dark:border-slate-700/50'}`}>
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                     {editingId ? (
@@ -279,7 +279,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold placeholder:text-slate-400 outline-none transition-all"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold placeholder:text-slate-400 outline-none transition-all"
                         placeholder="Nome da música"
                         required
                     />
@@ -294,7 +294,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                         type="text"
                         value={artist}
                         onChange={(e) => setArtist(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold placeholder:text-slate-400 outline-none transition-all"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold placeholder:text-slate-400 outline-none transition-all"
                         placeholder="Cantor ou Banda Original"
                         required
                     />
@@ -309,7 +309,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                         <select
                             value={key}
                             onChange={(e) => setKey(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold outline-none transition-all appearance-none"
+                            className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold outline-none transition-all appearance-none"
                         >
                             <option value="">-</option>
                             {MUSICAL_KEYS.map(k => (
@@ -326,7 +326,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                         <select
                             value={selectedSingerId}
                             onChange={(e) => setSelectedSingerId(e.target.value)}
-                            className="w-full pl-10 pr-2 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold outline-none transition-all appearance-none text-sm"
+                            className="w-full pl-10 pr-2 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold outline-none transition-all appearance-none text-sm"
                         >
                             <option value="">--</option>
                             {singerOptions.map(singer => (
@@ -345,7 +345,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                         type="url"
                         value={lyricsLink}
                         onChange={(e) => setLyricsLink(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
                         placeholder="https://..."
                     />
                 </div>
@@ -359,7 +359,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                         type="url"
                         value={youtubeLink}
                         onChange={(e) => setYoutubeLink(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 outline-none transition-all"
                         placeholder="https://..."
                     />
                 </div>
@@ -367,7 +367,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
 
               <button
                 type="submit"
-                className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95 mt-2 flex items-center justify-center gap-2 ${
+                className={`w-full font-bold py-4 rounded-lg transition-all shadow-lg active:scale-95 mt-2 flex items-center justify-center gap-2 ${
                     editingId 
                     ? 'bg-pink-600 hover:bg-pink-700 text-white shadow-pink-500/30' 
                     : 'bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900'
@@ -382,7 +382,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
 
         {/* List Column */}
         <div className="lg:col-span-8">
-             <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 min-h-[500px]">
+             <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-sm rounded-xl border border-slate-200 dark:border-slate-800 p-8 min-h-[500px]">
                 <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
                     <div className="flex items-center gap-2">
                        <span className="text-2xl font-black text-slate-800 dark:text-white">{songs.length}</span>
@@ -395,14 +395,14 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                             placeholder="Pesquisar no acervo..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-pink-500/20 outline-none transition-all shadow-sm"
+                            className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium focus:ring-2 focus:ring-pink-500/20 outline-none transition-all shadow-sm"
                         />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {filteredSongs.length === 0 ? (
-                        <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
+                        <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
                             Nenhuma música encontrada.
                         </div>
                     ) : (

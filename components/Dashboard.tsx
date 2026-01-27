@@ -92,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
       
       {/* Header */}
       <div className="flex items-center gap-5">
-        <div className="p-4 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-[2rem] shadow-xl shadow-indigo-500/20 transform rotate-[-5deg]">
+        <div className="p-4 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl shadow-xl shadow-indigo-500/20 transform rotate-[-5deg]">
             <BarChart3 size={32} />
         </div>
         <div>
@@ -110,9 +110,9 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
             { label: 'Faltas Totais', val: totalAbsencesRecorded, icon: AlertOctagon, from: 'from-red-500', to: 'to-rose-400' },
             { label: 'Repertório', val: songs.length, icon: Music2, from: 'from-pink-500', to: 'to-rose-400' },
           ].map((item, i) => (
-            <div key={i} className="group bg-white dark:bg-slate-900/60 backdrop-blur-md p-5 rounded-[2rem] border border-white/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/40 dark:shadow-none hover:-translate-y-1 transition-all duration-300">
+            <div key={i} className="group bg-white dark:bg-slate-900/60 backdrop-blur-md p-5 rounded-xl border border-white/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/40 dark:shadow-none hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-start justify-between mb-4">
-                   <div className={`p-3 rounded-2xl bg-gradient-to-br ${item.from} ${item.to} text-white shadow-lg`}>
+                   <div className={`p-3 rounded-lg bg-gradient-to-br ${item.from} ${item.to} text-white shadow-lg`}>
                       <item.icon size={18} />
                    </div>
                    <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-full text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -132,10 +132,10 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
         {/* Coluna Esquerda: Participação e Faltas */}
         <div className="xl:col-span-2 space-y-8">
             {/* Presence Card */}
-            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-amber-100 dark:bg-amber-900/20 rounded-xl text-amber-500">
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/20 rounded-lg text-amber-500">
                         <Award size={20} />
                         </div>
                         <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Top Participações</h3>
@@ -150,7 +150,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
                             <div key={stat.member.id} className="relative">
                                 <div className="flex items-center gap-4 z-10 relative">
                                     <span className={`w-6 text-sm font-black italic ${idx === 0 ? 'text-amber-500 text-lg' : 'text-slate-300'}`}>#{idx + 1}</span>
-                                    <div className="w-10 h-10 rounded-full shadow-md overflow-hidden border-2 border-white dark:border-slate-700">
+                                    <div className="w-10 h-10 rounded-lg shadow-md overflow-hidden border-2 border-white dark:border-slate-700">
                                     {stat.member.photoUrl ? (
                                         <img src={stat.member.photoUrl} className="w-full h-full object-cover" />
                                     ) : (
@@ -177,12 +177,12 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
             </div>
 
             {/* Ranking de Faltas (Novo) */}
-            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-[2.5rem] border border-red-50 dark:border-red-900/20 shadow-xl shadow-slate-200/40 dark:shadow-none relative overflow-hidden">
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-xl border border-red-50 dark:border-red-900/20 shadow-xl shadow-slate-200/40 dark:shadow-none relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-3xl pointer-events-none"></div>
                 
                 <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-xl text-red-500">
+                        <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg text-red-500">
                         <AlertOctagon size={20} />
                         </div>
                         <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Ranking de Faltas</h3>
@@ -203,8 +203,8 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {absenceStats.slice(0, 6).map((stat, idx) => (
-                            <div key={stat.member.id} className="flex items-center gap-3 p-3 bg-red-50/50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20">
-                                <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center font-black text-xs text-slate-500 shadow-sm shrink-0">
+                            <div key={stat.member.id} className="flex items-center gap-3 p-3 bg-red-50/50 dark:bg-red-900/10 rounded-lg border border-red-100 dark:border-red-900/20">
+                                <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center font-black text-xs text-slate-500 shadow-sm shrink-0">
                                     {idx + 1}
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -220,10 +220,10 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
 
         {/* Coluna Direita: Top Songs */}
         <div className="xl:col-span-1">
-            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none h-full">
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none h-full">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-pink-100 dark:bg-pink-900/20 rounded-xl text-pink-500">
+                        <div className="p-2 bg-pink-100 dark:bg-pink-900/20 rounded-lg text-pink-500">
                         <ListOrdered size={20} />
                         </div>
                         <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Músicas em Alta</h3>
@@ -235,8 +235,8 @@ const Dashboard: React.FC<DashboardProps> = ({ members, schedule, logs, songs })
                 ) : (
                     <div className="space-y-5">
                         {topSongs.map((item, idx) => (
-                            <div key={item.song?.id} className="group flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-colors">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-pink-500/20 shrink-0">
+                            <div key={item.song?.id} className="group flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-rose-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-pink-500/20 shrink-0">
                                     {idx + 1}
                                 </div>
                                 <div className="flex-1 min-w-0">

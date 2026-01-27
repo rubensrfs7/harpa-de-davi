@@ -221,15 +221,15 @@ const App: React.FC = () => {
 
   const handleUpdateScheduleItem = async (updatedItem: ScheduleItem) => {
     setIsSyncing(true);
+
+    // Prepare data outside try block so it is available in catch block for retry logic
+    const safeMusicians = updatedItem.musicians.map(m => m.id).filter(id => id && id.length > 0);
+    const safeSingers = updatedItem.singers.map(s => s.id).filter(id => id && id.length > 0);
+    const safeSongs = (updatedItem.songs || []).filter(id => id && id.length > 0);
+    const attendanceRecord = updatedItem.attendance || {};
+
     try {
       setSchedule(prev => prev.map(s => s.id === updatedItem.id ? updatedItem : s));
-      
-      const safeMusicians = updatedItem.musicians.map(m => m.id).filter(id => id && id.length > 0);
-      const safeSingers = updatedItem.singers.map(s => s.id).filter(id => id && id.length > 0);
-      const safeSongs = (updatedItem.songs || []).filter(id => id && id.length > 0);
-      
-      // Enviamos attendance_record para o Supabase (JSONB)
-      const attendanceRecord = updatedItem.attendance || {};
 
       const { error } = await supabase.from('schedules').update({
         musician_ids: safeMusicians,
@@ -240,8 +240,26 @@ const App: React.FC = () => {
       
       if (error) throw error;
     } catch (err) {
+      // ERRO SILENCIOSO DE COLUNA FALTANDO
+      // Se a coluna attendance_record não existir, tentamos salvar sem ela
+      const errorMsg = formatError(err);
+      if (errorMsg.includes('attendance_record')) {
+          console.warn("Coluna attendance_record não encontrada. Tentando salvar sem ela.");
+          try {
+               const { error: retryError } = await supabase.from('schedules').update({
+                musician_ids: safeMusicians,
+                singer_ids: safeSingers,
+                song_ids: safeSongs
+              }).eq('id', updatedItem.id);
+              if (retryError) throw retryError;
+              return; // Sucesso no retry
+          } catch (retryErr) {
+             alert(`Erro ao atualizar escala (Retry falhou): ${formatError(retryErr)}`);
+             return;
+          }
+      }
       console.error("Erro ao atualizar:", err);
-      alert(`Erro ao atualizar escala: ${formatError(err)}`);
+      alert(`Erro ao atualizar escala: ${errorMsg}`);
     } finally {
       setIsSyncing(false);
     }
@@ -257,23 +275,19 @@ const App: React.FC = () => {
     if (members.length === 0) { alert("Cadastre membros antes de gerar a escala."); return; }
     
     // --- CORREÇÃO DE DUPLICIDADE ---
-    // Verifica quais datas selecionadas já existem na escala atual (comparando timestamps)
     const existingTimestamps = new Set(schedule.map(s => new Date(s.date).getTime()));
     
-    // Filtra apenas as datas que são realmente novas
     const uniqueDatesToGenerate = selectedDates.filter(dateStr => {
         const timestamp = new Date(dateStr).getTime();
         return !existingTimestamps.has(timestamp);
     });
 
-    // Se todas as datas já existirem, avisa o usuário e para
     if (uniqueDatesToGenerate.length === 0) {
         alert("Todas as datas selecionadas já possuem uma escala agendada. Nenhuma duplicata foi criada.");
         setSelectedDates([]);
         return;
     }
 
-    // Se algumas já existiam, avisa e pede confirmação para prosseguir com as restantes
     if (uniqueDatesToGenerate.length < selectedDates.length) {
         const duplicatesCount = selectedDates.length - uniqueDatesToGenerate.length;
         if (!window.confirm(`Atenção: ${duplicatesCount} data(s) selecionada(s) já existem na escala e serão ignoradas. Deseja gerar apenas as ${uniqueDatesToGenerate.length} novas datas?`)) {
@@ -283,10 +297,8 @@ const App: React.FC = () => {
 
     setIsSyncing(true);
     try {
-      // Gera escalas apenas para as NOVAS datas únicas
       const newScheduleItems = generateFullSchedule(uniqueDatesToGenerate, members);
       
-      // Adiciona ao estado existente (Append)
       setSchedule(prev => [...prev, ...newScheduleItems].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
       
       const dbData = newScheduleItems.map(item => ({
@@ -301,7 +313,6 @@ const App: React.FC = () => {
       const { error } = await supabase.from('schedules').insert(dbData);
       if (error) throw error;
       
-      // Limpa a área de "Selected Dates" após gerar com sucesso
       setSelectedDates([]);
       alert(`${newScheduleItems.length} novos cultos gerados com sucesso!`);
 
@@ -352,7 +363,7 @@ const App: React.FC = () => {
     }
   };
 
-  // --- MÚSICAS (CRUD PADRONIZADO E BLINDADO) ---
+  // --- MÚSICAS ---
 
   const handleAddSong = async (song: Song) => {
     setIsSyncing(true);
@@ -478,11 +489,11 @@ const App: React.FC = () => {
 
       {/* Floating Navbar Aligned */}
       <div className="sticky top-4 z-40 w-full max-w-7xl mx-auto px-4 md:px-6 mb-8">
-        <nav className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-full px-4 py-3 shadow-xl shadow-indigo-500/5 transition-all">
+        <nav className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-xl px-4 py-3 shadow-xl shadow-indigo-500/5 transition-all">
           <div className="flex items-center justify-between">
             {/* Logo Area */}
             <div className="flex items-center gap-3 pl-2">
-              <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+              <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2 rounded-lg text-white shadow-lg shadow-indigo-500/30">
                  <HarpIcon size={20} />
               </div>
               <div className="hidden md:block">
@@ -492,7 +503,7 @@ const App: React.FC = () => {
             
             {/* Desktop Navigation */}
             {!isPublicLinkMode && (
-              <div className="hidden md:flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-full border border-slate-200/50 dark:border-slate-700/50">
+              <div className="hidden md:flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
                 {[
                   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
                   { id: 'scheduler', label: 'Escalas', icon: CalendarIcon },
@@ -503,7 +514,7 @@ const App: React.FC = () => {
                   <button 
                     key={item.id} 
                     onClick={() => setView(item.id as any)} 
-                    className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${
+                    className={`flex items-center gap-2 px-5 py-2 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-300 ${
                       view === item.id 
                       ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' 
                       : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/50'
@@ -521,7 +532,7 @@ const App: React.FC = () => {
                {!isPublicLinkMode && (
                   <button 
                     onClick={handleCopyPublicLink} 
-                    className={`p-2.5 rounded-full transition-all border ${
+                    className={`p-2.5 rounded-lg transition-all border ${
                       copiedLink 
                       ? 'bg-green-100 text-green-600 border-green-200' 
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-transparent hover:bg-indigo-50 hover:text-indigo-600'
@@ -534,7 +545,7 @@ const App: React.FC = () => {
 
                <button 
                   onClick={() => setIsDarkMode(!isDarkMode)} 
-                  className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                >
                  {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
                </button>
@@ -542,7 +553,7 @@ const App: React.FC = () => {
                {isAuthenticated && (
                  <button 
                     onClick={handleLogout} 
-                    className="p-2.5 bg-red-50 dark:bg-red-900/20 rounded-full text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                    className="p-2.5 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
                  >
                    <LogOut size={18} />
                  </button>
@@ -558,7 +569,7 @@ const App: React.FC = () => {
         ) : view === 'scheduler' ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Action Bar */}
-            <div className="relative z-30 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white/40 dark:border-slate-700/40 shadow-xl shadow-slate-200/40 dark:shadow-none">
+            <div className="relative z-30 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-xl border border-white/40 dark:border-slate-700/40 shadow-xl shadow-slate-200/40 dark:shadow-none">
               <div className="flex flex-col md:flex-row gap-6 items-end">
                 <div className="flex-1 w-full space-y-3">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Adicionar Culto</label>
@@ -567,13 +578,13 @@ const App: React.FC = () => {
                 <div className="flex gap-3 w-full md:w-auto">
                     <button 
                       onClick={() => { if (newDateInput) { setSelectedDates(prev => [...new Set([...prev, newDateInput])].sort()); setNewDateInput(''); } }} 
-                      className="flex-1 md:flex-none h-[52px] px-8 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 active:scale-95"
+                      className="flex-1 md:flex-none h-[52px] px-8 bg-indigo-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 active:scale-95"
                     >
                       <CalendarIcon size={20} /> Agendar
                     </button>
                     <button 
                       onClick={handleGenerateSchedule} 
-                      className="flex-1 md:flex-none h-[52px] px-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg active:scale-95"
+                      className="flex-1 md:flex-none h-[52px] px-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg active:scale-95"
                     >
                       <Wand2 size={20} /> <span className="hidden md:inline">Gerar Escala</span><span className="md:hidden">Gerar</span>
                     </button>
@@ -595,13 +606,13 @@ const App: React.FC = () => {
                     {selectedDates.map(dateStr => {
                       const dateObj = new Date(dateStr);
                       return (
-                        <span key={dateStr} className="inline-flex items-center gap-3 pl-4 pr-2 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl text-sm font-bold border border-indigo-100 dark:border-indigo-800">
+                        <span key={dateStr} className="inline-flex items-center gap-3 pl-4 pr-2 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-bold border border-indigo-100 dark:border-indigo-800">
                           {dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} 
                           <span className="opacity-50">•</span> 
                           {dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                           <button
                             onClick={() => setSelectedDates(prev => prev.filter(d => d !== dateStr))}
-                            className="ml-1 p-1 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors text-indigo-400 hover:text-red-500"
+                            className="ml-1 p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md transition-colors text-indigo-400 hover:text-red-500"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -662,7 +673,7 @@ const App: React.FC = () => {
       {/* Mobile Tab Navigation */}
       {!isPublicLinkMode && isAuthenticated && (
         <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
-           <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-700/50 shadow-2xl p-2 grid grid-cols-5 gap-1">
+           <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl border border-white/20 dark:border-slate-700/50 shadow-2xl p-2 grid grid-cols-5 gap-1">
                 {[
                     { id: 'dashboard', icon: LayoutDashboard, label: 'Dash' },
                     { id: 'scheduler', icon: CalendarIcon, label: 'Escalas' },
@@ -673,7 +684,7 @@ const App: React.FC = () => {
                     <button 
                         key={item.id} 
                         onClick={() => setView(item.id as any)}
-                        className={`flex flex-col items-center justify-center gap-1 h-16 rounded-[1.5rem] transition-all duration-300 ${
+                        className={`flex flex-col items-center justify-center gap-1 h-16 rounded-lg transition-all duration-300 ${
                           view === item.id 
                           ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 translate-y-[-8px]' 
                           : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
