@@ -33,64 +33,65 @@ const formatCardDate = (dateString: string) => {
   };
 };
 
-// Subcomponente: Card de Música GRANDE (Aba Repertório)
+// --- SUBCOMPONENTE: CARD DE MÚSICA (Visual Rico para Aba Repertório) ---
 const RepertoireSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singer }) => {
     const primaryLink = song.youtubeLink || song.lyricsLink;
     const videoId = getYoutubeId(song.youtubeLink || '');
+    // Usa maxresdefault para qualidade melhor no card grande, fallback para hqdefault
     const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
 
     return (
-        <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/10 flex flex-col h-full">
-            
-            {/* Header / Thumbnail Area */}
-            <div className="relative h-32 w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
+        <a 
+            href={primaryLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`group relative overflow-hidden rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col h-full ${!primaryLink ? 'pointer-events-none' : ''}`}
+        >
+            {/* Imagem / Thumbnail */}
+            <div className="relative h-40 w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
                 {thumbUrl ? (
                     <img src={thumbUrl} alt={song.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
-                        <Music2 className="text-slate-600" size={40} />
+                        <Music2 className="text-slate-600" size={48} />
                     </div>
                 )}
                 
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
+                {/* Overlay Escuro com Gradiente */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
 
-                {/* Key Badge (Top Right) */}
+                {/* Badge de Tonalidade (Canto Superior Direito) */}
                 {song.key && (
-                    <div className="absolute top-2 right-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-2 py-1 rounded text-xs font-black shadow-sm">
+                    <div className="absolute top-3 right-3 bg-pink-600 text-white px-2.5 py-1 rounded-md text-xs font-black shadow-lg shadow-black/20 border border-white/10 z-20">
                         {song.key}
                     </div>
                 )}
 
-                {/* Play Button Overlay */}
+                {/* Botão Play (Aparece no Hover) */}
                 {primaryLink && (
-                    <a 
-                        href={primaryLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
-                    >
-                        <div className="bg-pink-600 text-white p-3 rounded-full shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                            <Play size={24} fill="currentColor" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-[2px]">
+                        <div className="bg-white text-indigo-600 p-3 rounded-full shadow-2xl transform scale-90 group-hover:scale-110 transition-transform">
+                            <Play size={28} fill="currentColor" className="ml-1" />
                         </div>
-                    </a>
+                    </div>
                 )}
             </div>
 
-            {/* Content Area */}
-            <div className="p-4 flex-1 flex flex-col justify-between">
+            {/* Informações da Música */}
+            <div className="p-4 flex-1 flex flex-col justify-between relative bg-white dark:bg-slate-800">
                 <div>
-                    <h3 className="font-bold text-slate-800 dark:text-white leading-tight mb-1 line-clamp-2" title={song.title}>
+                    <h3 className="font-bold text-slate-800 dark:text-white leading-tight mb-1 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" title={song.title}>
                         {song.title}
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide truncate">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wide truncate">
                         {song.artist}
                     </p>
                 </div>
 
+                {/* Cantor da Pasta (se houver) */}
                 {singer && (
                     <div className="mt-4 flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                        <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600">
                             {singer.photoUrl ? (
                                 <img src={singer.photoUrl} className="w-full h-full object-cover" />
                             ) : (
@@ -99,13 +100,13 @@ const RepertoireSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, s
                                 </div>
                             )}
                         </div>
-                        <span className="text-xs text-slate-600 dark:text-slate-300 truncate">
+                        <span className="text-xs text-slate-600 dark:text-slate-300 truncate font-medium">
                             {singer.name}
                         </span>
                     </div>
                 )}
             </div>
-        </div>
+        </a>
     );
 };
 
@@ -251,6 +252,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                         </div>
                     )}
 
+                    {/* Cabeçalho do Card */}
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
                       <div className="flex items-center gap-4">
                         <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-lg shadow-sm border ${isNext ? 'bg-indigo-600 border-indigo-500' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}>
@@ -296,7 +298,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
 
                       <div className="h-px bg-slate-100 dark:bg-slate-800 w-full"></div>
 
-                      {/* Vocal */}
+                      {/* Vocal com Destaque para Ministro */}
                       <div className="flex-1">
                         <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                           <Mic size={12} className="text-purple-500" /> Equipe Vocal
@@ -346,7 +348,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                         )}
                       </div>
 
-                      {/* Louvores (Com Thumbnails e Key) */}
+                      {/* Louvores (Com Thumbnails Pequenas e Key) */}
                       {item.songs && item.songs.length > 0 && (
                           <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
@@ -426,7 +428,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
         </div>
       )}
 
-      {/* --- CONTEÚDO DO REPERTÓRIO (Visual de Cards/Grade) --- */}
+      {/* --- CONTEÚDO DO REPERTÓRIO (Visual de Cards Ricos) --- */}
       {activeTab === 'repertoire' && (
         <div className="px-4 md:px-0 animate-in fade-in slide-in-from-right-4 duration-500">
              
@@ -517,7 +519,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             </div>
                     )}
 
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredSongs.length === 0 ? (
                             <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
                                 <Music2 className="mx-auto mb-2 opacity-20" size={48} />
