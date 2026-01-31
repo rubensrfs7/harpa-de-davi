@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle, ChevronLeft, ChevronRight, X, Eye, ExternalLink, ChevronDown, Check, Search, Plus } from 'lucide-react';
+import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle, ChevronLeft, ChevronRight, X, Eye, ExternalLink, ChevronDown, Check, Search, Plus, Crown, UserPlus, Shield } from 'lucide-react';
 import { ScheduleItem, Member, Song } from '../types';
 
 interface ScheduleProps {
@@ -59,7 +59,9 @@ const MemberSelect: React.FC<MemberSelectProps> = ({ label, value, options, onCh
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5">{label}</label>
+      <label className="text-[10px] font-black text-slate-400 uppercase block mb-1.5 flex items-center gap-1">
+        {icon} {label}
+      </label>
       
       <div 
         onClick={() => setIsOpen(!isOpen)}
@@ -247,7 +249,13 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
   const [viewItem, setViewItem] = useState<ScheduleItem | null>(null);
   
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editState, setEditState] = useState<{ musicians: string[], singers: string[], songs: string[] }>({ musicians: [], singers: [], songs: [] });
+  const [editState, setEditState] = useState<{ 
+      musicians: string[], 
+      singers: string[], 
+      songs: string[],
+      worshipLeaderId: string | null,
+      backupSingerId: string | null
+  }>({ musicians: [], singers: [], songs: [], worshipLeaderId: null, backupSingerId: null });
   
   // Estado para o filtro de mês
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -262,7 +270,9 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
     setEditState({
       musicians: item.musicians.map(m => m.id),
       singers: item.singers.map(s => s.id),
-      songs: validSongs
+      songs: validSongs,
+      worshipLeaderId: item.worshipLeaderId || null,
+      backupSingerId: item.backupSinger?.id || null
     });
   };
 
@@ -275,11 +285,21 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
     const updatedMusicians = editState.musicians.map(id => allMembers.find(m => m.id === id)).filter(Boolean) as Member[];
     const updatedSingers = editState.singers.map(id => allMembers.find(m => m.id === id)).filter(Boolean) as Member[];
     
+    // Garante que o ministro esteja entre os cantores (se o usuário removeu o ministro da lista de vocal, limpa)
+    let finalLeaderId = editState.worshipLeaderId;
+    if (finalLeaderId && !editState.singers.includes(finalLeaderId)) {
+        finalLeaderId = undefined; // Reset if invalid
+    }
+
+    const updatedBackupSinger = editState.backupSingerId ? allMembers.find(m => m.id === editState.backupSingerId) : undefined;
+
     const updatedItem = {
       ...item,
       musicians: updatedMusicians,
       singers: updatedSingers,
-      songs: editState.songs
+      songs: editState.songs,
+      worshipLeaderId: finalLeaderId || undefined,
+      backupSinger: updatedBackupSinger
     };
 
     onUpdateScheduleItem(updatedItem);
@@ -296,6 +316,9 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
   const updateSinger = (idx: number, id: string) => {
     const newS = [...editState.singers];
     newS[idx] = id;
+    
+    // Se mudou o cantor e ele era o ministro, talvez precise resetar? 
+    // Por enquanto deixamos flexível, validamos no Save.
     setEditState({ ...editState, singers: newS });
   };
 
@@ -307,6 +330,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
     const ePiano = '\uD83C\uDFB9';
     const eMic = '\uD83C\uDFA4';
     const eNotes = '\uD83C\uDFB6';
+    const eCrown = '\uD83D\uDC51';
     
     let text = `*ESCALA HARPA DE DAVI* ${eHarp}\n\n`;
     text += `${eCal} *Data:* ${dateInfo.weekday}, ${dateInfo.day} de ${dateInfo.month}\n`;
@@ -322,8 +346,15 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
 
     text += `*${eMic} EQUIPE DE VOCAL:*\n`;
     if (item.singers.length > 0) {
-      item.singers.forEach(s => text += `• ${s.name}\n`);
+      item.singers.forEach(s => {
+          const isLeader = s.id === item.worshipLeaderId;
+          text += `• ${s.name} ${isLeader ? eCrown : ''}\n`
+      });
     } else { text += `_Nenhum vocal definido_\n`; }
+    
+    if (item.backupSinger) {
+        text += `_Reserva: ${item.backupSinger.name}_\n`;
+    }
     text += `\n`;
 
     text += `*${eNotes} LOUVORES:*\n`;
@@ -567,33 +598,87 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
 
                                             <div className="space-y-4">
                                                 {isEditing ? (
-                                                    [0, 1, 2].map((idx) => (
-                                                        <MemberSelect
-                                                            key={idx}
-                                                            label={`Vocal ${idx + 1}`}
-                                                            value={editState.singers[idx] || ''}
-                                                            options={allMembers.filter(m => m.role === 'singer')}
-                                                            onChange={(newVal) => updateSinger(idx, newVal)}
-                                                        />
-                                                    ))
-                                                ) : (
-                                                    viewItem.singers.length > 0 ? viewItem.singers.map(s => (
-                                                        <div key={s.id} className="flex items-center gap-4 group/item">
-                                                            <div className="relative">
-                                                                {s.photoUrl ? (
-                                                                    <img src={s.photoUrl} className="w-12 h-12 rounded-lg object-cover shadow-sm" />
-                                                                ) : (
-                                                                    <div className="w-12 h-12 rounded-lg bg-purple-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-purple-500/20">
-                                                                        {getInitials(s.name)}
+                                                    <>
+                                                        {[0, 1, 2].map((idx) => {
+                                                            const singerId = editState.singers[idx] || '';
+                                                            const isLeader = singerId && editState.worshipLeaderId === singerId;
+
+                                                            return (
+                                                                <div key={idx} className="flex items-end gap-2">
+                                                                    <div className="flex-1">
+                                                                        <MemberSelect
+                                                                            label={`Vocal ${idx + 1}`}
+                                                                            value={singerId}
+                                                                            options={allMembers.filter(m => m.role === 'singer')}
+                                                                            onChange={(newVal) => updateSinger(idx, newVal)}
+                                                                        />
                                                                     </div>
-                                                                )}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-bold text-slate-800 dark:text-white">{s.name}</p>
-                                                                <p className="text-xs text-slate-400 mt-0.5">Equipe de Louvor</p>
-                                                            </div>
+                                                                    {singerId && (
+                                                                        <button
+                                                                            onClick={() => setEditState(prev => ({...prev, worshipLeaderId: isLeader ? null : singerId }))}
+                                                                            className={`mb-[10px] p-2 rounded-lg border transition-all ${isLeader ? 'bg-amber-100 border-amber-300 text-amber-600' : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-amber-500'}`}
+                                                                            title={isLeader ? "Ministro de Louvor (Selecionado)" : "Definir como Ministro"}
+                                                                        >
+                                                                            <Crown size={18} fill={isLeader ? "currentColor" : "none"} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+                                                            <MemberSelect 
+                                                                label="Cantor Reserva" 
+                                                                value={editState.backupSingerId || ''}
+                                                                options={allMembers.filter(m => m.role === 'singer')}
+                                                                onChange={(val) => setEditState(prev => ({...prev, backupSingerId: val}))}
+                                                                icon={<Shield size={12} />}
+                                                            />
                                                         </div>
-                                                    )) : <p className="text-sm text-slate-400 italic">Nenhum vocal escalado.</p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {viewItem.singers.length > 0 ? viewItem.singers.map(s => {
+                                                            const isLeader = s.id === viewItem.worshipLeaderId;
+                                                            return (
+                                                                <div key={s.id} className={`flex items-center gap-4 group/item p-2 rounded-lg transition-colors ${isLeader ? 'bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20' : ''}`}>
+                                                                    <div className="relative">
+                                                                        {s.photoUrl ? (
+                                                                            <img src={s.photoUrl} className={`w-12 h-12 rounded-lg object-cover shadow-sm ${isLeader ? 'ring-2 ring-amber-400' : ''}`} />
+                                                                        ) : (
+                                                                            <div className={`w-12 h-12 rounded-lg ${isLeader ? 'bg-amber-500' : 'bg-purple-500'} text-white flex items-center justify-center text-sm font-black shadow-lg`}>
+                                                                                {getInitials(s.name)}
+                                                                            </div>
+                                                                        )}
+                                                                        {isLeader && (
+                                                                            <div className="absolute -top-2 -right-2 bg-amber-400 text-white p-1 rounded-full shadow-md z-10" title="Ministro de Louvor">
+                                                                                <Crown size={10} fill="currentColor" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                                                            {s.name}
+                                                                            {isLeader && <span className="text-[9px] bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Ministro</span>}
+                                                                        </p>
+                                                                        <p className="text-xs text-slate-400 mt-0.5">Equipe de Louvor</p>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }) : <p className="text-sm text-slate-400 italic">Nenhum vocal escalado.</p>}
+
+                                                        {/* BACKUP SINGER DISPLAY */}
+                                                        {viewItem.backupSinger && (
+                                                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3 opacity-70">
+                                                                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                                                    <Shield size={14} />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Reserva</p>
+                                                                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{viewItem.backupSinger.name}</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 )}
                                             </div>
                                         </div>

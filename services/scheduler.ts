@@ -51,23 +51,52 @@ export const generateFullSchedule = (
     // Vocal: Exatamente 3
     const selectedSingers: Member[] = [];
     const singersPool = activeMembers.filter(m => m.role === 'singer');
+    
     for (let i = 0; i < 3; i++) {
       const picked = pickMember(singersPool, state, date, weekIndex, selectedSingers);
       if (picked) selectedSingers.push(picked);
     }
 
-    // Registrar participação
+    // --- NOVA LÓGICA: MINISTRO E RESERVA ---
+    
+    // 1. Sorteia o Ministro de Louvor (entre os 3 selecionados)
+    let worshipLeaderId: string | undefined = undefined;
+    if (selectedSingers.length > 0) {
+        const randomIndex = Math.floor(Math.random() * selectedSingers.length);
+        worshipLeaderId = selectedSingers[randomIndex].id;
+    }
+
+    // 2. Sorteia o Reserva (alguém do pool que NÃO foi selecionado)
+    let backupSinger: Member | undefined = undefined;
+    const backupCandidates = singersPool.filter(s => !selectedSingers.some(sel => sel.id === s.id));
+    
+    // Usa a mesma lógica de pickMember para o reserva para manter a rotatividade,
+    // mas não adiciona ao scheduledThisWeek tão agressivamente (opcional), 
+    // aqui vamos usar o pickMember normal para garantir que rode a escala.
+    // Passamos selectedSingers como "alreadySelected" para não repetir.
+    backupSinger = pickMember(backupCandidates, state, date, weekIndex, selectedSingers) || undefined;
+
+
+    // Registrar participação (Incluindo reserva ou não? Geralmente reserva conta menos, 
+    // mas aqui vamos contar para rodar a fila. Se preferir não contar reserva na estatística, remova o backupSinger daqui)
     [...selectedMusicians, ...selectedSingers].forEach(m => {
       state.usageMap[m.id]++;
       state.lastPlayedOnDay[m.id][dayOfWeek] = date.getTime();
       state.scheduledThisWeek[weekIndex].add(m.id);
     });
 
+    // Reserva conta uso? Vamos assumir que sim para ele não ficar sendo reserva sempre e nunca titular
+    if (backupSinger) {
+       // state.usageMap[backupSinger.id]++; // Descomente se quiser que reserva conte como "escalado" para fins de fila
+    }
+
     schedule.push({
       id: crypto.randomUUID(),
       date: dateStr,
       musicians: selectedMusicians,
       singers: selectedSingers,
+      worshipLeaderId,
+      backupSinger,
       songs: []
     });
   }

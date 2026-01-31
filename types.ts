@@ -29,6 +29,8 @@ export interface ScheduleItem {
   date: string; // ISO date string YYYY-MM-DDTHH:mm
   musicians: Member[];
   singers: Member[];
+  worshipLeaderId?: string; // ID do Ministro de Louvor (deve ser um dos singers)
+  backupSinger?: Member; // Cantor Reserva (não está nos singers principais)
   songs?: string[];
   // Record<MemberID, boolean> -> true = presente, false = falta
   attendance?: Record<string, boolean>; 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder, Crown, Shield, ExternalLink } from 'lucide-react';
 import { ScheduleItem, Song, Member } from '../types';
 
 interface PublicCalendarProps {
@@ -15,111 +15,61 @@ const MONTH_NAMES = [
 
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
-const getYoutubeId = (url: string) => {
-  if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
+// Helper para formatar data
+const formatCardDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return {
+    day: date.getDate(),
+    month: date.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase(),
+    weekday: date.toLocaleDateString('pt-BR', { weekday: 'long' }),
+    time: date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  };
 };
 
-// Subcomponente para Card de Música (Visualização Pública)
+// Subcomponente para Card de Música (Visualização Pública - Estilo Lista Limpa)
 const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singer }) => {
-    const videoId = getYoutubeId(song.youtubeLink || '');
-    const [imgSrc, setImgSrc] = useState(videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
-    const [isLowQuality, setIsLowQuality] = useState(false);
-
-    const handleImgError = () => {
-        if (!isLowQuality && videoId) {
-            setIsLowQuality(true);
-            setImgSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
-        }
-    };
+    // Define o link principal (Youtube pref, ou Letra)
+    const primaryLink = song.youtubeLink || song.lyricsLink;
 
     return (
-        <div className="group relative bg-[#0f172a] rounded-xl border border-slate-800 hover:border-pink-500/50 transition-all duration-300 shadow-lg shadow-black/20 overflow-hidden h-[220px] flex flex-col justify-between isolate">
-            
-            {/* --- DESTAQUE DO TOM (KEY) --- */}
-            {song.key && (
-                <div className="absolute top-0 right-0 z-20">
-                     <div className="bg-pink-600 text-white px-4 py-2 rounded-bl-xl font-black text-lg shadow-lg shadow-pink-900/50 flex items-center justify-center min-w-[3.5rem]">
-                         {song.key}
-                     </div>
-                </div>
-            )}
-
-            {/* Background Image Layer */}
-            {imgSrc ? (
-                <>
-                    <div className="absolute inset-0 z-0 bg-slate-900 overflow-hidden">
-                        <img 
-                            src={imgSrc} 
-                            alt={song.title} 
-                            onError={handleImgError}
-                            className={`w-full h-full object-cover bg-center transition-transform duration-700 opacity-60 group-hover:opacity-100 ${isLowQuality ? 'scale-[1.35]' : 'group-hover:scale-110'}`} 
-                        />
-                    </div>
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"></div>
-                </>
-            ) : (
-                <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-900 to-slate-950"></div>
-            )}
-
-            {/* Content Container */}
-            <div className="relative z-10 p-5 flex flex-col h-full justify-between pointer-events-none">
-                
-                {/* Header Content */}
-                <div className="pt-1 pr-12"> {/* Padding right para não bater no Tom */}
-                    <h4 className="font-bold text-white line-clamp-2 text-xl drop-shadow-lg leading-tight" title={song.title}>{song.title}</h4>
-                    <p className="text-xs font-bold text-slate-300 uppercase tracking-wide mt-1 drop-shadow-md">{song.artist}</p>
-                </div>
-                
-                {/* Body Content (Bottom) */}
-                <div className="mt-auto space-y-4 pointer-events-auto">
-                    {/* Info Badges Row */}
-                    <div className="flex items-center gap-3">
-                        {/* Singer Badge */}
-                        {singer && (
-                            <div className="flex items-center gap-2 pl-1 pr-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
-                                <div className="w-7 h-7 rounded-full bg-purple-900/50 overflow-hidden flex items-center justify-center border border-purple-500/30">
-                                    {singer.photoUrl ? (
-                                        <img src={singer.photoUrl} alt={singer.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-[9px] font-bold text-purple-300">{getInitials(singer.name)}</span>
-                                    )}
-                                </div>
-                                <span className="text-sm font-bold text-slate-200 truncate max-w-[100px]">
-                                    {singer.name.split(' ')[0]}
-                                </span>
-                            </div>
+        <div className="w-full bg-[#1e293b] dark:bg-slate-800/60 border border-slate-700/50 hover:border-slate-600 rounded-xl p-5 transition-all duration-200 group flex flex-col justify-center">
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-[15px] font-bold text-slate-100 truncate">
+                            {song.title}
+                        </h4>
+                        {primaryLink && (
+                            <a 
+                                href={primaryLink} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-slate-500 hover:text-indigo-400 transition-colors"
+                                title="Abrir link"
+                            >
+                                <ExternalLink size={14} />
+                            </a>
                         )}
                     </div>
-                    
-                    {/* Buttons */}
-                    <div className="flex gap-3">
-                        {song.lyricsLink ? (
-                            <a 
-                                href={song.lyricsLink} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-black/60 backdrop-blur-sm text-orange-400 hover:bg-orange-900/40 hover:text-orange-300 transition-colors border border-orange-500/30 hover:border-orange-500/50"
-                            >
-                                <FileText size={16} /> Letra
-                            </a>
-                        ) : <div className="flex-1"></div>}
-                        
-                        {song.youtubeLink ? (
-                            <a 
-                                href={song.youtubeLink} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-black/60 backdrop-blur-sm text-red-400 hover:bg-red-900/40 hover:text-red-300 transition-colors border border-red-500/30 hover:border-red-500/50"
-                            >
-                                <Youtube size={16} /> Vídeo
-                            </a>
-                        ) : <div className="flex-1"></div>}
+                    <div className="flex items-center text-sm font-medium text-slate-400">
+                        <span className="truncate">{song.artist}</span>
+                        {song.key && (
+                            <>
+                                <span className="mx-2 opacity-50">•</span>
+                                <span className="text-slate-300">{song.key}</span>
+                            </>
+                        )}
                     </div>
                 </div>
+                
+                {/* Opcional: Se quiser mostrar o cantor dono da música no canto, descomente abaixo */}
+                {/* 
+                {singer && (
+                    <div className="shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300 border border-slate-600">
+                        {getInitials(singer.name)}
+                    </div>
+                )}
+                */}
             </div>
         </div>
     );
@@ -149,16 +99,6 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
 
   const now = new Date();
   const nextEventIndex = filteredSchedule.findIndex(s => new Date(s.date) >= now);
-
-  const formatCardDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return {
-      day: date.getDate(),
-      month: date.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase(),
-      weekday: date.toLocaleDateString('pt-BR', { weekday: 'long' }),
-      time: date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-  };
 
   const changeMonth = (offset: number) => {
     const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + offset, 1);
@@ -352,21 +292,46 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                         </h4>
                         {item.singers.length > 0 ? (
                           <div className="space-y-3">
-                            {item.singers.map(singer => (
-                              <div key={singer.id} className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-[10px] font-bold text-purple-600 border border-purple-100 dark:border-purple-800/30 shrink-0 shadow-sm">
-                                  {singer.photoUrl ? (
-                                    <img src={singer.photoUrl} alt="" className="w-full h-full rounded-full object-cover" />
-                                  ) : getInitials(singer.name)}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{singer.name}</p>
-                                </div>
-                              </div>
-                            ))}
+                            {item.singers.map(singer => {
+                                const isLeader = singer.id === item.worshipLeaderId;
+                                return (
+                                  <div key={singer.id} className={`flex items-center gap-3 p-1.5 rounded-lg ${isLeader ? 'bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30' : ''}`}>
+                                    <div className="relative shrink-0">
+                                        <div className={`w-9 h-9 rounded-full ${isLeader ? 'bg-amber-500' : 'bg-purple-50 dark:bg-purple-900/20'} flex items-center justify-center text-[10px] font-bold ${isLeader ? 'text-white' : 'text-purple-600'} border ${isLeader ? 'border-amber-400' : 'border-purple-100 dark:border-purple-800/30'} shadow-sm`}>
+                                            {singer.photoUrl ? (
+                                                <img src={singer.photoUrl} alt="" className="w-full h-full rounded-full object-cover" />
+                                            ) : getInitials(singer.name)}
+                                        </div>
+                                        {isLeader && (
+                                            <div className="absolute -top-1.5 -right-1.5 bg-amber-400 text-white rounded-full p-0.5 border-2 border-white dark:border-slate-900 shadow-sm" title="Ministro de Louvor">
+                                                <Crown size={8} fill="currentColor" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate flex items-center gap-1">
+                                          {singer.name}
+                                      </p>
+                                      {isLeader && <p className="text-[8px] font-black uppercase text-amber-500 tracking-wider">Ministro</p>}
+                                    </div>
+                                  </div>
+                                );
+                            })}
                           </div>
                         ) : (
                           <p className="text-xs italic text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg text-center">Escala em definição</p>
+                        )}
+
+                        {item.backupSinger && (
+                           <div className="mt-3 pt-3 border-t border-slate-50 dark:border-slate-800/50 flex items-center gap-2">
+                                <div className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-400">
+                                    <Shield size={10} />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Reserva</p>
+                                    <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 truncate">{item.backupSinger.name}</p>
+                                </div>
+                           </div>
                         )}
                       </div>
 
@@ -510,9 +475,10 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* LISTA DE MÚSICAS - ESTILO LISTA ESCURA */}
+                    <div className="space-y-3">
                         {filteredSongs.length === 0 ? (
-                            <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                            <div className="py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
                                 <Music2 className="mx-auto mb-2 opacity-20" size={48} />
                                 <p className="text-sm font-medium">Nenhuma música encontrada.</p>
                             </div>

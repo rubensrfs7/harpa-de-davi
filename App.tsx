@@ -125,13 +125,15 @@ const App: React.FC = () => {
                 ...item,
                 musicians: (item.musician_ids || []).map((id: string) => membersRes.data.find(m => m.id === id)).filter(Boolean),
                 singers: (item.singer_ids || []).map((id: string) => membersRes.data.find(m => m.id === id)).filter(Boolean),
+                // MAPEAMENTO NOVO: Ministro e Reserva
+                worshipLeaderId: item.worship_leader_id,
+                backupSinger: item.backup_singer_id ? membersRes.data.find(m => m.id === item.backup_singer_id) : undefined,
                 songs: cleanSongs,
-                attendance: item.attendance_record || undefined // Mapeia o JSONB do banco para o frontend
+                attendance: item.attendance_record || undefined
              };
           });
 
-          // CORREÇÃO DE DUPLICIDADE VISUAL: Filtra itens com exatamente a mesma data/hora para a visualização
-          // Mantém apenas o primeiro item encontrado para cada timestamp
+          // CORREÇÃO DE DUPLICIDADE VISUAL
           const uniqueMap = new Map();
           const uniqueSchedule: ScheduleItem[] = [];
           
@@ -144,8 +146,6 @@ const App: React.FC = () => {
           });
 
           setSchedule(uniqueSchedule);
-          // NÃO PREENCHEMOS selectedDates AQUI. 
-          // selectedDates serve apenas para a "Fila de Geração" de novos cultos.
         }
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
@@ -222,44 +222,43 @@ const App: React.FC = () => {
   const handleUpdateScheduleItem = async (updatedItem: ScheduleItem) => {
     setIsSyncing(true);
 
-    // Prepare data outside try block so it is available in catch block for retry logic
     const safeMusicians = updatedItem.musicians.map(m => m.id).filter(id => id && id.length > 0);
     const safeSingers = updatedItem.singers.map(s => s.id).filter(id => id && id.length > 0);
     const safeSongs = (updatedItem.songs || []).filter(id => id && id.length > 0);
     const attendanceRecord = updatedItem.attendance || {};
 
+    const dbPayload: any = {
+      musician_ids: safeMusicians,
+      singer_ids: safeSingers,
+      song_ids: safeSongs,
+      attendance_record: attendanceRecord,
+      // NOVOS CAMPOS
+      worship_leader_id: updatedItem.worshipLeaderId || null,
+      backup_singer_id: updatedItem.backupSinger?.id || null
+    };
+
     try {
       setSchedule(prev => prev.map(s => s.id === updatedItem.id ? updatedItem : s));
 
-      const { error } = await supabase.from('schedules').update({
-        musician_ids: safeMusicians,
-        singer_ids: safeSingers,
-        song_ids: safeSongs,
-        attendance_record: attendanceRecord 
-      }).eq('id', updatedItem.id);
+      const { error } = await supabase.from('schedules').update(dbPayload).eq('id', updatedItem.id);
       
       if (error) throw error;
     } catch (err) {
-      // ERRO SILENCIOSO DE COLUNA FALTANDO
-      // Se a coluna attendance_record não existir, tentamos salvar sem ela
+      // ERRO SILENCIOSO DE COLUNA FALTANDO (Fallback)
       const errorMsg = formatError(err);
-      if (errorMsg.includes('attendance_record')) {
-          console.warn("Coluna attendance_record não encontrada. Tentando salvar sem ela.");
-          try {
-               const { error: retryError } = await supabase.from('schedules').update({
-                musician_ids: safeMusicians,
-                singer_ids: safeSingers,
-                song_ids: safeSongs
-              }).eq('id', updatedItem.id);
-              if (retryError) throw retryError;
-              return; // Sucesso no retry
-          } catch (retryErr) {
-             alert(`Erro ao atualizar escala (Retry falhou): ${formatError(retryErr)}`);
-             return;
-          }
+      console.warn("Tentativa principal falhou. Tentando fallback sem colunas novas...", errorMsg);
+      
+      // Remove campos novos se o banco não suportar
+      const fallbackPayload = { ...dbPayload };
+      delete fallbackPayload.worship_leader_id;
+      delete fallbackPayload.backup_singer_id;
+      
+      try {
+           const { error: retryError } = await supabase.from('schedules').update(fallbackPayload).eq('id', updatedItem.id);
+           if (retryError) throw retryError;
+      } catch (retryErr) {
+         alert(`Erro ao atualizar escala: ${formatError(retryErr)}`);
       }
-      console.error("Erro ao atualizar:", err);
-      alert(`Erro ao atualizar escala: ${errorMsg}`);
     } finally {
       setIsSyncing(false);
     }
@@ -306,6 +305,8 @@ const App: React.FC = () => {
         date: new Date(item.date).toISOString(),
         musician_ids: item.musicians.map(m => m.id),
         singer_ids: item.singers.map(s => s.id),
+        worship_leader_id: item.worshipLeaderId || null,
+        backup_singer_id: item.backupSinger?.id || null,
         song_ids: [],
         attendance_record: {}
       }));
@@ -317,7 +318,7 @@ const App: React.FC = () => {
       alert(`${newScheduleItems.length} novos cultos gerados com sucesso!`);
 
     } catch (err: any) {
-        alert(`Erro ao salvar escala: ${formatError(err)}`);
+        alert(`Erro ao salvar escala (Verifique se as colunas worship_leader_id e backup_singer_id existem no banco): ${formatError(err)}`);
     } finally {
       setIsSyncing(false);
     }
