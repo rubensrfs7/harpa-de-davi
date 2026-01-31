@@ -33,33 +33,30 @@ const formatCardDate = (dateString: string) => {
   };
 };
 
-// --- SUBCOMPONENTE: CARD DE MÚSICA (Visual Rico para Aba Repertório) ---
+// --- SUBCOMPONENTE: CARD DE MÚSICA (Visual Rico com Links Explícitos) ---
 const RepertoireSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singer }) => {
-    const primaryLink = song.youtubeLink || song.lyricsLink;
     const videoId = getYoutubeId(song.youtubeLink || '');
-    // Usa maxresdefault para qualidade melhor no card grande, fallback para hqdefault
-    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
+    // Usa hqdefault para qualidade melhor no card grande
+    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
 
     return (
-        <a 
-            href={primaryLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`group relative overflow-hidden rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col h-full ${!primaryLink ? 'pointer-events-none' : ''}`}
-        >
-            {/* Imagem / Thumbnail */}
-            <div className="relative h-40 w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
+        <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+            
+            {/* Imagem / Thumbnail (Clicável para o vídeo se existir) */}
+            <a 
+                href={song.youtubeLink || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`relative h-44 w-full block overflow-hidden bg-slate-100 dark:bg-slate-900 ${!song.youtubeLink ? 'pointer-events-none' : 'cursor-pointer'}`}
+            >
                 {thumbUrl ? (
                     <img src={thumbUrl} alt={song.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
-                        <Music2 className="text-slate-600" size={48} />
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+                        <Music2 className="text-slate-300 dark:text-slate-600" size={48} />
                     </div>
                 )}
                 
-                {/* Overlay Escuro com Gradiente */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
-
                 {/* Badge de Tonalidade (Canto Superior Direito) */}
                 {song.key && (
                     <div className="absolute top-3 right-3 bg-pink-600 text-white px-2.5 py-1 rounded-md text-xs font-black shadow-lg shadow-black/20 border border-white/10 z-20">
@@ -67,20 +64,20 @@ const RepertoireSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, s
                     </div>
                 )}
 
-                {/* Botão Play (Aparece no Hover) */}
-                {primaryLink && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-[2px]">
-                        <div className="bg-white text-indigo-600 p-3 rounded-full shadow-2xl transform scale-90 group-hover:scale-110 transition-transform">
-                            <Play size={28} fill="currentColor" className="ml-1" />
+                {/* Overlay Play Button (Se tiver vídeo) */}
+                {song.youtubeLink && (
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center z-10">
+                        <div className="bg-white/90 text-red-600 p-3 rounded-full opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all duration-300 shadow-xl backdrop-blur-sm">
+                            <Play size={24} fill="currentColor" className="ml-1" />
                         </div>
                     </div>
                 )}
-            </div>
+            </a>
 
             {/* Informações da Música */}
-            <div className="p-4 flex-1 flex flex-col justify-between relative bg-white dark:bg-slate-800">
+            <div className="p-4 flex-1 flex flex-col justify-between bg-white dark:bg-slate-800 relative">
                 <div>
-                    <h3 className="font-bold text-slate-800 dark:text-white leading-tight mb-1 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" title={song.title}>
+                    <h3 className="font-bold text-slate-800 dark:text-white leading-tight mb-1 line-clamp-2" title={song.title}>
                         {song.title}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wide truncate">
@@ -88,25 +85,60 @@ const RepertoireSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, s
                     </p>
                 </div>
 
-                {/* Cantor da Pasta (se houver) */}
-                {singer && (
-                    <div className="mt-4 flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                        <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600">
-                            {singer.photoUrl ? (
-                                <img src={singer.photoUrl} className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-slate-500">
-                                    {getInitials(singer.name)}
-                                </div>
-                            )}
-                        </div>
-                        <span className="text-xs text-slate-600 dark:text-slate-300 truncate font-medium">
-                            {singer.name}
-                        </span>
+                <div className="mt-4 space-y-3">
+                    {/* Botões de Ação */}
+                    <div className="flex gap-2">
+                        {song.youtubeLink ? (
+                            <a 
+                                href={song.youtubeLink} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 transition-colors text-xs font-bold"
+                            >
+                                <Youtube size={14} /> Vídeo
+                            </a>
+                        ) : (
+                            <div className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-300 border border-slate-100 dark:border-slate-700/50 text-xs font-bold cursor-not-allowed">
+                                <Youtube size={14} /> Vídeo
+                            </div>
+                        )}
+
+                        {song.lyricsLink ? (
+                            <a 
+                                href={song.lyricsLink} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/40 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30 transition-colors text-xs font-bold"
+                            >
+                                <FileText size={14} /> Letra
+                            </a>
+                        ) : (
+                            <div className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-300 border border-slate-100 dark:border-slate-700/50 text-xs font-bold cursor-not-allowed">
+                                <FileText size={14} /> Letra
+                            </div>
+                        )}
                     </div>
-                )}
+
+                    {/* Cantor da Pasta (Rodapé Pequeno) */}
+                    {singer && (
+                        <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                            <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600">
+                                {singer.photoUrl ? (
+                                    <img src={singer.photoUrl} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[7px] font-bold text-slate-500">
+                                        {getInitials(singer.name)}
+                                    </div>
+                                )}
+                            </div>
+                            <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider truncate">
+                                {singer.name}
+                            </span>
+                        </div>
+                    )}
+                </div>
             </div>
-        </a>
+        </div>
     );
 };
 
