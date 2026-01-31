@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder, Crown, Shield, ExternalLink } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder, Crown, Shield, ExternalLink, ListMusic } from 'lucide-react';
 import { ScheduleItem, Song, Member } from '../types';
 
 interface PublicCalendarProps {
@@ -26,51 +26,43 @@ const formatCardDate = (dateString: string) => {
   };
 };
 
-// Subcomponente para Card de Música (Visualização Pública - Estilo Lista Limpa)
+// Subcomponente para Card de Música (Visualização Pública - Estilo Lista Limpa com Destaque no Tom)
 const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singer }) => {
     // Define o link principal (Youtube pref, ou Letra)
     const primaryLink = song.youtubeLink || song.lyricsLink;
 
     return (
-        <div className="w-full bg-[#1e293b] dark:bg-slate-800/60 border border-slate-700/50 hover:border-slate-600 rounded-xl p-5 transition-all duration-200 group flex flex-col justify-center">
-            <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-[15px] font-bold text-slate-100 truncate">
-                            {song.title}
-                        </h4>
-                        {primaryLink && (
-                            <a 
-                                href={primaryLink} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="text-slate-500 hover:text-indigo-400 transition-colors"
-                                title="Abrir link"
-                            >
-                                <ExternalLink size={14} />
-                            </a>
-                        )}
-                    </div>
-                    <div className="flex items-center text-sm font-medium text-slate-400">
-                        <span className="truncate">{song.artist}</span>
-                        {song.key && (
-                            <>
-                                <span className="mx-2 opacity-50">•</span>
-                                <span className="text-slate-300">{song.key}</span>
-                            </>
-                        )}
-                    </div>
+        <div className="w-full bg-[#1e293b] dark:bg-slate-800/60 border border-slate-700/50 hover:border-indigo-500/30 rounded-xl p-4 transition-all duration-200 group flex items-center gap-4">
+            
+            {/* Conteúdo Principal */}
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1.5">
+                    <h4 className="text-[15px] font-bold text-slate-100 truncate leading-tight">
+                        {song.title}
+                    </h4>
+                    {primaryLink && (
+                        <a 
+                            href={primaryLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-slate-500 hover:text-indigo-400 transition-colors shrink-0"
+                            title="Abrir link"
+                        >
+                            <ExternalLink size={14} />
+                        </a>
+                    )}
                 </div>
-                
-                {/* Opcional: Se quiser mostrar o cantor dono da música no canto, descomente abaixo */}
-                {/* 
-                {singer && (
-                    <div className="shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300 border border-slate-600">
-                        {getInitials(singer.name)}
-                    </div>
-                )}
-                */}
+                <div className="flex items-center text-sm font-medium text-slate-400">
+                    <span className="truncate">{song.artist}</span>
+                </div>
             </div>
+
+            {/* Destaque do Tom (Badge) */}
+            {song.key && (
+                <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 group-hover:border-pink-500/30 group-hover:bg-pink-500/10 transition-colors shadow-sm">
+                    <span className="text-base font-black text-slate-300 group-hover:text-pink-400">{song.key}</span>
+                </div>
+            )}
         </div>
     );
 };
@@ -78,7 +70,7 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
 const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, members }) => {
   const [activeTab, setActiveTab] = useState<'agenda' | 'repertoire'>('agenda');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSingerFilter, setSelectedSingerFilter] = useState<string | 'uncategorized' | null>(null);
+  const [selectedSingerFilter, setSelectedSingerFilter] = useState<string | 'uncategorized' | 'all' | null>(null);
   
   // Estado para navegação de mês (Inicializa com o mês atual do usuário)
   const [viewDate, setViewDate] = useState(new Date());
@@ -118,6 +110,9 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
 
     // 2. Filtro de Pasta (Singer) - Apenas se NÃO estiver pesquisando
     if (!isSearching && selectedSingerFilter) {
+        if (selectedSingerFilter === 'all') {
+            return true;
+        }
         if (selectedSingerFilter === 'uncategorized') {
             return !song.singerId;
         }
@@ -140,6 +135,14 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
   }).filter(Boolean) as Member[];
 
   const uncategorizedCount = groupedSongs['uncategorized'] || 0;
+
+  // Título da visualização atual
+  const getFilterTitle = () => {
+      if (selectedSingerFilter === 'all') return 'Todas as Músicas';
+      if (selectedSingerFilter === 'uncategorized') return 'Geral / Outros';
+      const singer = members.find(m => m.id === selectedSingerFilter);
+      return singer ? singer.name : 'Músicas';
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700 pb-20 pt-4">
@@ -408,6 +411,21 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                     </h4>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                        
+                         {/* Card "TODAS AS MÚSICAS" (Novo) */}
+                         <button 
+                            onClick={() => setSelectedSingerFilter('all')}
+                            className="flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-indigo-600 dark:to-indigo-800 rounded-xl shadow-lg shadow-indigo-500/20 hover:scale-[1.02] transition-all group"
+                        >
+                            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white">
+                                <ListMusic size={24} />
+                            </div>
+                            <div className="text-center">
+                                <p className="font-bold text-white text-sm">Todas as Músicas</p>
+                                <p className="text-xs text-indigo-100 mt-1">{songs.length} músicas</p>
+                            </div>
+                        </button>
+
                         {/* Card "Sem Cantor" (se houver músicas) */}
                         {uncategorizedCount > 0 && (
                             <button 
@@ -468,7 +486,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             </button>
                             <div>
                                 <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                    {selectedSingerFilter === 'uncategorized' ? 'Geral / Outros' : members.find(m => m.id === selectedSingerFilter)?.name}
+                                    {getFilterTitle()}
                                 </h3>
                                 <p className="text-xs text-slate-400">Exibindo {filteredSongs.length} músicas</p>
                             </div>
