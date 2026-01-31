@@ -341,39 +341,40 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                       {item.songs && item.songs.length > 0 && (
                           <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
-                                <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                                <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                                     <Music2 size={12} className="text-pink-500" /> Louvores
                                 </h4>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {item.songs.slice(0, 3).map(songId => {
-                                        const song = songs.find(s => s.id === songId);
-                                        if (!song) return null;
-                                        
-                                        if (song.youtubeLink) {
-                                            return (
-                                                <a 
-                                                    key={songId} 
-                                                    href={song.youtubeLink} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    title={`Ouvir: ${song.title}`}
-                                                    className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg font-bold truncate max-w-[150px] hover:text-indigo-500 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/30 transition-colors"
-                                                >
-                                                    {song.title}
-                                                </a>
-                                            )
-                                        }
-                                        return (
-                                            <span key={songId} className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg font-bold truncate max-w-[150px]">
-                                                {song.title}
-                                            </span>
-                                        );
-                                    })}
-                                    {item.songs.length > 3 && (
-                                        <span className="text-[10px] px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-lg font-bold">
-                                            +{item.songs.length - 3}
-                                        </span>
-                                    )}
+                                <div className="space-y-2 mt-2">
+                                  {item.songs.map(songId => {
+                                    const song = songs.find(s => s.id === songId);
+                                    if (!song) return null;
+
+                                    const Wrapper = song.youtubeLink || song.lyricsLink ? 'a' : 'div';
+                                    const props = song.youtubeLink || song.lyricsLink
+                                      ? { href: song.youtubeLink || song.lyricsLink, target: '_blank', rel: 'noopener noreferrer' }
+                                      : {};
+
+                                    return (
+                                      <Wrapper
+                                        key={songId}
+                                        {...props}
+                                        className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-sm transition-all group/song"
+                                      >
+                                        <div className="flex-1 min-w-0 mr-3">
+                                          <div className="flex items-center gap-1.5">
+                                             <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{song.title}</p>
+                                             {(song.youtubeLink || song.lyricsLink) && <ExternalLink size={10} className="text-slate-400 group-hover/song:text-indigo-500" />}
+                                          </div>
+                                          <p className="text-[10px] font-medium text-slate-400 truncate">{song.artist}</p>
+                                        </div>
+                                        {song.key && (
+                                           <div className="shrink-0 px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-black text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 group-hover/song:bg-indigo-50 dark:group-hover/song:bg-indigo-900/30 group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-300 group-hover/song:border-indigo-200 dark:group-hover/song:border-indigo-800 transition-colors">
+                                              {song.key}
+                                           </div>
+                                        )}
+                                      </Wrapper>
+                                    );
+                                  })}
                                 </div>
                             </div>
                           </div>

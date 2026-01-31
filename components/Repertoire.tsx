@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Music2, Youtube, FileText, Trash2, Search, Mic2, Edit, X, Save, Music, User, Folder, ChevronLeft, LayoutGrid, List } from 'lucide-react';
+import { Plus, Music2, Youtube, FileText, Trash2, Search, Mic2, Edit, X, Save, Music, User, Folder, ChevronLeft, LayoutGrid, List, Sparkles, Loader2 } from 'lucide-react';
 import { Song, Member } from '../types';
+import { GoogleGenAI } from "@google/genai";
 
 interface RepertoireProps {
   songs: Song[];
@@ -164,9 +165,39 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
   
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isDetectingKey, setIsDetectingKey] = useState(false);
   
   // Estado para navegação por pastas
   const [selectedSingerFilter, setSelectedSingerFilter] = useState<string | 'uncategorized' | null>(null);
+
+  const detectKey = async (override = false) => {
+      // Se não for override (manual), só busca se o campo estiver vazio
+      if (!override && key) return;
+      if (!title.trim() || !artist.trim()) return;
+
+      setIsDetectingKey(true);
+      try {
+          const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+          const response = await ai.models.generateContent({
+              model: 'gemini-3-flash-preview',
+              contents: `Identify the original musical key of the song "${title}" by "${artist}". 
+              Return ONLY the key in standard notation (e.g. C, Cm, C#, Db, etc). 
+              If valid, choose one from this list: ${MUSICAL_KEYS.join(', ')}.
+              If unsure, return nothing. Do not add any explanation.`,
+          });
+          
+          const detected = response.text?.trim();
+          if (detected) {
+               // Normalização simples e verificação
+               const match = MUSICAL_KEYS.find(k => k.toLowerCase() === detected.toLowerCase());
+               if (match) setKey(match);
+          }
+      } catch (error) {
+          console.error("Erro ao detectar tom:", error);
+      } finally {
+          setIsDetectingKey(false);
+      }
+  };
 
   const startEditing = (song: Song) => {
     setEditingId(song.id);
@@ -192,6 +223,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
     setYoutubeLink('');
     setKey('');
     setSelectedSingerId('');
+    setIsDetectingKey(false);
   };
 
   const handleRemoveClick = (id: string) => {
@@ -326,6 +358,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                         type="text"
                         value={artist}
                         onChange={(e) => setArtist(e.target.value)}
+                        onBlur={() => detectKey(false)}
                         className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold placeholder:text-slate-400 outline-none transition-all"
                         placeholder="Cantor ou Banda Original"
                         required
@@ -335,13 +368,31 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
 
               <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Tom</label>
+                    <div className="flex items-center justify-between ml-1">
+                         <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tom</label>
+                         {/* Manual trigger for AI Key detection */}
+                         {title && artist && !isDetectingKey && (
+                            <button 
+                                type="button" 
+                                onClick={() => detectKey(true)}
+                                className="text-[10px] font-bold text-indigo-500 hover:text-indigo-600 flex items-center gap-1 transition-colors"
+                                title="Detectar tom com IA"
+                            >
+                                <Sparkles size={10} /> IA
+                            </button>
+                         )}
+                    </div>
                     <div className="relative">
-                        <Music className="absolute left-3 top-3.5 text-slate-400" size={16} />
+                        {isDetectingKey ? (
+                             <Loader2 className="absolute left-3 top-3.5 text-indigo-500 animate-spin" size={16} />
+                        ) : (
+                             <Music className="absolute left-3 top-3.5 text-slate-400" size={16} />
+                        )}
                         <select
                             value={key}
                             onChange={(e) => setKey(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold outline-none transition-all appearance-none"
+                            disabled={isDetectingKey}
+                            className={`w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-md focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold outline-none transition-all appearance-none ${isDetectingKey ? 'opacity-50 cursor-wait' : ''}`}
                         >
                             <option value="">-</option>
                             {MUSICAL_KEYS.map(k => (
