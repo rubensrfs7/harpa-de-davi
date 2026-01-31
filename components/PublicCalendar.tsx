@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder, Crown, Shield, ExternalLink, ListMusic } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder, Crown, Shield, ExternalLink, ListMusic, PlayCircle } from 'lucide-react';
 import { ScheduleItem, Song, Member } from '../types';
 
 interface PublicCalendarProps {
@@ -14,6 +14,13 @@ const MONTH_NAMES = [
 ];
 
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+
+const getYoutubeId = (url: string) => {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+};
 
 // Helper para formatar data
 const formatCardDate = (dateString: string) => {
@@ -30,14 +37,33 @@ const formatCardDate = (dateString: string) => {
 const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singer }) => {
     // Define o link principal (Youtube pref, ou Letra)
     const primaryLink = song.youtubeLink || song.lyricsLink;
+    const videoId = getYoutubeId(song.youtubeLink || '');
+    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
 
     return (
-        <div className="w-full bg-[#1e293b] dark:bg-slate-800/60 border border-slate-700/50 hover:border-indigo-500/30 rounded-xl p-4 transition-all duration-200 group flex items-center gap-4">
+        <div className="w-full bg-[#1e293b] dark:bg-slate-800/60 border border-slate-700/50 hover:border-indigo-500/30 rounded-xl p-3 transition-all duration-200 group flex items-center gap-4 overflow-hidden">
             
+            {/* Thumbnail Image */}
+            <div className="relative shrink-0 w-16 h-12 rounded-md overflow-hidden bg-slate-900 border border-slate-700 group-hover:border-indigo-500/50 transition-colors">
+                {thumbUrl ? (
+                    <img src={thumbUrl} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-600">
+                        <Music2 size={20} />
+                    </div>
+                )}
+                {/* Play Overlay */}
+                {primaryLink && (
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                         <PlayCircle size={20} className="text-white drop-shadow-md" />
+                    </div>
+                )}
+            </div>
+
             {/* Conteúdo Principal */}
             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5">
-                    <h4 className="text-[15px] font-bold text-slate-100 truncate leading-tight">
+                <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-[15px] font-bold text-slate-100 truncate leading-tight group-hover:text-indigo-400 transition-colors">
                         {song.title}
                     </h4>
                     {primaryLink && (
@@ -47,20 +73,21 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
                             rel="noopener noreferrer" 
                             className="text-slate-500 hover:text-indigo-400 transition-colors shrink-0"
                             title="Abrir link"
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <ExternalLink size={14} />
                         </a>
                     )}
                 </div>
-                <div className="flex items-center text-sm font-medium text-slate-400">
+                <div className="flex items-center text-xs font-medium text-slate-400">
                     <span className="truncate">{song.artist}</span>
                 </div>
             </div>
 
             {/* Destaque do Tom (Badge) */}
             {song.key && (
-                <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 group-hover:border-pink-500/30 group-hover:bg-pink-500/10 transition-colors shadow-sm">
-                    <span className="text-base font-black text-slate-300 group-hover:text-pink-400">{song.key}</span>
+                <div className="shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-slate-900 border border-slate-700 group-hover:border-pink-500/30 group-hover:bg-pink-500/10 transition-colors shadow-sm">
+                    <span className="text-sm font-black text-slate-300 group-hover:text-pink-400">{song.key}</span>
                 </div>
             )}
         </div>
@@ -358,12 +385,15 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                           title: "Ouvir Música"
                                         }
                                       : {};
+                                    
+                                    const videoId = getYoutubeId(song.youtubeLink || '');
+                                    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
 
                                     return (
                                       <Wrapper
                                         key={songId}
                                         {...props}
-                                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all group/song
+                                        className={`flex items-center gap-3 p-2 rounded-lg border transition-all group/song
                                             bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700
                                             ${(song.youtubeLink || song.lyricsLink) 
                                                 ? 'hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-md cursor-pointer' 
@@ -371,7 +401,17 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                             }
                                         `}
                                       >
-                                        <div className="min-w-0 flex-1 mr-3">
+                                        <div className="shrink-0 w-12 h-9 rounded bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-600">
+                                            {thumbUrl ? (
+                                                <img src={thumbUrl} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
+                                                    <Music2 size={16} />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="min-w-0 flex-1">
                                           <div className="flex items-center gap-1.5">
                                              <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-400 transition-colors">
                                                  {song.title}
