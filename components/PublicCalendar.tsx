@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder, Crown, Shield, ExternalLink, ListMusic, PlayCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder, Crown, Shield, ExternalLink, ListMusic, PlayCircle, Play } from 'lucide-react';
 import { ScheduleItem, Song, Member } from '../types';
 
 interface PublicCalendarProps {
@@ -33,63 +33,78 @@ const formatCardDate = (dateString: string) => {
   };
 };
 
-// Subcomponente para Card de Música (Visualização Pública - Aba Repertório)
-const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singer }) => {
-    // Define o link principal (Youtube pref, ou Letra)
+// Subcomponente: Card de Música GRANDE (Aba Repertório)
+const RepertoireSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singer }) => {
     const primaryLink = song.youtubeLink || song.lyricsLink;
     const videoId = getYoutubeId(song.youtubeLink || '');
     const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
 
     return (
-        <div className="w-full bg-[#1e293b] dark:bg-slate-800/60 border border-slate-700/50 hover:border-indigo-500/30 rounded-xl p-3 transition-all duration-200 group flex items-center gap-4 overflow-hidden">
+        <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/10 flex flex-col h-full">
             
-            {/* Thumbnail Image */}
-            <div className="relative shrink-0 w-16 h-12 rounded-md overflow-hidden bg-slate-900 border border-slate-700 group-hover:border-indigo-500/50 transition-colors">
+            {/* Header / Thumbnail Area */}
+            <div className="relative h-32 w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
                 {thumbUrl ? (
-                    <img src={thumbUrl} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                    <img src={thumbUrl} alt={song.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-600">
-                        <Music2 size={20} />
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                        <Music2 className="text-slate-600" size={40} />
                     </div>
                 )}
-                {/* Play Overlay */}
+                
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
+
+                {/* Key Badge (Top Right) */}
+                {song.key && (
+                    <div className="absolute top-2 right-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-2 py-1 rounded text-xs font-black shadow-sm">
+                        {song.key}
+                    </div>
+                )}
+
+                {/* Play Button Overlay */}
                 {primaryLink && (
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                         <PlayCircle size={20} className="text-white drop-shadow-md" />
-                    </div>
+                    <a 
+                        href={primaryLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+                    >
+                        <div className="bg-pink-600 text-white p-3 rounded-full shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                            <Play size={24} fill="currentColor" />
+                        </div>
+                    </a>
                 )}
             </div>
 
-            {/* Conteúdo Principal */}
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-[15px] font-bold text-slate-100 truncate leading-tight group-hover:text-indigo-400 transition-colors">
+            {/* Content Area */}
+            <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                    <h3 className="font-bold text-slate-800 dark:text-white leading-tight mb-1 line-clamp-2" title={song.title}>
                         {song.title}
-                    </h4>
-                    {primaryLink && (
-                        <a 
-                            href={primaryLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="text-slate-500 hover:text-indigo-400 transition-colors shrink-0"
-                            title="Abrir link"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <ExternalLink size={14} />
-                        </a>
-                    )}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide truncate">
+                        {song.artist}
+                    </p>
                 </div>
-                <div className="flex items-center text-xs font-medium text-slate-400">
-                    <span className="truncate">{song.artist}</span>
-                </div>
-            </div>
 
-            {/* Destaque do Tom (Badge) */}
-            {song.key && (
-                <div className="shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-slate-900 border border-slate-700 group-hover:border-pink-500/30 group-hover:bg-pink-500/10 transition-colors shadow-sm">
-                    <span className="text-sm font-black text-slate-300 group-hover:text-pink-400">{song.key}</span>
-                </div>
-            )}
+                {singer && (
+                    <div className="mt-4 flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                        <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0">
+                            {singer.photoUrl ? (
+                                <img src={singer.photoUrl} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-slate-500">
+                                    {getInitials(singer.name)}
+                                </div>
+                            )}
+                        </div>
+                        <span className="text-xs text-slate-600 dark:text-slate-300 truncate">
+                            {singer.name}
+                        </span>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -98,8 +113,6 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
   const [activeTab, setActiveTab] = useState<'agenda' | 'repertoire'>('agenda');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSingerFilter, setSelectedSingerFilter] = useState<string | 'uncategorized' | 'all' | null>(null);
-  
-  // Estado para navegação de mês (Inicializa com o mês atual do usuário)
   const [viewDate, setViewDate] = useState(new Date());
 
   // --- LÓGICA DA AGENDA ---
@@ -124,32 +137,22 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
     setViewDate(newDate);
   };
 
-  // --- LÓGICA DO REPERTÓRIO (COM PASTAS) ---
-  
+  // --- LÓGICA DO REPERTÓRIO ---
   const isSearching = searchTerm.trim().length > 0;
 
   const filteredSongs = songs.filter(song => {
-    // 1. Filtro de Texto (Search)
     const matchesSearch = song.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           song.artist.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (!matchesSearch) return false;
-
-    // 2. Filtro de Pasta (Singer) - Apenas se NÃO estiver pesquisando
     if (!isSearching && selectedSingerFilter) {
-        if (selectedSingerFilter === 'all') {
-            return true;
-        }
-        if (selectedSingerFilter === 'uncategorized') {
-            return !song.singerId;
-        }
+        if (selectedSingerFilter === 'all') return true;
+        if (selectedSingerFilter === 'uncategorized') return !song.singerId;
         return song.singerId === selectedSingerFilter;
     }
-
     return true;
   });
 
-  // Agrupamento para as pastas
   const groupedSongs = songs.reduce((acc, song) => {
       const sId = song.singerId || 'uncategorized';
       if (!acc[sId]) acc[sId] = 0;
@@ -163,7 +166,6 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
 
   const uncategorizedCount = groupedSongs['uncategorized'] || 0;
 
-  // Título da visualização atual
   const getFilterTitle = () => {
       if (selectedSingerFilter === 'all') return 'Todas as Músicas';
       if (selectedSingerFilter === 'uncategorized') return 'Geral / Outros';
@@ -176,8 +178,6 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
       
       {/* Header & Tabs */}
       <div className="px-4 md:px-0 space-y-6">
-        
-        {/* Tab Switcher */}
         <div className="bg-slate-200 dark:bg-slate-800/50 p-1.5 rounded-lg flex relative">
            <button 
              onClick={() => setActiveTab('agenda')}
@@ -212,16 +212,10 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                {MONTH_NAMES[viewDate.getMonth()]} <span className="text-slate-400 font-medium">{viewDate.getFullYear()}</span>
             </h2>
             <div className="flex gap-2">
-                <button 
-                    onClick={() => changeMonth(-1)}
-                    className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                >
+                <button onClick={() => changeMonth(-1)} className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                     <ChevronLeft size={20} />
                 </button>
-                <button 
-                    onClick={() => changeMonth(1)}
-                    className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                >
+                <button onClick={() => changeMonth(1)} className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                     <ChevronRight size={20} />
                 </button>
             </div>
@@ -244,28 +238,13 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
               <p className="text-sm text-slate-400 mt-1">Nenhum evento programado para {MONTH_NAMES[viewDate.getMonth()]}.</p>
             </div>
           ) : (
-            <div className="
-                flex flex-nowrap gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 -mx-4
-                md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:pb-0 md:px-0 md:mx-0 md:overflow-visible
-                no-scrollbar
-            ">
+            <div className="flex flex-nowrap gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 -mx-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:pb-0 md:px-0 md:mx-0 md:overflow-visible no-scrollbar">
               {filteredSchedule.map((item, index) => {
                 const dateInfo = formatCardDate(item.date);
                 const isNext = index === nextEventIndex;
                 
                 return (
-                  <div 
-                    key={item.id} 
-                    className={`
-                        group relative flex flex-col shrink-0 snap-center
-                        w-[85vw] md:w-auto 
-                        bg-white dark:bg-slate-900 rounded-xl border overflow-hidden transition-all duration-300
-                        ${isNext 
-                            ? 'border-indigo-500 ring-4 ring-indigo-50 dark:ring-indigo-900/20 shadow-xl shadow-indigo-500/10' 
-                            : 'border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none'
-                        }
-                    `}
-                  >
+                  <div key={item.id} className={`group relative flex flex-col shrink-0 snap-center w-[85vw] md:w-auto bg-white dark:bg-slate-900 rounded-xl border overflow-hidden transition-all duration-300 ${isNext ? 'border-indigo-500 ring-4 ring-indigo-50 dark:ring-indigo-900/20 shadow-xl shadow-indigo-500/10' : 'border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none'}`}>
                     {isNext && (
                         <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest py-1.5 px-4 rounded-bl-xl z-10 flex items-center gap-1 shadow-sm">
                             <Sparkles size={10} className="text-yellow-300" /> Próximo
@@ -289,6 +268,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                     </div>
 
                     <div className="p-6 space-y-6 flex-1 flex flex-col">
+                      {/* Instrumentistas */}
                       <div className="flex-1">
                         <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                           <Music size={12} className="text-indigo-500" /> Instrumentistas
@@ -316,6 +296,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
 
                       <div className="h-px bg-slate-100 dark:bg-slate-800 w-full"></div>
 
+                      {/* Vocal */}
                       <div className="flex-1">
                         <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                           <Mic size={12} className="text-purple-500" /> Equipe Vocal
@@ -365,6 +346,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                         )}
                       </div>
 
+                      {/* Louvores (Com Thumbnails e Key) */}
                       {item.songs && item.songs.length > 0 && (
                           <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
@@ -387,7 +369,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                       : {};
                                     
                                     const videoId = getYoutubeId(song.youtubeLink || '');
-                                    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
+                                    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/default.jpg` : null;
 
                                     return (
                                       <Wrapper
@@ -401,9 +383,10 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                             }
                                         `}
                                       >
-                                        <div className="shrink-0 w-12 h-9 rounded bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-600">
+                                        {/* Pequena Thumbnail no card da agenda */}
+                                        <div className="shrink-0 w-10 h-10 rounded bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-600 relative">
                                             {thumbUrl ? (
-                                                <img src={thumbUrl} alt="" className="w-full h-full object-cover" />
+                                                <img src={thumbUrl} alt="" className="w-full h-full object-cover transform group-hover/song:scale-110 transition-transform" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
                                                     <Music2 size={16} />
@@ -420,8 +403,10 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                           </div>
                                           <p className="text-[10px] font-medium text-slate-400 truncate">{song.artist}</p>
                                         </div>
+                                        
+                                        {/* Key Badge Destacado */}
                                         {song.key && (
-                                           <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-xs font-black text-slate-600 dark:text-slate-300 group-hover/song:bg-indigo-50 dark:group-hover/song:bg-indigo-900/30 group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-300 group-hover/song:border-indigo-200 dark:group-hover/song:border-indigo-800 transition-colors">
+                                           <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 dark:bg-slate-700 border border-slate-600 dark:border-slate-600 text-xs font-black text-white group-hover/song:bg-pink-500 dark:group-hover/song:bg-pink-600 group-hover/song:border-pink-400 transition-colors shadow-sm">
                                               {song.key}
                                            </div>
                                         )}
@@ -441,7 +426,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
         </div>
       )}
 
-      {/* --- CONTEÚDO DO REPERTÓRIO --- */}
+      {/* --- CONTEÚDO DO REPERTÓRIO (Visual de Cards/Grade) --- */}
       {activeTab === 'repertoire' && (
         <div className="px-4 md:px-0 animate-in fade-in slide-in-from-right-4 duration-500">
              
@@ -465,8 +450,6 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                     </h4>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                        
-                         {/* Card "TODAS AS MÚSICAS" (Novo) */}
                          <button 
                             onClick={() => setSelectedSingerFilter('all')}
                             className="flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-indigo-600 dark:to-indigo-800 rounded-xl shadow-lg shadow-indigo-500/20 hover:scale-[1.02] transition-all group"
@@ -480,7 +463,6 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             </div>
                         </button>
 
-                        {/* Card "Sem Cantor" (se houver músicas) */}
                         {uncategorizedCount > 0 && (
                             <button 
                                 onClick={() => setSelectedSingerFilter('uncategorized')}
@@ -496,7 +478,6 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             </button>
                         )}
 
-                        {/* Cards dos Cantores */}
                         {singersWithSongs.map(singer => (
                             <button 
                                 key={singer.id}
@@ -518,24 +499,13 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                 </div>
                             </button>
                         ))}
-
-                        {/* Estado vazio se não houver nenhuma música */}
-                        {singersWithSongs.length === 0 && uncategorizedCount === 0 && (
-                            <div className="col-span-full py-10 text-center text-slate-400">
-                                <p className="text-sm">Nenhuma música cadastrada ainda.</p>
-                            </div>
-                        )}
                     </div>
                 </div>
             ) : (
                 <>
-                    {/* CABEÇALHO DA LISTA FILTRADA (PASTA OU BUSCA) */}
                     {!isSearching && selectedSingerFilter && (
                             <div className="flex items-center gap-4 mb-6 animate-in slide-in-from-left-2">
-                            <button 
-                                onClick={() => setSelectedSingerFilter(null)}
-                                className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-300"
-                            >
+                            <button onClick={() => setSelectedSingerFilter(null)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-300">
                                 <ChevronLeft size={20} />
                             </button>
                             <div>
@@ -547,10 +517,9 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             </div>
                     )}
 
-                    {/* LISTA DE MÚSICAS - ESTILO LISTA ESCURA */}
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {filteredSongs.length === 0 ? (
-                            <div className="py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                            <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
                                 <Music2 className="mx-auto mb-2 opacity-20" size={48} />
                                 <p className="text-sm font-medium">Nenhuma música encontrada.</p>
                             </div>
@@ -558,7 +527,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             filteredSongs.map(song => {
                                 const singer = members.find(m => m.id === song.singerId);
                                 return (
-                                    <PublicSongCard key={song.id} song={song} singer={singer} />
+                                    <RepertoireSongCard key={song.id} song={song} singer={singer} />
                                 );
                             })
                         )}
