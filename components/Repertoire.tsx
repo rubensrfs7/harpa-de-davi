@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Music2, Youtube, FileText, Trash2, Search, Mic2, Edit, X, Save, Music, User } from 'lucide-react';
+import { Plus, Music2, Youtube, FileText, Trash2, Search, Mic2, Edit, X, Save, Music, User, Folder, ChevronLeft, LayoutGrid, List } from 'lucide-react';
 import { Song, Member } from '../types';
 
 interface RepertoireProps {
@@ -36,14 +36,12 @@ const SongCard: React.FC<{
     onRemove: (id: string) => void; 
 }> = ({ song, singer, onEdit, onRemove }) => {
     const videoId = getYoutubeId(song.youtubeLink || '');
-    // Tenta usar maxresdefault (HD 16:9) primeiro para evitar barras pretas
     const [imgSrc, setImgSrc] = useState(videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
     const [isLowQuality, setIsLowQuality] = useState(false);
 
     const handleImgError = () => {
         if (!isLowQuality && videoId) {
             setIsLowQuality(true);
-            // Fallback para hqdefault se maxresdefault não existir
             setImgSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
         }
     };
@@ -166,6 +164,9 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
   
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // Estado para navegação por pastas
+  const [selectedSingerFilter, setSelectedSingerFilter] = useState<string | 'uncategorized' | null>(null);
 
   const startEditing = (song: Song) => {
     setEditingId(song.id);
@@ -224,14 +225,45 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
     cancelEditing();
   };
 
-  const filteredSongs = songs.filter(song => 
-    song.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    song.artist.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Lógica de Filtragem
+  // Se houver busca, ignora as pastas e mostra tudo que combina
+  const isSearching = searchTerm.trim().length > 0;
+
+  const filteredSongs = songs.filter(song => {
+    // 1. Filtro de Texto (Search)
+    const matchesSearch = song.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          song.artist.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (!matchesSearch) return false;
+
+    // 2. Filtro de Pasta (Singer) - Apenas se NÃO estiver pesquisando
+    if (!isSearching && selectedSingerFilter) {
+        if (selectedSingerFilter === 'uncategorized') {
+            return !song.singerId;
+        }
+        return song.singerId === selectedSingerFilter;
+    }
+
+    return true;
+  });
 
   const singerOptions = (members || [])
     .filter(m => m.role === 'singer')
     .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  // Agrupamento para as pastas
+  const groupedSongs = songs.reduce((acc, song) => {
+      const sId = song.singerId || 'uncategorized';
+      if (!acc[sId]) acc[sId] = 0;
+      acc[sId]++;
+      return acc;
+  }, {} as Record<string, number>);
+
+  const singersWithSongs = Object.keys(groupedSongs).filter(id => id !== 'uncategorized').map(id => {
+      return members.find(m => m.id === id);
+  }).filter(Boolean) as Member[];
+
+  const uncategorizedCount = groupedSongs['uncategorized'] || 0;
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -400,27 +432,104 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {filteredSongs.length === 0 ? (
-                        <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                            <Music2 className="mx-auto mb-2 opacity-20" size={48} />
-                            <p className="text-sm font-medium">Nenhuma música encontrada.</p>
+                {/* VISUALIZAÇÃO DE PASTAS DE CANTORES */}
+                {!isSearching && !selectedSingerFilter ? (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-4">
+                            <Folder size={14} /> Pastas por Cantor
+                        </h4>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {/* Card "Sem Cantor" (se houver músicas) */}
+                            {uncategorizedCount > 0 && (
+                                <button 
+                                    onClick={() => setSelectedSingerFilter('uncategorized')}
+                                    className="flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-lg hover:shadow-pink-500/10 transition-all group"
+                                >
+                                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-pink-50 dark:group-hover:bg-pink-900/20 group-hover:text-pink-500 transition-colors">
+                                        <Music size={24} />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">Geral / Outros</p>
+                                        <p className="text-xs text-slate-400 mt-1">{uncategorizedCount} músicas</p>
+                                    </div>
+                                </button>
+                            )}
+
+                            {/* Cards dos Cantores */}
+                            {singersWithSongs.map(singer => (
+                                <button 
+                                    key={singer.id}
+                                    onClick={() => setSelectedSingerFilter(singer.id)}
+                                    className="flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-lg hover:shadow-pink-500/10 transition-all group"
+                                >
+                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-pink-500 transition-all">
+                                        {singer.photoUrl ? (
+                                            <img src={singer.photoUrl} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 text-xs font-bold">
+                                                {getInitials(singer.name)}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-bold text-slate-700 dark:text-slate-200 text-sm truncate max-w-[120px]">{singer.name}</p>
+                                        <p className="text-xs text-slate-400 mt-1">{groupedSongs[singer.id]} músicas</p>
+                                    </div>
+                                </button>
+                            ))}
+
+                            {/* Estado vazio se não houver nenhuma música */}
+                            {singersWithSongs.length === 0 && uncategorizedCount === 0 && (
+                                <div className="col-span-full py-10 text-center text-slate-400">
+                                    <p className="text-sm">Nenhuma música cadastrada ainda.</p>
+                                </div>
+                            )}
                         </div>
-                    ) : (
-                        filteredSongs.map(song => {
-                            const singer = members.find(m => m.id === song.singerId);
-                            return (
-                                <SongCard 
-                                    key={song.id} 
-                                    song={song} 
-                                    singer={singer} 
-                                    onEdit={startEditing} 
-                                    onRemove={handleRemoveClick} 
-                                />
-                            );
-                        })
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <>
+                        {/* CABEÇALHO DA LISTA FILTRADA (PASTA OU BUSCA) */}
+                        {!isSearching && selectedSingerFilter && (
+                             <div className="flex items-center gap-4 mb-6 animate-in slide-in-from-left-2">
+                                <button 
+                                    onClick={() => setSelectedSingerFilter(null)}
+                                    className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-300"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                        {selectedSingerFilter === 'uncategorized' ? 'Geral / Outros' : members.find(m => m.id === selectedSingerFilter)?.name}
+                                    </h3>
+                                    <p className="text-xs text-slate-400">Exibindo {filteredSongs.length} músicas</p>
+                                </div>
+                             </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {filteredSongs.length === 0 ? (
+                                <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                                    <Music2 className="mx-auto mb-2 opacity-20" size={48} />
+                                    <p className="text-sm font-medium">Nenhuma música encontrada.</p>
+                                </div>
+                            ) : (
+                                filteredSongs.map(song => {
+                                    const singer = members.find(m => m.id === song.singerId);
+                                    return (
+                                        <SongCard 
+                                            key={song.id} 
+                                            song={song} 
+                                            singer={singer} 
+                                            onEdit={startEditing} 
+                                            onRemove={handleRemoveClick} 
+                                        />
+                                    );
+                                })
+                            )}
+                        </div>
+                    </>
+                )}
              </div>
         </div>
       </div>

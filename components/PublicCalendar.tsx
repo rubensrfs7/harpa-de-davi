@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Music, Mic, Music2, MapPin, Sparkles, ChevronRight, Search, FileText, Youtube, BookOpen, User, ChevronLeft, Folder } from 'lucide-react';
 import { ScheduleItem, Song, Member } from '../types';
 
 interface PublicCalendarProps {
@@ -37,6 +37,16 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
 
     return (
         <div className="group relative bg-[#0f172a] rounded-xl border border-slate-800 hover:border-pink-500/50 transition-all duration-300 shadow-lg shadow-black/20 overflow-hidden h-[220px] flex flex-col justify-between isolate">
+            
+            {/* --- DESTAQUE DO TOM (KEY) --- */}
+            {song.key && (
+                <div className="absolute top-0 right-0 z-20">
+                     <div className="bg-pink-600 text-white px-4 py-2 rounded-bl-xl font-black text-lg shadow-lg shadow-pink-900/50 flex items-center justify-center min-w-[3.5rem]">
+                         {song.key}
+                     </div>
+                </div>
+            )}
+
             {/* Background Image Layer */}
             {imgSrc ? (
                 <>
@@ -59,7 +69,7 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
             <div className="relative z-10 p-5 flex flex-col h-full justify-between pointer-events-none">
                 
                 {/* Header Content */}
-                <div className="pt-1">
+                <div className="pt-1 pr-12"> {/* Padding right para não bater no Tom */}
                     <h4 className="font-bold text-white line-clamp-2 text-xl drop-shadow-lg leading-tight" title={song.title}>{song.title}</h4>
                     <p className="text-xs font-bold text-slate-300 uppercase tracking-wide mt-1 drop-shadow-md">{song.artist}</p>
                 </div>
@@ -68,13 +78,6 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
                 <div className="mt-auto space-y-4 pointer-events-auto">
                     {/* Info Badges Row */}
                     <div className="flex items-center gap-3">
-                        {/* Key Badge */}
-                        {song.key && (
-                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-pink-500 text-white font-black text-sm shadow-lg shadow-pink-500/30" title={`Tom: ${song.key}`}>
-                                {song.key}
-                            </div>
-                        )}
-                        
                         {/* Singer Badge */}
                         {singer && (
                             <div className="flex items-center gap-2 pl-1 pr-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
@@ -125,14 +128,12 @@ const PublicSongCard: React.FC<{ song: Song; singer?: Member }> = ({ song, singe
 const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, members }) => {
   const [activeTab, setActiveTab] = useState<'agenda' | 'repertoire'>('agenda');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSingerFilter, setSelectedSingerFilter] = useState<string | 'uncategorized' | null>(null);
   
   // Estado para navegação de mês (Inicializa com o mês atual do usuário)
   const [viewDate, setViewDate] = useState(new Date());
 
   // --- LÓGICA DA AGENDA ---
-  
-  // 1. Filtra escalas que JÁ PASSARAM (Data < Hoje à meia-noite)
-  // O usuário pediu: "escalas que passou da data pode tirar a visualização"
   const todayMidnight = new Date();
   todayMidnight.setHours(0, 0, 0, 0);
 
@@ -141,13 +142,11 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
     return itemDate >= todayMidnight;
   });
 
-  // 2. Filtra pelo MÊS SELECIONADO (viewDate)
   const filteredSchedule = upcomingSchedule.filter(item => {
     const d = new Date(item.date);
     return d.getMonth() === viewDate.getMonth() && d.getFullYear() === viewDate.getFullYear();
   }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Índice para destacar o próximo evento no mês
   const now = new Date();
   const nextEventIndex = filteredSchedule.findIndex(s => new Date(s.date) >= now);
 
@@ -166,11 +165,41 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
     setViewDate(newDate);
   };
 
-  // --- LÓGICA DO REPERTÓRIO ---
-  const filteredSongs = songs.filter(song => 
-    song.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    song.artist.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // --- LÓGICA DO REPERTÓRIO (COM PASTAS) ---
+  
+  const isSearching = searchTerm.trim().length > 0;
+
+  const filteredSongs = songs.filter(song => {
+    // 1. Filtro de Texto (Search)
+    const matchesSearch = song.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          song.artist.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (!matchesSearch) return false;
+
+    // 2. Filtro de Pasta (Singer) - Apenas se NÃO estiver pesquisando
+    if (!isSearching && selectedSingerFilter) {
+        if (selectedSingerFilter === 'uncategorized') {
+            return !song.singerId;
+        }
+        return song.singerId === selectedSingerFilter;
+    }
+
+    return true;
+  });
+
+  // Agrupamento para as pastas
+  const groupedSongs = songs.reduce((acc, song) => {
+      const sId = song.singerId || 'uncategorized';
+      if (!acc[sId]) acc[sId] = 0;
+      acc[sId]++;
+      return acc;
+  }, {} as Record<string, number>);
+
+  const singersWithSongs = Object.keys(groupedSongs).filter(id => id !== 'uncategorized').map(id => {
+      return members.find(m => m.id === id);
+  }).filter(Boolean) as Member[];
+
+  const uncategorizedCount = groupedSongs['uncategorized'] || 0;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700 pb-20 pt-4">
@@ -406,21 +435,98 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                 />
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredSongs.length === 0 ? (
-                    <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                        <Music2 className="mx-auto mb-2 opacity-20" size={48} />
-                        <p className="text-sm font-medium">Nenhuma música encontrada.</p>
+            {/* VISUALIZAÇÃO DE PASTAS DE CANTORES */}
+            {!isSearching && !selectedSingerFilter ? (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-4">
+                        <Folder size={14} /> Pastas por Cantor
+                    </h4>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {/* Card "Sem Cantor" (se houver músicas) */}
+                        {uncategorizedCount > 0 && (
+                            <button 
+                                onClick={() => setSelectedSingerFilter('uncategorized')}
+                                className="flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-lg hover:shadow-pink-500/10 transition-all group"
+                            >
+                                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-pink-50 dark:group-hover:bg-pink-900/20 group-hover:text-pink-500 transition-colors">
+                                    <Music size={24} />
+                                </div>
+                                <div className="text-center">
+                                    <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">Geral / Outros</p>
+                                    <p className="text-xs text-slate-400 mt-1">{uncategorizedCount} músicas</p>
+                                </div>
+                            </button>
+                        )}
+
+                        {/* Cards dos Cantores */}
+                        {singersWithSongs.map(singer => (
+                            <button 
+                                key={singer.id}
+                                onClick={() => setSelectedSingerFilter(singer.id)}
+                                className="flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-lg hover:shadow-pink-500/10 transition-all group"
+                            >
+                                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-pink-500 transition-all">
+                                    {singer.photoUrl ? (
+                                        <img src={singer.photoUrl} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 text-xs font-bold">
+                                            {getInitials(singer.name)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="text-center">
+                                    <p className="font-bold text-slate-700 dark:text-slate-200 text-sm truncate max-w-[120px]">{singer.name}</p>
+                                    <p className="text-xs text-slate-400 mt-1">{groupedSongs[singer.id]} músicas</p>
+                                </div>
+                            </button>
+                        ))}
+
+                        {/* Estado vazio se não houver nenhuma música */}
+                        {singersWithSongs.length === 0 && uncategorizedCount === 0 && (
+                            <div className="col-span-full py-10 text-center text-slate-400">
+                                <p className="text-sm">Nenhuma música cadastrada ainda.</p>
+                            </div>
+                        )}
                     </div>
-                ) : (
-                    filteredSongs.map(song => {
-                        const singer = members.find(m => m.id === song.singerId);
-                        return (
-                            <PublicSongCard key={song.id} song={song} singer={singer} />
-                        );
-                    })
-                )}
-             </div>
+                </div>
+            ) : (
+                <>
+                    {/* CABEÇALHO DA LISTA FILTRADA (PASTA OU BUSCA) */}
+                    {!isSearching && selectedSingerFilter && (
+                            <div className="flex items-center gap-4 mb-6 animate-in slide-in-from-left-2">
+                            <button 
+                                onClick={() => setSelectedSingerFilter(null)}
+                                className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-300"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                    {selectedSingerFilter === 'uncategorized' ? 'Geral / Outros' : members.find(m => m.id === selectedSingerFilter)?.name}
+                                </h3>
+                                <p className="text-xs text-slate-400">Exibindo {filteredSongs.length} músicas</p>
+                            </div>
+                            </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredSongs.length === 0 ? (
+                            <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                                <Music2 className="mx-auto mb-2 opacity-20" size={48} />
+                                <p className="text-sm font-medium">Nenhuma música encontrada.</p>
+                            </div>
+                        ) : (
+                            filteredSongs.map(song => {
+                                const singer = members.find(m => m.id === song.singerId);
+                                return (
+                                    <PublicSongCard key={song.id} song={song} singer={singer} />
+                                );
+                            })
+                        )}
+                    </div>
+                </>
+            )}
         </div>
       )}
 
