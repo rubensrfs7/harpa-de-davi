@@ -391,6 +391,9 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                   {item.songs.map(songId => {
                                     const song = songs.find(s => s.id === songId);
                                     if (!song) return null;
+                                    
+                                    // ENCONTRA O CANTOR ESPECÍFICO DESSA MÚSICA
+                                    const songSinger = members.find(m => m.id === song.singerId);
 
                                     const Wrapper = (song.youtubeLink || song.lyricsLink) ? 'a' : 'div';
                                     const props = (song.youtubeLink || song.lyricsLink)
@@ -409,7 +412,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                       <Wrapper
                                         key={songId}
                                         {...props}
-                                        className={`flex items-center gap-3 p-2 rounded-lg border transition-all group/song
+                                        className={`flex items-start gap-3 p-2.5 rounded-lg border transition-all group/song relative
                                             bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700
                                             ${(song.youtubeLink || song.lyricsLink) 
                                                 ? 'hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-md cursor-pointer' 
@@ -418,7 +421,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                         `}
                                       >
                                         {/* Pequena Thumbnail no card da agenda */}
-                                        <div className="shrink-0 w-10 h-10 rounded bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-600 relative">
+                                        <div className="shrink-0 w-11 h-11 rounded-lg bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-600 relative mt-0.5">
                                             {thumbUrl ? (
                                                 <img src={thumbUrl} alt="" className="w-full h-full object-cover transform group-hover/song:scale-110 transition-transform" />
                                             ) : (
@@ -428,22 +431,44 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                                             )}
                                         </div>
 
-                                        <div className="min-w-0 flex-1">
-                                          <div className="flex items-center gap-1.5">
-                                             <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-400 transition-colors">
-                                                 {song.title}
-                                             </p>
-                                             {(song.youtubeLink || song.lyricsLink) && <ExternalLink size={10} className="text-slate-400 group-hover/song:text-indigo-500" />}
-                                          </div>
-                                          <p className="text-[10px] font-medium text-slate-400 truncate">{song.artist}</p>
+                                        <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                            <div className="flex justify-between items-start w-full gap-2">
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-400 transition-colors">
+                                                            {song.title}
+                                                        </p>
+                                                        {(song.youtubeLink || song.lyricsLink) && <ExternalLink size={10} className="text-slate-400 group-hover/song:text-indigo-500 shrink-0" />}
+                                                    </div>
+                                                    <p className="text-[10px] font-medium text-slate-400 truncate leading-tight">{song.artist}</p>
+                                                </div>
+                                                
+                                                {/* Key Badge Destacado */}
+                                                {song.key && (
+                                                    <div className="shrink-0 flex items-center justify-center px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] font-black text-slate-600 dark:text-slate-300 group-hover/song:bg-pink-500 dark:group-hover/song:bg-pink-600 group-hover/song:text-white group-hover/song:border-pink-400 transition-colors shadow-sm min-w-[24px]">
+                                                        {song.key}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* MOSTRA O CANTOR DA MÚSICA SE EXISTIR */}
+                                            {songSinger && (
+                                                <div className="flex items-center gap-1.5 mt-1.5" title={`Cantor: ${songSinger.name}`}>
+                                                    <div className="w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600">
+                                                        {songSinger.photoUrl ? (
+                                                            <img src={songSinger.photoUrl} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-[6px] font-bold text-slate-500">
+                                                                {getInitials(songSinger.name)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 truncate max-w-[120px]">
+                                                        {songSinger.name.split(' ')[0]}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
-                                        
-                                        {/* Key Badge Destacado */}
-                                        {song.key && (
-                                           <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 dark:bg-slate-700 border border-slate-600 dark:border-slate-600 text-xs font-black text-white group-hover/song:bg-pink-500 dark:group-hover/song:bg-pink-600 group-hover/song:border-pink-400 transition-colors shadow-sm">
-                                              {song.key}
-                                           </div>
-                                        )}
                                       </Wrapper>
                                     );
                                   })}
