@@ -489,24 +489,25 @@ const App: React.FC = () => {
       <div className="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-cyan-400/20 to-blue-500/20 rounded-full blur-[120px] pointer-events-none animate-blob animation-delay-2000"></div>
 
       {/* Floating Navbar Aligned */}
-      <div className="sticky top-4 z-40 w-full max-w-7xl mx-auto px-4 md:px-6 mb-8">
-        <nav className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-xl px-4 py-3 shadow-xl shadow-indigo-500/5 transition-all">
+      <div className="sticky top-4 z-40 w-full max-w-7xl mx-auto px-4 md:px-6 mb-10">
+        <nav className="w-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-3xl px-6 py-4 shadow-2xl shadow-indigo-500/10 transition-all duration-500">
           <div className="flex items-center justify-between">
             {/* Logo Area */}
-            <div className="flex items-center gap-3 pl-2">
-              <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2 rounded-lg text-white shadow-lg shadow-indigo-500/30">
-                 <HarpIcon size={20} />
+            <div className="flex items-center gap-4 pl-2 group cursor-pointer">
+              <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 p-3 rounded-2xl text-white shadow-xl shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-500">
+                 <HarpIcon size={24} />
               </div>
               <div className="hidden md:block">
-                <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-none tracking-tight">Harpa de Davi</h1>
+                <h1 className="text-xl font-black text-slate-900 dark:text-white leading-none tracking-tighter">Harpa de Davi</h1>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">Ministério de Música</p>
               </div>
             </div>
             
             {/* Desktop Navigation */}
             {!isPublicLinkMode && (
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden md:flex items-center gap-2 bg-slate-50/50 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-700/50">
                 {[
-                  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                  { id: 'dashboard', label: 'Início', icon: LayoutDashboard },
                   { id: 'scheduler', label: 'Escalas', icon: CalendarIcon },
                   { id: 'attendance', label: 'Presença', icon: UserCheck },
                   { id: 'members', label: 'Equipe', icon: Users },
@@ -515,13 +516,13 @@ const App: React.FC = () => {
                   <button 
                     key={item.id} 
                     onClick={() => setView(item.id as any)} 
-                    className={`flex items-center gap-2 px-5 py-2 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-300 ${
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-500 ${
                       view === item.id 
-                      ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' 
-                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/50'
+                      ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-xl shadow-indigo-500/5' 
+                      : 'text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/50'
                     }`}
                   >
-                    <item.icon size={14} />
+                    <item.icon size={16} />
                     {item.label}
                   </button>
                 ))}
@@ -529,34 +530,34 @@ const App: React.FC = () => {
             )}
             
             {/* Actions Area */}
-            <div className="flex items-center gap-2 pr-1">
+            <div className="flex items-center gap-3 pr-1">
                {!isPublicLinkMode && (
                   <button 
                     onClick={handleCopyPublicLink} 
-                    className={`p-2.5 rounded-lg transition-all border ${
+                    className={`p-3 rounded-2xl transition-all duration-500 border-2 ${
                       copiedLink 
-                      ? 'bg-green-100 text-green-600 border-green-200' 
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-transparent hover:bg-indigo-50 hover:text-indigo-600'
+                      ? 'bg-green-500 text-white border-green-500 shadow-lg shadow-green-500/30' 
+                      : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-transparent hover:border-indigo-500/30 hover:text-indigo-600 hover:bg-indigo-50'
                     }`}
                     title="Copiar Link Público"
                   >
-                    {copiedLink ? <Check size={18} /> : <Globe size={18} />}
+                    {copiedLink ? <Check size={20} /> : <Globe size={20} />}
                   </button>
                )}
 
                <button 
                   onClick={() => setIsDarkMode(!isDarkMode)} 
-                  className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  className="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-500 border-2 border-transparent hover:border-indigo-500/30"
                >
-                 {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                </button>
                
                {isAuthenticated && (
                  <button 
                     onClick={handleLogout} 
-                    className="p-2.5 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                    className="p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all duration-500 border-2 border-transparent hover:border-red-500 shadow-lg shadow-red-500/0 hover:shadow-red-500/20"
                  >
-                   <LogOut size={18} />
+                   <LogOut size={20} />
                  </button>
                )}
             </div>
@@ -564,58 +565,65 @@ const App: React.FC = () => {
         </nav>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 relative z-10 pb-20">
         {view === 'dashboard' ? (
            <Dashboard members={members} schedule={schedule} logs={substitutionLogs} songs={songs} />
         ) : view === 'scheduler' ? (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {/* Action Bar */}
-            <div className="relative z-30 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-xl border border-white/40 dark:border-slate-700/40 shadow-xl shadow-slate-200/40 dark:shadow-none">
-              <div className="flex flex-col md:flex-row gap-6 items-end">
-                <div className="flex-1 w-full space-y-3">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Adicionar Culto</label>
+            <div className="relative z-30 bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl p-8 rounded-3xl border border-white/40 dark:border-slate-700/40 shadow-2xl shadow-slate-200/40 dark:shadow-none">
+              <div className="flex flex-col md:flex-row gap-8 items-end">
+                <div className="flex-1 w-full space-y-4">
+                  <div className="flex items-center gap-2 ml-1">
+                    <CalendarIcon size={14} className="text-indigo-500" />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Adicionar Novo Culto</label>
+                  </div>
                   <DateTimePicker value={newDateInput} onChange={setNewDateInput} />
                 </div>
-                <div className="flex gap-3 w-full md:w-auto">
+                <div className="flex gap-4 w-full md:w-auto">
                     <button 
                       onClick={() => { if (newDateInput) { setSelectedDates(prev => [...new Set([...prev, newDateInput])].sort()); setNewDateInput(''); } }} 
-                      className="flex-1 md:flex-none h-[52px] px-8 bg-indigo-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 active:scale-95"
+                      className="flex-1 md:flex-none h-[60px] px-10 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-500/30 active:scale-95 group"
                     >
-                      <CalendarIcon size={20} /> Agendar
+                      <CalendarIcon size={20} className="group-hover:scale-110 transition-transform" /> Agendar
                     </button>
                     <button 
                       onClick={handleGenerateSchedule} 
-                      className="flex-1 md:flex-none h-[52px] px-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg active:scale-95"
+                      className="flex-1 md:flex-none h-[60px] px-10 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-slate-900/20 dark:shadow-none group"
                     >
-                      <Wand2 size={20} /> <span className="hidden md:inline">Gerar Escala</span><span className="md:hidden">Gerar</span>
+                      <Wand2 size={20} className="group-hover:rotate-12 transition-transform" /> <span className="hidden md:inline">Gerar Escala</span><span className="md:hidden">Gerar</span>
                     </button>
                 </div>
               </div>
 
               {selectedDates.length > 0 && (
-                <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex justify-between items-center mb-3">
-                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Datas para gerar</p>
+                <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex justify-between items-center mb-5">
+                     <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Datas aguardando geração</p>
+                     </div>
                      <button 
                         onClick={() => setSelectedDates([])}
-                        className="text-[10px] font-bold text-red-400 hover:text-red-500 flex items-center gap-1 hover:underline"
+                        className="text-[10px] font-black text-red-400 hover:text-red-600 flex items-center gap-2 uppercase tracking-widest transition-colors"
                      >
-                        <Eraser size={12} /> Limpar Seleção
+                        <Eraser size={14} /> Limpar Seleção
                      </button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-3">
                     {selectedDates.map(dateStr => {
                       const dateObj = new Date(dateStr);
                       return (
-                        <span key={dateStr} className="inline-flex items-center gap-3 pl-4 pr-2 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-bold border border-indigo-100 dark:border-indigo-800">
-                          {dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} 
-                          <span className="opacity-50">•</span> 
-                          {dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        <span key={dateStr} className="group inline-flex items-center gap-4 pl-5 pr-3 py-3 bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-2xl text-sm font-black border border-indigo-100 dark:border-indigo-800/50 shadow-sm hover:shadow-md transition-all">
+                          <div className="flex flex-col">
+                            <span className="leading-none">{dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</span>
+                            <span className="text-[9px] opacity-60 mt-1 uppercase tracking-tighter">{dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
                           <button
                             onClick={() => setSelectedDates(prev => prev.filter(d => d !== dateStr))}
-                            className="ml-1 p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md transition-colors text-indigo-400 hover:text-red-500"
+                            className="p-2 bg-white dark:bg-slate-800 rounded-xl transition-all text-indigo-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 shadow-sm"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </span>
                       );
@@ -673,8 +681,8 @@ const App: React.FC = () => {
       
       {/* Mobile Tab Navigation */}
       {!isPublicLinkMode && isAuthenticated && (
-        <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
-           <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl border border-white/20 dark:border-slate-700/50 shadow-2xl p-2 grid grid-cols-5 gap-1">
+        <div className="md:hidden fixed bottom-6 left-4 right-4 z-50">
+           <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-2 flex items-center justify-between gap-1">
                 {[
                     { id: 'dashboard', icon: LayoutDashboard, label: 'Dash' },
                     { id: 'scheduler', icon: CalendarIcon, label: 'Escalas' },
@@ -685,14 +693,18 @@ const App: React.FC = () => {
                     <button 
                         key={item.id} 
                         onClick={() => setView(item.id as any)}
-                        className={`flex flex-col items-center justify-center gap-1 h-16 rounded-lg transition-all duration-300 ${
+                        className={`flex-1 flex flex-col items-center justify-center gap-1 h-14 rounded-xl transition-all duration-500 ${
                           view === item.id 
-                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 translate-y-[-8px]' 
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/40 scale-105 -translate-y-1' 
                           : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                     >
-                        <item.icon size={20} />
-                        {view !== item.id && <span className="text-[8px] font-bold uppercase tracking-wide">{item.label}</span>}
+                        <item.icon size={view === item.id ? 22 : 20} className="transition-all" />
+                        {view === item.id ? (
+                          <span className="text-[7px] font-black uppercase tracking-widest animate-in fade-in zoom-in duration-300">{item.label}</span>
+                        ) : (
+                          <span className="text-[8px] font-bold uppercase tracking-wide">{item.label}</span>
+                        )}
                     </button>
                 ))}
            </div>

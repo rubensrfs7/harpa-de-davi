@@ -46,19 +46,20 @@ const SongThumb: React.FC<{ videoId: string | null; title: string; size?: string
     };
 
     return (
-        <div className={`${size} rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 relative flex-shrink-0`}>
+        <div className={`${size} rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 relative flex-shrink-0 shadow-inner`}>
             {imgSrc ? (
                 <img 
                     src={imgSrc} 
                     alt={title} 
                     onError={handleImgError}
-                    className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${isLowQuality ? 'scale-[1.35]' : ''}`} 
+                    className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${isLowQuality ? 'scale-[1.4]' : ''}`} 
                 />
             ) : (
                 <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
                     <Music2 size={iconSize} />
                 </div>
             )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
         </div>
     );
 };
@@ -202,174 +203,195 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700 pb-20 pt-4">
+    <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 animate-in fade-in duration-700 pb-32 pt-4 sm:pt-6">
       
       {/* Header & Tabs */}
-      <div className="px-4 md:px-0 space-y-6">
-        <div className="bg-slate-200 dark:bg-slate-800/50 p-1.5 rounded-lg flex relative">
+      <div className="px-4 sm:px-0">
+        <div className="bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-2xl p-1.5 rounded-2xl flex relative shadow-inner border border-white/20 dark:border-slate-700/50">
            <button 
              onClick={() => setActiveTab('agenda')}
-             className={`flex-1 py-3 rounded-md text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+             className={`flex-1 py-3 sm:py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center gap-3 ${
                activeTab === 'agenda' 
-               ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm' 
-               : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+               ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xl scale-[1.02] border border-indigo-100 dark:border-indigo-900/50' 
+               : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'
              }`}
            >
-             <CalendarIcon size={16} /> Agenda
+             <CalendarIcon size={18} /> Agenda
            </button>
            <button 
              onClick={() => setActiveTab('repertoire')}
-             className={`flex-1 py-3 rounded-md text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+             className={`flex-1 py-3 sm:py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center gap-3 ${
                activeTab === 'repertoire' 
-               ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-white shadow-sm' 
-               : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+               ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-white shadow-xl scale-[1.02] border border-pink-100 dark:border-pink-900/50' 
+               : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'
              }`}
            >
-             <Music2 size={16} /> Repertório
+             <Music2 size={18} /> Repertório
            </button>
         </div>
       </div>
 
       {/* --- CONTEÚDO DA AGENDA --- */}
       {activeTab === 'agenda' && (
-        <div className="animate-in fade-in slide-in-from-left-4 duration-500">
+        <div className="animate-in fade-in slide-in-from-left-6 duration-700 space-y-6 sm:space-y-10">
           
           {/* Navegador de Meses */}
-          <div className="flex items-center justify-between px-4 md:px-0 mb-6">
-            <h2 className="text-xl font-black text-slate-800 dark:text-white capitalize">
-               {MONTH_NAMES[viewDate.getMonth()]} <span className="text-slate-400 font-medium">{viewDate.getFullYear()}</span>
-            </h2>
-            <div className="flex gap-2">
-                <button onClick={() => changeMonth(-1)} className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                    <ChevronLeft size={20} />
+          <div className="flex items-center justify-between px-4 sm:px-0">
+            <div className="space-y-1">
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white capitalize tracking-tighter">
+                   {MONTH_NAMES[viewDate.getMonth()]}
+                </h2>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">{viewDate.getFullYear()}</p>
+            </div>
+            <div className="flex gap-3">
+                <button 
+                  onClick={() => changeMonth(-1)} 
+                  className="p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-90 transition-all"
+                >
+                    <ChevronLeft size={24} />
                 </button>
-                <button onClick={() => changeMonth(1)} className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                    <ChevronRight size={20} />
+                <button 
+                  onClick={() => changeMonth(1)} 
+                  className="p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-90 transition-all"
+                >
+                    <ChevronRight size={24} />
                 </button>
             </div>
           </div>
 
-          <div className="px-4 md:px-0">
+          <div className="px-4 sm:px-0">
              {filteredSchedule.length > 1 && (
-                <div className="md:hidden flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full w-fit mb-2 animate-pulse">
-                   Deslize para ver mais <ChevronRight size={12} />
+                <div className="md:hidden flex items-center gap-2 text-[10px] font-black text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-4 py-2 rounded-full w-fit mb-4 border border-indigo-100 dark:border-indigo-800/50 shadow-sm">
+                   <Sparkles size={12} className="animate-pulse" /> DESLIZE PARA VER MAIS <ChevronRight size={14} />
                 </div>
              )}
           </div>
 
           {filteredSchedule.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center mx-4 md:mx-0">
-              <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-full mb-4">
-                 <MapPin size={32} className="text-slate-400" />
+            <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 border-dashed border-slate-100 dark:border-slate-800 text-center mx-4 sm:mx-0 shadow-2xl shadow-slate-200/20">
+              <div className="p-8 bg-slate-50 dark:bg-slate-800 rounded-3xl mb-6 text-slate-200 dark:text-slate-700">
+                 <CalendarIcon size={64} strokeWidth={1} />
               </div>
-              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200">Sem escalas neste mês</h3>
-              <p className="text-sm text-slate-400 mt-1">Nenhum evento programado para {MONTH_NAMES[viewDate.getMonth()]}.</p>
+              <h3 className="text-xl font-black text-slate-800 dark:text-slate-200 tracking-tight">Sem escalas neste mês</h3>
+              <p className="text-sm font-medium text-slate-400 mt-2 max-w-[240px]">Nenhum evento programado para {MONTH_NAMES[viewDate.getMonth()]}.</p>
             </div>
           ) : (
-            <div className="flex flex-nowrap gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 -mx-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:pb-0 md:px-0 md:mx-0 md:overflow-visible no-scrollbar">
+            <div className="flex flex-nowrap gap-6 overflow-x-auto snap-x snap-mandatory px-4 pb-12 -mx-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8 md:pb-0 md:px-0 md:mx-0 md:overflow-visible no-scrollbar">
               {filteredSchedule.map((item, index) => {
                 const dateInfo = formatCardDate(item.date);
                 const isNext = index === nextEventIndex;
                 
                 return (
-                  <div key={item.id} className={`group relative flex flex-col shrink-0 snap-center w-[85vw] md:w-auto bg-white dark:bg-slate-900 rounded-xl border overflow-hidden transition-all duration-300 ${isNext ? 'border-indigo-500 ring-4 ring-indigo-50 dark:ring-indigo-900/20 shadow-xl shadow-indigo-500/10' : 'border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none'}`}>
+                  <div key={item.id} className={`group relative flex flex-col shrink-0 snap-center w-[88vw] sm:w-[420px] md:w-auto bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 transition-all duration-700 ${isNext ? 'border-indigo-500 shadow-2xl shadow-indigo-500/20 scale-[1.02]' : 'border-slate-50 dark:border-slate-800 hover:shadow-2xl hover:border-indigo-100 dark:hover:border-indigo-900/30'}`}>
                     {isNext && (
-                        <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest py-1.5 px-4 rounded-bl-xl z-10 flex items-center gap-1 shadow-sm">
-                            <Sparkles size={10} className="text-yellow-300" /> Próximo
+                        <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] py-2 px-6 rounded-bl-[2rem] z-10 flex items-center gap-2 shadow-xl shadow-indigo-500/30">
+                            <Sparkles size={12} className="text-yellow-300 animate-pulse" /> Próximo Culto
                         </div>
                     )}
 
                     {/* Cabeçalho do Card */}
-                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
-                      <div className="flex items-center gap-4">
-                        <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-lg shadow-sm border ${isNext ? 'bg-indigo-600 border-indigo-500' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}>
+                    <div className={`p-8 sm:p-10 flex items-center justify-between border-b-2 ${isNext ? 'bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30' : 'bg-slate-50/30 dark:bg-slate-800/20 border-slate-50 dark:border-slate-800'}`}>
+                      <div className="flex items-center gap-6">
+                        <div className={`flex flex-col items-center justify-center w-16 h-16 rounded-2xl shadow-xl border-2 transition-all group-hover:scale-110 duration-500 ${isNext ? 'bg-indigo-600 border-indigo-400' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}>
                           <span className={`text-[10px] font-black uppercase tracking-tighter ${isNext ? 'text-indigo-200' : 'text-indigo-500'}`}>{dateInfo.month}</span>
-                          <span className={`text-2xl font-black leading-none ${isNext ? 'text-white' : 'text-slate-800 dark:text-white'}`}>{dateInfo.day}</span>
+                          <span className={`text-3xl font-black leading-none ${isNext ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{dateInfo.day}</span>
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-800 dark:text-white capitalize">{dateInfo.weekday}</p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <Clock size={12} className="text-slate-400" />
-                            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{dateInfo.time}</p>
+                        <div className="space-y-1">
+                          <p className="text-xl font-black text-slate-900 dark:text-white capitalize leading-none tracking-tight">{dateInfo.weekday}</p>
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 shadow-inner">
+                                <Clock size={12} className="text-slate-500 dark:text-slate-400" />
+                            </div>
+                            <p className="text-sm font-black text-slate-500 dark:text-slate-400 tracking-tight">{dateInfo.time}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-6 space-y-6 flex-1 flex flex-col">
+                    <div className="p-8 sm:p-10 space-y-8 flex-1 flex flex-col">
                       {/* Instrumentistas */}
                       <div className="flex-1">
-                        <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                          <Music size={12} className="text-indigo-500" /> Instrumentistas
+                        <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
+                          <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shadow-sm">
+                            <Music size={12} className="text-indigo-500" />
+                          </div>
+                          Instrumentistas
                         </h4>
                         {item.musicians.length > 0 ? (
-                          <div className="space-y-3">
+                          <div className="grid grid-cols-1 gap-4">
                             {item.musicians.map(musician => (
-                              <div key={musician.id} className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-[10px] font-bold text-indigo-600 border border-indigo-100 dark:border-indigo-800/30 shrink-0 shadow-sm">
+                              <div key={musician.id} className="flex items-center gap-4 group/member">
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-xs font-black text-indigo-600 border-2 border-indigo-100 dark:border-indigo-800/30 shrink-0 shadow-xl shadow-indigo-500/5 overflow-hidden group-hover/member:scale-110 transition-all duration-500">
                                   {musician.photoUrl ? (
-                                    <img src={musician.photoUrl} alt="" className="w-full h-full rounded-full object-cover" />
+                                    <img src={musician.photoUrl} alt="" className="w-full h-full object-cover" />
                                   ) : getInitials(musician.name)}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{musician.name}</p>
-                                  <p className="text-[9px] font-semibold text-slate-400 uppercase truncate max-w-[150px]">{musician.instruments?.join(', ')}</p>
+                                  <p className="text-base font-black text-slate-800 dark:text-slate-100 truncate leading-tight tracking-tight">{musician.name}</p>
+                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase truncate tracking-widest mt-1">{musician.instruments?.join(' • ')}</p>
                                 </div>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="text-xs italic text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg text-center">Escala em definição</p>
+                          <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Escala em definição</p>
+                          </div>
                         )}
                       </div>
 
-                      <div className="h-px bg-slate-100 dark:bg-slate-800 w-full"></div>
+                      <div className="h-px bg-gradient-to-r from-transparent via-slate-100 dark:via-slate-800 to-transparent w-full"></div>
 
                       {/* Vocal com Destaque para Ministro */}
                       <div className="flex-1">
-                        <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                          <Mic size={12} className="text-purple-500" /> Equipe Vocal
+                        <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
+                          <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center shadow-sm">
+                            <Mic size={12} className="text-purple-500" />
+                          </div>
+                          Equipe Vocal
                         </h4>
                         {item.singers.length > 0 ? (
-                          <div className="space-y-3">
+                          <div className="grid grid-cols-1 gap-4">
                             {item.singers.map(singer => {
                                 const isLeader = singer.id === item.worshipLeaderId;
                                 return (
-                                  <div key={singer.id} className={`flex items-center gap-3 p-1.5 rounded-lg ${isLeader ? 'bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30' : ''}`}>
+                                  <div key={singer.id} className={`flex items-center gap-4 p-3 rounded-2xl transition-all duration-500 ${isLeader ? 'bg-amber-50/50 dark:bg-amber-900/10 border-2 border-amber-100 dark:border-amber-900/30 shadow-xl shadow-amber-500/5' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
                                     <div className="relative shrink-0">
-                                        <div className={`w-9 h-9 rounded-full ${isLeader ? 'bg-amber-500' : 'bg-purple-50 dark:bg-purple-900/20'} flex items-center justify-center text-[10px] font-bold ${isLeader ? 'text-white' : 'text-purple-600'} border ${isLeader ? 'border-amber-400' : 'border-purple-100 dark:border-purple-800/30'} shadow-sm`}>
+                                        <div className={`w-12 h-12 rounded-2xl ${isLeader ? 'bg-amber-500' : 'bg-purple-50 dark:bg-purple-900/20'} flex items-center justify-center text-xs font-black ${isLeader ? 'text-white' : 'text-purple-600'} border-2 ${isLeader ? 'border-amber-400' : 'border-purple-100 dark:border-purple-800/30'} shadow-xl overflow-hidden transition-transform duration-500 group-hover:scale-110`}>
                                             {singer.photoUrl ? (
-                                                <img src={singer.photoUrl} alt="" className="w-full h-full rounded-full object-cover" />
+                                                <img src={singer.photoUrl} alt="" className="w-full h-full object-cover" />
                                             ) : getInitials(singer.name)}
                                         </div>
                                         {isLeader && (
-                                            <div className="absolute -top-1.5 -right-1.5 bg-amber-400 text-white rounded-full p-0.5 border-2 border-white dark:border-slate-900 shadow-sm" title="Ministro de Louvor">
-                                                <Crown size={8} fill="currentColor" />
+                                            <div className="absolute -top-2 -right-2 bg-amber-400 text-white rounded-xl p-1.5 border-2 border-white dark:border-slate-900 shadow-xl animate-bounce" title="Ministro de Louvor">
+                                                <Crown size={12} fill="currentColor" />
                                             </div>
                                         )}
                                     </div>
                                     <div className="min-w-0">
-                                      <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate flex items-center gap-1">
+                                      <p className="text-base font-black text-slate-800 dark:text-slate-100 truncate leading-tight tracking-tight">
                                           {singer.name}
                                       </p>
-                                      {isLeader && <p className="text-[8px] font-black uppercase text-amber-500 tracking-wider">Ministro</p>}
+                                      {isLeader && <p className="text-[9px] font-black uppercase text-amber-600 dark:text-amber-400 tracking-[0.2em] mt-1.5">Ministro de Louvor</p>}
                                     </div>
                                   </div>
                                 );
                             })}
                           </div>
                         ) : (
-                          <p className="text-xs italic text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg text-center">Escala em definição</p>
+                          <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Escala em definição</p>
+                          </div>
                         )}
 
                         {item.backupSinger && (
-                           <div className="mt-3 pt-3 border-t border-slate-50 dark:border-slate-800/50 flex items-center gap-2">
-                                <div className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-400">
-                                    <Shield size={10} />
+                           <div className="mt-6 pt-6 border-t-2 border-slate-50 dark:border-slate-800 flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-300 flex items-center justify-center shadow-inner border border-slate-100 dark:border-slate-700">
+                                    <Shield size={18} />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Reserva</p>
-                                    <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 truncate">{item.backupSinger.name}</p>
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1.5">Reserva Vocal</p>
+                                    <p className="text-sm font-black text-slate-600 dark:text-slate-300 truncate tracking-tight">{item.backupSinger.name}</p>
                                 </div>
                            </div>
                         )}
@@ -377,90 +399,86 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
 
                       {/* Louvores (Com Thumbnails Pequenas e Key) */}
                       {item.songs && item.songs.length > 0 && (
-                          <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <div>
-                                <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                                    <Music2 size={12} className="text-pink-500" /> Louvores
+                          <div className="mt-auto pt-8 border-t-2 border-slate-50 dark:border-slate-800">
+                            <div className="space-y-5">
+                                <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                                    <div className="w-6 h-6 rounded-lg bg-pink-50 dark:bg-pink-900/30 flex items-center justify-center shadow-sm">
+                                        <Music2 size={12} className="text-pink-500" />
+                                    </div>
+                                    Repertório do Culto
                                 </h4>
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                   {item.songs.map((songId, sIndex) => {
                                     const song = songs.find(s => s.id === songId);
                                     if (!song) return null;
                                     
-                                    // ENCONTRA O CANTOR ESPECÍFICO DESSA MÚSICA
                                     const songSinger = members.find(m => m.id === song.singerId);
-
                                     const Wrapper = (song.youtubeLink || song.lyricsLink) ? 'a' : 'div';
                                     const props = (song.youtubeLink || song.lyricsLink)
                                       ? { 
                                           href: song.youtubeLink || song.lyricsLink, 
                                           target: "_blank", 
-                                          rel: "noopener noreferrer",
-                                          title: "Ouvir Música"
+                                          rel: "noopener noreferrer"
                                         }
                                       : {};
                                     
                                     const videoId = getYoutubeId(song.youtubeLink || '');
-                                    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/default.jpg` : null;
 
                                     return (
                                       <Wrapper
                                         key={songId}
                                         {...props}
-                                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all group/song relative
-                                            bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700
+                                        className={`flex items-center gap-4 p-3 rounded-2xl border-2 transition-all duration-500 group/song relative
+                                            bg-white dark:bg-slate-800 border-slate-50 dark:border-slate-700
                                             ${(song.youtubeLink || song.lyricsLink) 
-                                                ? 'hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-md cursor-pointer' 
+                                                ? 'hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 cursor-pointer active:scale-[0.98]' 
                                                 : ''
                                             }
                                         `}
                                       >
                                         {/* Numbering */}
-                                        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center bg-pink-500 text-white font-black rounded text-[10px] shadow-sm">
+                                        <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-600 text-white font-black rounded-xl text-xs shadow-xl shadow-pink-500/30 ring-4 ring-white dark:ring-slate-800 z-10">
                                             {sIndex + 1}
                                         </div>
 
-                                        {/* Pequena Thumbnail no card da agenda */}
                                         <SongThumb 
                                             videoId={videoId} 
                                             title={song.title} 
-                                            size="shrink-0 w-11 h-11" 
-                                            iconSize={16} 
+                                            size="shrink-0 w-16 h-16 rounded-xl" 
+                                            iconSize={20} 
                                         />
 
                                         <div className="min-w-0 flex-1 flex flex-col justify-center">
-                                            <div className="flex justify-between items-start w-full gap-2">
+                                            <div className="flex justify-between items-start w-full gap-3">
                                                 <div className="min-w-0 flex-1">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-400 transition-colors">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-base font-black text-slate-900 dark:text-slate-100 truncate group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-400 transition-colors leading-tight tracking-tight">
                                                             {song.title}
                                                         </p>
-                                                        {(song.youtubeLink || song.lyricsLink) && <ExternalLink size={10} className="text-slate-400 group-hover/song:text-indigo-500 shrink-0" />}
+                                                        {(song.youtubeLink || song.lyricsLink) && <ExternalLink size={14} className="text-slate-200 group-hover/song:text-indigo-500 shrink-0 transition-colors" />}
                                                     </div>
-                                                    <p className="text-[10px] font-medium text-slate-400 truncate leading-tight">{song.artist}</p>
+                                                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 truncate mt-1.5 uppercase tracking-widest">{song.artist}</p>
                                                 </div>
                                                 
-                                                {/* Key Badge Destacado */}
                                                 {song.key && (
-                                                    <div className="shrink-0 flex items-center justify-center px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] font-black text-slate-600 dark:text-slate-300 group-hover/song:bg-pink-500 dark:group-hover/song:bg-pink-600 group-hover/song:text-white group-hover/song:border-pink-400 transition-colors shadow-sm min-w-[24px]">
+                                                    <div className="shrink-0 flex items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-700 border-2 border-slate-100 dark:border-slate-600 text-[10px] font-black text-slate-600 dark:text-slate-300 group-hover/song:bg-pink-500 group-hover/song:text-white group-hover/song:border-pink-400 transition-all shadow-xl shadow-slate-200/10 min-w-[32px]">
                                                         {song.key}
                                                     </div>
                                                 )}
                                             </div>
 
-                                            {/* MOSTRA O CANTOR DA MÚSICA SE EXISTIR */}
                                             {songSinger && (
-                                                <div className="flex items-center gap-1.5 mt-1.5" title={`Cantor: ${songSinger.name}`}>
-                                                    <div className="w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600">
+                                                <div className="flex items-center gap-2.5 mt-3">
+                                                    <div className="w-6 h-6 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden shrink-0 border-2 border-white dark:border-slate-600 shadow-xl">
                                                         {songSinger.photoUrl ? (
                                                             <img src={songSinger.photoUrl} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-[6px] font-bold text-slate-500">
+                                                            <div className="w-full h-full flex items-center justify-center text-[8px] font-black text-slate-500">
                                                                 {getInitials(songSinger.name)}
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 truncate max-w-[120px]">
+                                                    <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 truncate max-w-[160px] uppercase tracking-tight">
                                                         {songSinger.name.split(' ')[0]}
                                                     </span>
                                                 </div>
@@ -484,52 +502,59 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
 
       {/* --- CONTEÚDO DO REPERTÓRIO (Visual de Cards Ricos) --- */}
       {activeTab === 'repertoire' && (
-        <div className="px-4 md:px-0 animate-in fade-in slide-in-from-right-4 duration-500">
+        <div className="px-4 sm:px-0 animate-in fade-in slide-in-from-right-4 duration-500 space-y-4 sm:space-y-6">
              
              {/* Search Bar */}
-             <div className="relative mb-6">
-                <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
+             <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Search className="text-slate-400 group-focus-within:text-pink-500 transition-colors" size={20} />
+                </div>
                 <input 
                     type="text" 
                     placeholder="Pesquisar música ou artista..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium focus:ring-2 focus:ring-pink-500/20 outline-none transition-all shadow-sm text-slate-800 dark:text-white"
+                    className="w-full pl-12 pr-4 py-3.5 sm:py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all shadow-sm text-slate-800 dark:text-white placeholder:text-slate-400"
                 />
              </div>
 
             {/* VISUALIZAÇÃO DE PASTAS DE CANTORES */}
             {!isSearching && !selectedSingerFilter ? (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-4">
-                        <Folder size={14} /> Pastas por Cantor
-                    </h4>
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <Folder size={14} className="text-pink-500" /> Pastas por Cantor
+                        </h4>
+                    </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
                          <button 
                             onClick={() => setSelectedSingerFilter('all')}
-                            className="flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-indigo-600 dark:to-indigo-800 rounded-xl shadow-lg shadow-indigo-500/20 hover:scale-[1.02] transition-all group"
+                            className="flex flex-col items-center justify-center gap-4 p-6 sm:p-8 bg-gradient-to-br from-indigo-500 to-indigo-700 dark:from-indigo-600 dark:to-indigo-900 rounded-2xl shadow-xl shadow-indigo-500/20 hover:scale-[1.03] active:scale-95 transition-all group relative overflow-hidden"
                         >
-                            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white">
-                                <ListMusic size={24} />
+                            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:rotate-12 transition-transform">
+                                <Music2 size={80} />
                             </div>
-                            <div className="text-center">
-                                <p className="font-bold text-white text-sm">Todas as Músicas</p>
-                                <p className="text-xs text-indigo-100 mt-1">{songs.length} músicas</p>
+                            <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-lg">
+                                <ListMusic size={28} />
+                            </div>
+                            <div className="text-center relative z-10">
+                                <p className="font-black text-white text-sm sm:text-base leading-tight">Todas as Músicas</p>
+                                <p className="text-[10px] font-bold text-indigo-100/80 mt-1.5 uppercase tracking-widest">{songs.length} músicas</p>
                             </div>
                         </button>
 
                         {uncategorizedCount > 0 && (
                             <button 
                                 onClick={() => setSelectedSingerFilter('uncategorized')}
-                                className="flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-lg hover:shadow-pink-500/10 transition-all group"
+                                className="flex flex-col items-center justify-center gap-4 p-6 sm:p-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-2xl hover:shadow-pink-500/10 active:scale-95 transition-all group"
                             >
-                                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-pink-50 dark:group-hover:bg-pink-900/20 group-hover:text-pink-500 transition-colors">
-                                    <Music size={24} />
+                                <div className="w-14 h-14 bg-slate-50 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-pink-50 dark:group-hover:bg-pink-900/20 group-hover:text-pink-500 transition-all shadow-inner">
+                                    <Music size={28} />
                                 </div>
                                 <div className="text-center">
-                                    <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">Geral / Outros</p>
-                                    <p className="text-xs text-slate-400 mt-1">{uncategorizedCount} músicas</p>
+                                    <p className="font-black text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-tight">Geral / Outros</p>
+                                    <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-widest">{uncategorizedCount} músicas</p>
                                 </div>
                             </button>
                         )}
@@ -538,46 +563,52 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             <button 
                                 key={singer.id}
                                 onClick={() => setSelectedSingerFilter(singer.id)}
-                                className="flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-lg hover:shadow-pink-500/10 transition-all group"
+                                className="flex flex-col items-center justify-center gap-4 p-6 sm:p-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-2xl hover:shadow-pink-500/10 active:scale-95 transition-all group"
                             >
-                                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-pink-500 transition-all">
+                                <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-pink-500 transition-all shadow-md group-hover:scale-110">
                                     {singer.photoUrl ? (
                                         <img src={singer.photoUrl} alt="" className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 text-xs font-bold">
+                                        <div className="w-full h-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 text-sm font-black">
                                             {getInitials(singer.name)}
                                         </div>
                                     )}
                                 </div>
                                 <div className="text-center">
-                                    <p className="font-bold text-slate-700 dark:text-slate-200 text-sm truncate max-w-[120px]">{singer.name}</p>
-                                    <p className="text-xs text-slate-400 mt-1">{groupedSongs[singer.id]} músicas</p>
+                                    <p className="font-black text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-tight truncate max-w-[120px]">{singer.name}</p>
+                                    <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-widest">{groupedSongs[singer.id]} músicas</p>
                                 </div>
                             </button>
                         ))}
                     </div>
                 </div>
             ) : (
-                <>
+                <div className="space-y-6">
                     {!isSearching && selectedSingerFilter && (
-                            <div className="flex items-center gap-4 mb-6 animate-in slide-in-from-left-2">
-                            <button onClick={() => setSelectedSingerFilter(null)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-300">
-                                <ChevronLeft size={20} />
-                            </button>
-                            <div>
-                                <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                    {getFilterTitle()}
-                                </h3>
-                                <p className="text-xs text-slate-400">Exibindo {filteredSongs.length} músicas</p>
-                            </div>
+                            <div className="flex items-center gap-4 animate-in slide-in-from-left-4 duration-500">
+                                <button 
+                                    onClick={() => setSelectedSingerFilter(null)} 
+                                    className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-90 transition-all text-slate-500 dark:text-slate-300 shadow-sm"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+                                <div>
+                                    <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2 leading-tight">
+                                        {getFilterTitle()}
+                                    </h3>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Exibindo {filteredSongs.length} músicas</p>
+                                </div>
                             </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                         {filteredSongs.length === 0 ? (
-                            <div className="col-span-full py-16 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                                <Music2 className="mx-auto mb-2 opacity-20" size={48} />
-                                <p className="text-sm font-medium">Nenhuma música encontrada.</p>
+                            <div className="col-span-full py-20 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/50 shadow-inner">
+                                <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Music2 className="opacity-20" size={32} />
+                                </div>
+                                <p className="text-sm font-bold">Nenhuma música encontrada.</p>
+                                <p className="text-xs mt-1">Tente outro termo de busca.</p>
                             </div>
                         ) : (
                             filteredSongs.map((song, index) => {
@@ -588,7 +619,7 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
                             })
                         )}
                     </div>
-                </>
+                </div>
             )}
         </div>
       )}

@@ -52,30 +52,30 @@ const MemberCard: React.FC<{ member: Member; onRemove: (id: string) => void; onE
   const isSuspended = member.isSuspended;
   
   return (
-    <div className={`group relative flex items-center gap-4 p-4 bg-white dark:bg-slate-900/60 backdrop-blur-sm rounded-lg border transition-all duration-300 hover:shadow-lg ${isSuspended ? 'border-red-200 dark:border-red-900/30 bg-red-50/50' : 'border-white/50 dark:border-slate-700/50 hover:border-indigo-200 dark:hover:border-indigo-900'}`}>
+    <div className={`group relative flex items-center gap-4 p-4 bg-white dark:bg-slate-900/60 backdrop-blur-sm rounded-2xl border transition-all duration-500 hover:shadow-xl ${isSuspended ? 'border-red-200 dark:border-red-900/30 bg-red-50/30' : 'border-slate-100 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500'}`}>
        
        {/* Avatar */}
        <div className="relative flex-shrink-0">
-          <div className={`w-14 h-14 rounded-lg flex items-center justify-center text-sm font-black shadow-md overflow-hidden ${isSuspended ? 'grayscale opacity-70' : ''}`}>
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-sm font-black shadow-lg overflow-hidden border-2 ${isSuspended ? 'grayscale opacity-60 border-red-200 dark:border-red-900/50' : 'border-white dark:border-slate-800 group-hover:border-indigo-500 transition-colors'}`}>
               {member.photoUrl ? (
-                 <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
+                 <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               ) : (
-                 <div className={`w-full h-full flex items-center justify-center text-white ${isMusician ? 'bg-gradient-to-br from-indigo-500 to-blue-500' : 'bg-gradient-to-br from-purple-500 to-pink-500'}`}>
+                 <div className={`w-full h-full flex items-center justify-center text-white ${isMusician ? 'bg-gradient-to-br from-indigo-500 to-blue-600' : 'bg-gradient-to-br from-purple-500 to-pink-600'}`}>
                     {getInitials(member.name)}
                  </div>
               )}
           </div>
           
           {/* Status Badges */}
-          <div className="absolute -top-2 -right-2 flex gap-1">
+          <div className="absolute -top-2 -right-2 flex flex-col gap-1">
               {member.onlyWeekends && !isSuspended && (
-                  <div className="bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400 p-1 rounded-full shadow-sm" title="Apenas FDS">
-                      <CalendarClock size={10} />
+                  <div className="bg-amber-400 text-white p-1.5 rounded-lg shadow-lg border-2 border-white dark:border-slate-900 animate-pulse" title="Apenas FDS">
+                      <CalendarClock size={12} />
                   </div>
               )}
               {isSuspended && (
-                  <div className="bg-red-500 text-white p-1 rounded-full shadow-sm" title="Suspenso">
-                      <UserX size={10} />
+                  <div className="bg-red-500 text-white p-1.5 rounded-lg shadow-lg border-2 border-white dark:border-slate-900" title="Suspenso">
+                      <UserX size={12} />
                   </div>
               )}
           </div>
@@ -83,31 +83,39 @@ const MemberCard: React.FC<{ member: Member; onRemove: (id: string) => void; onE
 
        {/* Info */}
        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <p className={`font-bold truncate text-base ${isSuspended ? 'text-slate-500 line-through' : 'text-slate-800 dark:text-slate-100'}`}>{member.name}</p>
+          <div className="flex items-center gap-2 mb-1.5">
+            <p className={`font-black truncate text-base sm:text-lg leading-tight ${isSuspended ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-slate-100'}`}>{member.name}</p>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
              {isMusician ? (
                  member.instruments?.map(inst => (
-                     <span key={inst} className={`inline-flex items-center gap-1 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md ${isSuspended ? 'text-slate-400 bg-slate-100' : 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30'}`}>
+                     <span key={inst} className={`inline-flex items-center gap-1.5 text-[10px] uppercase font-black px-2.5 py-1 rounded-lg shadow-sm border transition-colors ${isSuspended ? 'text-slate-400 bg-slate-100 border-slate-200' : 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 border-indigo-100 dark:border-indigo-800/50 group-hover:bg-indigo-500 group-hover:text-white group-hover:border-indigo-400'}`}>
                          {getInstrumentIcon(inst)} {inst}
                      </span>
                  ))
              ) : (
-                <span className={`inline-flex items-center gap-1 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md ${isSuspended ? 'text-slate-400 bg-slate-100' : 'text-purple-600 bg-purple-50 dark:bg-purple-900/30'}`}>
-                    <Mic size={10} /> Vocal
+                <span className={`inline-flex items-center gap-1.5 text-[10px] uppercase font-black px-2.5 py-1 rounded-lg shadow-sm border transition-colors ${isSuspended ? 'text-slate-400 bg-slate-100 border-slate-200' : 'text-purple-600 bg-purple-50 dark:bg-purple-900/30 border-purple-100 dark:border-purple-800/50 group-hover:bg-purple-500 group-hover:text-white group-hover:border-purple-400'}`}>
+                    <Mic size={12} /> Vocal
                 </span>
              )}
           </div>
        </div>
 
-       {/* Actions (Visible on Hover) */}
-       <div className="flex flex-col gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-          <button onClick={() => onEdit(member)} className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-indigo-600 rounded-lg transition-colors shadow-sm">
-             <Edit2 size={14} />
+       {/* Actions */}
+       <div className="flex flex-col gap-2 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+          <button 
+            onClick={() => onEdit(member)} 
+            className="p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 rounded-xl transition-all shadow-sm active:scale-90 border border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-800"
+            title="Editar"
+          >
+             <Edit2 size={16} />
           </button>
-          <button onClick={() => onRemove(member.id)} className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-red-500 rounded-lg transition-colors shadow-sm">
-             <Trash2 size={14} />
+          <button 
+            onClick={() => onRemove(member.id)} 
+            className="p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50 rounded-xl transition-all shadow-sm active:scale-90 border border-slate-100 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-800"
+            title="Remover"
+          >
+             <Trash2 size={16} />
           </button>
        </div>
     </div>
@@ -116,15 +124,18 @@ const MemberCard: React.FC<{ member: Member; onRemove: (id: string) => void; onE
 
 const MemberList: React.FC<MemberListProps> = ({ members, onRemove, onEdit }) => {
   if (members.length === 0) return (
-    <div className="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-       <p className="text-sm font-medium">Sua equipe está vazia.</p>
-       <p className="text-xs mt-1">Adicione músicos ou cantores.</p>
+    <div className="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30">
+       <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm mb-4">
+          <UserX size={32} className="text-slate-300" />
+       </div>
+       <p className="text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">Sua equipe está vazia</p>
+       <p className="text-xs mt-1 font-medium">Adicione músicos ou cantores para começar.</p>
     </div>
   );
 
   return (
     <div className="p-1">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {members.map((member) => (
           <MemberCard key={member.id} member={member} onRemove={onRemove} onEdit={onEdit} />
         ))}

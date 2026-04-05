@@ -150,73 +150,81 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange }) => {
       <div 
         onClick={() => setIsOpen(!isOpen)}
         className={`
-            w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-0 rounded-md 
-            flex items-center justify-between cursor-pointer transition-all
-            ${isOpen ? 'ring-2 ring-indigo-500/20 bg-white dark:bg-slate-700' : 'hover:bg-slate-100 dark:hover:bg-slate-700/80'}
+            relative w-full pl-12 pr-5 py-4 bg-white dark:bg-slate-900/60 border-2 rounded-2xl 
+            flex items-center justify-between cursor-pointer transition-all duration-500 group
+            ${isOpen ? 'border-indigo-500 shadow-2xl shadow-indigo-500/10 scale-[1.02]' : 'border-slate-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-900 hover:shadow-xl'}
         `}
       >
-        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <CalendarIcon size={18} className={`${isOpen ? 'text-indigo-500' : 'text-slate-400'}`} />
+        <div className={`absolute inset-y-0 left-4 flex items-center pointer-events-none transition-colors duration-500 ${isOpen ? 'text-indigo-500' : 'text-slate-400 group-hover:text-indigo-400'}`}>
+            <CalendarIcon size={20} />
         </div>
         
-        <span className={`font-medium ${value ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400'}`}>
+        <span className={`text-sm font-black tracking-tight transition-colors duration-500 ${value ? 'text-slate-800 dark:text-slate-100' : 'text-slate-400'}`}>
             {value ? formatDisplayValue() : 'Selecione data e hora...'}
         </span>
 
-        <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <div className={`p-1.5 rounded-lg transition-all duration-500 ${isOpen ? 'bg-indigo-500 text-white rotate-180 shadow-lg shadow-indigo-500/30' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 group-hover:text-indigo-500 group-hover:bg-indigo-50'}`}>
+            <ChevronDown size={14} />
+        </div>
       </div>
 
       {/* Dropdown Popover */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-[300px] bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute top-full left-0 mt-3 w-full sm:w-[320px] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-6 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-500 backdrop-blur-xl">
           
           {/* Header Month/Year */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <button 
-                onClick={() => changeMonth(-1)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-500 dark:text-slate-400 transition-colors"
+                onClick={(e) => { e.stopPropagation(); changeMonth(-1); }}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-500 dark:text-slate-400 transition-all active:scale-90"
             >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={20} />
             </button>
-            <span className="text-sm font-bold text-slate-800 dark:text-white capitalize">
+            <span className="text-base font-black text-slate-800 dark:text-white capitalize tracking-tight">
                 {MONTH_NAMES[viewDate.getMonth()]} {viewDate.getFullYear()}
             </span>
             <button 
-                onClick={() => changeMonth(1)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-500 dark:text-slate-400 transition-colors"
+                onClick={(e) => { e.stopPropagation(); changeMonth(1); }}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-500 dark:text-slate-400 transition-all active:scale-90"
             >
-                <ChevronRight size={18} />
+                <ChevronRight size={20} />
             </button>
           </div>
 
           {/* Week Days Header */}
-          <div className="grid grid-cols-7 mb-2">
+          <div className="grid grid-cols-7 mb-4">
             {WEEK_DAYS.map((day, i) => (
-                <div key={i} className="h-8 w-8 flex items-center justify-center text-xs font-bold text-slate-400">
+                <div key={i} className="h-10 w-10 flex items-center justify-center text-[10px] font-black text-slate-300 uppercase tracking-widest">
                     {day}
                 </div>
             ))}
           </div>
 
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-y-1 mb-4">
-            {renderCalendarGrid()}
+          <div className="grid grid-cols-7 gap-1 mb-6">
+            {renderCalendarGrid().map((day, i) => (
+                <div key={i} className="flex items-center justify-center">
+                    {day}
+                </div>
+            ))}
           </div>
 
-          <div className="h-px bg-slate-100 dark:bg-slate-800 w-full mb-4"></div>
+          <div className="h-px bg-slate-100 dark:bg-slate-800 w-full mb-6"></div>
 
           {/* Time Selector Styled */}
-          <div className="flex items-center justify-between pt-1">
-             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                 <Clock size={16} />
-                 <span className="text-xs font-semibold uppercase tracking-wide">Horário</span>
+          <div className="flex items-center justify-between">
+             <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                 <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                    <Clock size={18} />
+                 </div>
+                 <span className="text-xs font-black uppercase tracking-[0.2em]">Horário</span>
              </div>
              <div className="relative group">
                  <input
                     type="time"
                     value={timeValue}
                     onChange={handleTimeChange}
-                    className="appearance-none bg-slate-900 dark:bg-slate-800 text-white font-bold text-lg px-4 py-2 rounded-lg border-none focus:ring-2 focus:ring-indigo-500/50 outline-none cursor-pointer text-center w-32 tracking-wider transition-transform active:scale-95 shadow-sm"
+                    className="appearance-none bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-xl px-5 py-3 rounded-2xl border-none focus:ring-4 focus:ring-indigo-500/20 outline-none cursor-pointer text-center w-36 tracking-tighter transition-all active:scale-95 shadow-xl shadow-slate-900/10"
                  />
              </div>
           </div>
