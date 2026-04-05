@@ -238,7 +238,9 @@ const App: React.FC = () => {
       attendance_record: attendanceRecord,
       // NOVOS CAMPOS
       worship_leader_id: updatedItem.worshipLeaderId || null,
-      backup_singer_id: updatedItem.backupSinger?.id || null
+      backup_singer_id: updatedItem.backupSinger?.id || null,
+      is_special: updatedItem.isSpecial || false,
+      special_name: updatedItem.specialName || null
     };
 
     try {
@@ -256,6 +258,8 @@ const App: React.FC = () => {
       const fallbackPayload = { ...dbPayload };
       delete fallbackPayload.worship_leader_id;
       delete fallbackPayload.backup_singer_id;
+      delete fallbackPayload.is_special;
+      delete fallbackPayload.special_name;
       
       try {
            const { error: retryError } = await supabase.from('schedules').update(fallbackPayload).eq('id', updatedItem.id);
@@ -318,7 +322,17 @@ const App: React.FC = () => {
       }));
 
       const { error } = await supabase.from('schedules').insert(dbData);
-      if (error) throw error;
+      
+      if (error) {
+          // Tenta fallback sem as colunas novas
+          console.warn("Falha ao inserir com colunas novas, tentando fallback...", error.message);
+          const fallbackData = dbData.map(item => {
+              const { is_special, special_name, worship_leader_id, backup_singer_id, ...rest } = item;
+              return rest;
+          });
+          const { error: retryError } = await supabase.from('schedules').insert(fallbackData);
+          if (retryError) throw retryError;
+      }
       
       setSelectedDates([]);
       alert(`${newScheduleItems.length} novos cultos gerados com sucesso!`);
