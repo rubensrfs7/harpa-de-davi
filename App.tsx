@@ -45,11 +45,13 @@ const App: React.FC = () => {
   const [view, setView] = useState<View>('scheduler');
   
   const [members, setMembers] = useState<Member[]>([]);
-  const [selectedDates, setSelectedDates] = useState<string[]>([]); // Apenas para NOVAS datas (Staging)
+  const [selectedDates, setSelectedDates] = useState<{ date: string, isSpecial: boolean, specialName: string }[]>([]); // Apenas para NOVAS datas (Staging)
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [substitutionLogs, setSubstitutionLogs] = useState<SubstitutionLog[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
   const [newDateInput, setNewDateInput] = useState('');
+  const [isSpecialEvent, setIsSpecialEvent] = useState(false);
+  const [specialEventName, setSpecialEventName] = useState('');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -129,7 +131,9 @@ const App: React.FC = () => {
                 worshipLeaderId: item.worship_leader_id,
                 backupSinger: item.backup_singer_id ? membersRes.data.find(m => m.id === item.backup_singer_id) : undefined,
                 songs: cleanSongs,
-                attendance: item.attendance_record || undefined
+                attendance: item.attendance_record || undefined,
+                isSpecial: item.is_special,
+                specialName: item.special_name
              };
           });
 
@@ -276,8 +280,8 @@ const App: React.FC = () => {
     // --- CORREÇÃO DE DUPLICIDADE ---
     const existingTimestamps = new Set(schedule.map(s => new Date(s.date).getTime()));
     
-    const uniqueDatesToGenerate = selectedDates.filter(dateStr => {
-        const timestamp = new Date(dateStr).getTime();
+    const uniqueDatesToGenerate = selectedDates.filter(item => {
+        const timestamp = new Date(item.date).getTime();
         return !existingTimestamps.has(timestamp);
     });
 
@@ -308,7 +312,9 @@ const App: React.FC = () => {
         worship_leader_id: item.worshipLeaderId || null,
         backup_singer_id: item.backupSinger?.id || null,
         song_ids: [],
-        attendance_record: {}
+        attendance_record: {},
+        is_special: item.isSpecial || false,
+        special_name: item.specialName || null
       }));
 
       const { error } = await supabase.from('schedules').insert(dbData);
@@ -318,7 +324,7 @@ const App: React.FC = () => {
       alert(`${newScheduleItems.length} novos cultos gerados com sucesso!`);
 
     } catch (err: any) {
-        alert(`Erro ao salvar escala (Verifique se as colunas worship_leader_id e backup_singer_id existem no banco): ${formatError(err)}`);
+        alert(`Erro ao salvar escala: ${formatError(err)}`);
     } finally {
       setIsSyncing(false);
     }
@@ -579,10 +585,47 @@ const App: React.FC = () => {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Adicionar Novo Culto</label>
                   </div>
                   <DateTimePicker value={newDateInput} onChange={setNewDateInput} />
+                  
+                  <div className="flex flex-col sm:flex-row gap-4 mt-4 p-4 bg-slate-50/50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => setIsSpecialEvent(!isSpecialEvent)}
+                        className={`w-12 h-6 rounded-full transition-all relative ${isSpecialEvent ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isSpecialEvent ? 'left-7' : 'left-1'}`}></div>
+                      </button>
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Evento Especial (Sem Escala)</span>
+                    </div>
+                    {isSpecialEvent && (
+                      <input 
+                        type="text" 
+                        placeholder="Nome do Evento (Ex: Congresso, Santa Ceia)" 
+                        value={specialEventName}
+                        onChange={(e) => setSpecialEventName(e.target.value)}
+                        className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="flex gap-4 w-full md:w-auto">
                     <button 
-                      onClick={() => { if (newDateInput) { setSelectedDates(prev => [...new Set([...prev, newDateInput])].sort()); setNewDateInput(''); } }} 
+                      onClick={() => { 
+                        if (newDateInput) { 
+                          const newItem = { 
+                            date: newDateInput, 
+                            isSpecial: isSpecialEvent, 
+                            specialName: isSpecialEvent ? specialEventName : '' 
+                          };
+                          setSelectedDates(prev => {
+                            const exists = prev.some(d => d.date === newDateInput);
+                            if (exists) return prev;
+                            return [...prev, newItem].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                          }); 
+                          setNewDateInput(''); 
+                          setIsSpecialEvent(false);
+                          setSpecialEventName('');
+                        } 
+                      }} 
                       className="flex-1 md:flex-none h-[60px] px-10 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-500/30 active:scale-95 group"
                     >
                       <CalendarIcon size={20} className="group-hover:scale-110 transition-transform" /> Agendar
@@ -611,17 +654,19 @@ const App: React.FC = () => {
                      </button>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    {selectedDates.map(dateStr => {
-                      const dateObj = new Date(dateStr);
+                    {selectedDates.map(item => {
+                      const dateObj = new Date(item.date);
                       return (
-                        <span key={dateStr} className="group inline-flex items-center gap-4 pl-5 pr-3 py-3 bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-2xl text-sm font-black border border-indigo-100 dark:border-indigo-800/50 shadow-sm hover:shadow-md transition-all">
+                        <span key={item.date} className={`group inline-flex items-center gap-4 pl-5 pr-3 py-3 rounded-2xl text-sm font-black border shadow-sm hover:shadow-md transition-all ${item.isSpecial ? 'bg-amber-50/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800/50' : 'bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-800/50'}`}>
                           <div className="flex flex-col">
                             <span className="leading-none">{dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</span>
-                            <span className="text-[9px] opacity-60 mt-1 uppercase tracking-tighter">{dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span className="text-[9px] opacity-60 mt-1 uppercase tracking-tighter">
+                              {item.isSpecial ? (item.specialName || 'Especial') : dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
                           </div>
                           <button
-                            onClick={() => setSelectedDates(prev => prev.filter(d => d !== dateStr))}
-                            className="p-2 bg-white dark:bg-slate-800 rounded-xl transition-all text-indigo-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 shadow-sm"
+                            onClick={() => setSelectedDates(prev => prev.filter(d => d.date !== item.date))}
+                            className={`p-2 rounded-xl transition-all shadow-sm ${item.isSpecial ? 'bg-white dark:bg-slate-800 text-amber-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30' : 'bg-white dark:bg-slate-800 text-indigo-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30'}`}
                           >
                             <Trash2 size={16} />
                           </button>

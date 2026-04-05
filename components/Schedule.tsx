@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle, ChevronLeft, ChevronRight, X, Eye, ExternalLink, ChevronDown, Check, Search, Plus, Crown, UserPlus, Shield, Youtube, FileText } from 'lucide-react';
+import { Music, Mic, Trash2, CalendarDays, Clock, Share2, Edit3, Save, Music2, AlertCircle, ChevronLeft, ChevronRight, X, Eye, ExternalLink, ChevronDown, Check, Search, Plus, Crown, UserPlus, Shield, Youtube, FileText, Sparkles } from 'lucide-react';
 import { ScheduleItem, Member, Song } from '../types';
 
 interface ScheduleProps {
@@ -342,46 +342,51 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
     text += `${eCal} *Data:* ${dateInfo.weekday}, ${dateInfo.day} de ${dateInfo.month}\n`;
     text += `${eClock} *Horário:* ${dateInfo.time}\n\n`;
 
-    text += `*${ePiano} EQUIPE DE MÚSICA:*\n`;
-    if (item.musicians.length > 0) {
-      item.musicians.forEach(m => {
-        text += `• ${m.name} (${m.instruments?.join(', ') || 'Instrumentista'})\n`;
-      });
-    } else { text += `_Nenhum músico definido_\n`; }
-    text += `\n`;
+    if (item.isSpecial) {
+        text += `*${item.specialName || 'EVENTO ESPECIAL'}*\n`;
+        text += `_Participação de toda a igreja_\n`;
+    } else {
+        text += `*${ePiano} EQUIPE DE MÚSICA:*\n`;
+        if (item.musicians.length > 0) {
+          item.musicians.forEach(m => {
+            text += `• ${m.name} (${m.instruments?.join(', ') || 'Instrumentista'})\n`;
+          });
+        } else { text += `_Nenhum músico definido_\n`; }
+        text += `\n`;
 
-    text += `*${eMic} EQUIPE DE VOCAL:*\n`;
-    if (item.singers.length > 0) {
-      item.singers.forEach(s => {
-          const isLeader = s.id === item.worshipLeaderId;
-          text += `• ${s.name} ${isLeader ? eCrown : ''}\n`
-      });
-    } else { text += `_Nenhum vocal definido_\n`; }
-    
-    if (item.backupSinger) {
-        text += `_Reserva: ${item.backupSinger.name}_\n`;
+        text += `*${eMic} EQUIPE DE VOCAL:*\n`;
+        if (item.singers.length > 0) {
+          item.singers.forEach(s => {
+              const isLeader = s.id === item.worshipLeaderId;
+              text += `• ${s.name} ${isLeader ? eCrown : ''}\n`
+          });
+        } else { text += `_Nenhum vocal definido_\n`; }
+        
+        if (item.backupSinger) {
+            text += `_Reserva: ${item.backupSinger.name}_\n`;
+        }
+        text += `\n`;
+
+        text += `*${eNotes} LOUVORES:*\n`;
+        if (item.songs && item.songs.length > 0) {
+           item.songs.forEach(songId => {
+             const song = allSongs.find(s => s.id === songId);
+             if (song) {
+                 text += `• ${song.title} - ${song.artist}`;
+                 // Adiciona a tonalidade se houver
+                 if (song.key) {
+                     text += ` (Tom: ${song.key})`;
+                 }
+                 text += `\n`;
+                 
+                 // Prioriza explicitamente o link do YouTube
+                 if (song.youtubeLink) {
+                     text += `  Assista: ${song.youtubeLink}\n`;
+                 }
+             }
+           });
+        } else { text += `_A definir_\n`; }
     }
-    text += `\n`;
-
-    text += `*${eNotes} LOUVORES:*\n`;
-    if (item.songs && item.songs.length > 0) {
-       item.songs.forEach(songId => {
-         const song = allSongs.find(s => s.id === songId);
-         if (song) {
-             text += `• ${song.title} - ${song.artist}`;
-             // Adiciona a tonalidade se houver
-             if (song.key) {
-                 text += ` (Tom: ${song.key})`;
-             }
-             text += `\n`;
-             
-             // Prioriza explicitamente o link do YouTube
-             if (song.youtubeLink) {
-                 text += `  Assista: ${song.youtubeLink}\n`;
-             }
-         }
-       });
-    } else { text += `_A definir_\n`; }
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -439,27 +444,44 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
             {filteredSchedule.map((item) => {
                 const dateInfo = formatDateTime(item.date);
+                const isSpecial = item.isSpecial;
                 
                 return (
                     <div 
                         key={item.id} 
                         onClick={() => setViewItem(item)}
-                        className="group relative bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-between h-48 sm:h-52"
+                        className={`group relative bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-between h-48 sm:h-52 ${
+                            isSpecial 
+                            ? 'border-amber-500 shadow-xl shadow-amber-500/10 hover:shadow-amber-500/20' 
+                            : 'border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10'
+                        }`}
                     >
+                        {isSpecial && (
+                            <div className="absolute top-0 right-0 bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest py-1.5 px-4 rounded-bl-2xl z-10 flex items-center gap-1.5 shadow-lg">
+                                <Sparkles size={10} className="animate-pulse" /> Especial
+                            </div>
+                        )}
+
                         {/* Compact Header */}
                         <div className="p-4 sm:p-6 flex flex-col items-center justify-center h-full text-center">
-                            <span className="text-[10px] sm:text-[11px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-2 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1 rounded-full">
+                            <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] mb-2 px-3 py-1 rounded-full ${
+                                isSpecial ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500'
+                            }`}>
                                 {dateInfo.month}
                             </span>
-                            <span className="text-4xl sm:text-5xl font-black text-slate-800 dark:text-white leading-none my-2 sm:my-3 tracking-tighter">
+                            <span className={`text-4xl sm:text-5xl font-black leading-none my-2 sm:my-3 tracking-tighter ${
+                                isSpecial ? 'text-amber-600 dark:text-amber-400' : 'text-slate-800 dark:text-white'
+                            }`}>
                                 {dateInfo.day}
                             </span>
                             <span className="text-[11px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">
-                                {dateInfo.weekday.split('-')[0]}
+                                {isSpecial ? (item.specialName || 'Evento Especial') : dateInfo.weekday.split('-')[0]}
                             </span>
-                            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-inner">
-                                <Clock size={12} className="text-slate-400" />
-                                <span className="text-[11px] sm:text-xs font-black text-slate-600 dark:text-slate-300">{dateInfo.time}</span>
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border shadow-inner ${
+                                isSpecial ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-800/50' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700'
+                            }`}>
+                                <Clock size={12} className={isSpecial ? 'text-amber-500' : 'text-slate-400'} />
+                                <span className={`text-[11px] sm:text-xs font-black ${isSpecial ? 'text-amber-700 dark:text-amber-300' : 'text-slate-600 dark:text-slate-300'}`}>{dateInfo.time}</span>
                             </div>
                         </div>
 
@@ -501,12 +523,18 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
               <div className="relative w-full max-w-4xl bg-white dark:bg-[#0f172a] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] flex flex-col animate-in slide-in-from-bottom-10 duration-500 border border-slate-200 dark:border-slate-700">
                   
                   {/* Modal Header */}
-                  <div className="sticky top-0 z-10 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md px-6 sm:px-8 py-4 sm:py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+                  <div className={`sticky top-0 z-10 backdrop-blur-md px-6 sm:px-8 py-4 sm:py-5 border-b flex items-center justify-between shrink-0 ${
+                      viewItem.isSpecial 
+                      ? 'bg-amber-50/95 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900/30' 
+                      : 'bg-white/95 dark:bg-[#0f172a]/95 border-slate-100 dark:border-slate-800'
+                  }`}>
                       <div className="flex items-center gap-4">
                           <div className="flex flex-col">
-                             <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Detalhes do Culto</span>
-                             <h2 className="text-lg sm:text-xl font-black text-slate-800 dark:text-white capitalize truncate max-w-[200px] sm:max-w-none">
-                                {new Date(viewItem.date).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+                             <span className={`text-[10px] font-bold uppercase tracking-widest ${viewItem.isSpecial ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                                {viewItem.isSpecial ? 'Evento Especial' : 'Detalhes do Culto'}
+                             </span>
+                             <h2 className={`text-lg sm:text-xl font-black capitalize truncate max-w-[200px] sm:max-w-none ${viewItem.isSpecial ? 'text-amber-700 dark:text-amber-300' : 'text-slate-800 dark:text-white'}`}>
+                                {viewItem.isSpecial && viewItem.specialName ? viewItem.specialName : new Date(viewItem.date).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
                              </h2>
                           </div>
                       </div>
@@ -520,19 +548,24 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                       {(() => {
                           const dateInfo = formatDateTime(viewItem.date);
                           const isEditing = editingId === viewItem.id;
+                          const isSpecial = viewItem.isSpecial;
                           
                           return (
                             <div className="flex flex-col lg:flex-row gap-8">
                                 {/* Left Side: Date & Time Info */}
                                 <div className="lg:w-48 flex flex-col items-center text-center">
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-5 sm:p-6 rounded-2xl w-full border border-slate-100 dark:border-slate-800 flex lg:flex-col items-center justify-between lg:justify-center gap-4">
+                                    <div className={`p-5 sm:p-6 rounded-2xl w-full border flex lg:flex-col items-center justify-between lg:justify-center gap-4 ${
+                                        isSpecial 
+                                        ? 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/20' 
+                                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800'
+                                    }`}>
                                         <div className="text-left lg:text-center">
-                                            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">{dateInfo.month}</span>
-                                            <span className="text-4xl sm:text-5xl font-black text-slate-800 dark:text-white block leading-none">{dateInfo.day}</span>
+                                            <span className={`text-[10px] font-black uppercase tracking-widest mb-1 block ${isSpecial ? 'text-amber-600' : 'text-indigo-500'}`}>{dateInfo.month}</span>
+                                            <span className={`text-4xl sm:text-5xl font-black block leading-none ${isSpecial ? 'text-amber-700 dark:text-amber-300' : 'text-slate-800 dark:text-white'}`}>{dateInfo.day}</span>
                                         </div>
                                         <div className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 w-auto lg:w-full">
-                                            <Clock size={14} className="text-slate-400" />
-                                            <span className="text-xs font-black text-slate-600 dark:text-slate-300">{dateInfo.time}</span>
+                                            <Clock size={14} className={isSpecial ? 'text-amber-500' : 'text-slate-400'} />
+                                            <span className={`text-xs font-black ${isSpecial ? 'text-amber-700 dark:text-amber-300' : 'text-slate-600 dark:text-slate-300'}`}>{dateInfo.time}</span>
                                         </div>
                                     </div>
 
@@ -543,7 +576,11 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                     <Save size={18} /> Salvar
                                                 </button>
                                             ) : (
-                                                <button onClick={() => startEditing(viewItem)} className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all font-bold flex items-center justify-center gap-2 active:scale-95">
+                                                <button onClick={() => startEditing(viewItem)} className={`w-full py-3 rounded-xl transition-all font-bold flex items-center justify-center gap-2 active:scale-95 ${
+                                                    isSpecial 
+                                                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200' 
+                                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                                }`}>
                                                     <Edit3 size={18} /> Editar
                                                 </button>
                                             )}
@@ -556,257 +593,275 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
 
                                 {/* Right Side: Content */}
                                 <div className="flex-1">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        {/* Musicians Column */}
-                                        <div className="space-y-5">
-                                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-                                                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-lg">
-                                                    <Music size={18} />
-                                                </div>
-                                                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Instrumentistas</h4>
+                                    {isSpecial ? (
+                                        <div className="bg-amber-50/50 dark:bg-amber-900/10 border-2 border-dashed border-amber-200 dark:border-amber-800/50 rounded-[2rem] p-8 sm:p-12 text-center space-y-6">
+                                            <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mx-auto text-amber-600 shadow-xl shadow-amber-500/10">
+                                                <Sparkles size={40} />
                                             </div>
-
-                                            <div className="space-y-4">
-                                                {isEditing ? (
-                                                    ['Teclado', 'Baixo', 'Bateria', 'Guitarra', 'Violão'].map((inst, idx) => (
-                                                        <MemberSelect
-                                                            key={inst}
-                                                            label={inst}
-                                                            value={editState.musicians[idx] || ''}
-                                                            options={allMembers.filter(m => m.role === 'musician' && m.instruments?.includes(inst))}
-                                                            onChange={(newVal) => updateMusician(idx, newVal)}
-                                                        />
-                                                    ))
-                                                ) : (
-                                                    viewItem.musicians.length > 0 ? viewItem.musicians.map(m => (
-                                                        <div key={m.id} className="flex items-center gap-4 group/item p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
-                                                            <div className="relative shrink-0">
-                                                                {m.photoUrl ? (
-                                                                    <img src={m.photoUrl} className="w-12 h-12 rounded-xl object-cover shadow-sm" />
-                                                                ) : (
-                                                                    <div className="w-12 h-12 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-indigo-500/20">
-                                                                        {getInitials(m.name)}
-                                                                    </div>
-                                                                )}
-                                                                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-800 text-[9px] font-black text-slate-500 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm">
-                                                                    {m.instruments?.[0]?.substring(0,3).toUpperCase()}
-                                                                </div>
-                                                            </div>
-                                                            <div className="min-w-0">
-                                                                <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{m.name}</p>
-                                                                <p className="text-xs text-slate-400 mt-0.5 group-hover/item:text-indigo-500 transition-colors truncate">{m.instruments?.join(', ')}</p>
-                                                            </div>
-                                                        </div>
-                                                    )) : <p className="text-sm text-slate-400 italic">Nenhum músico escalado.</p>
-                                                )}
+                                            <div className="space-y-2">
+                                                <h3 className="text-2xl font-black text-amber-800 dark:text-amber-200 tracking-tight">
+                                                    {viewItem.specialName || 'Evento Especial'}
+                                                </h3>
+                                                <p className="text-amber-600/70 dark:text-amber-400/70 font-bold uppercase text-[10px] tracking-[0.3em]">Participação de toda a igreja</p>
                                             </div>
+                                            <p className="text-sm text-amber-700/60 dark:text-amber-300/60 max-w-xs mx-auto font-medium">
+                                                Este evento não possui escala musical definida. Todos os membros e músicos participam livremente.
+                                            </p>
                                         </div>
-
-                                        {/* Singers Column */}
-                                        <div className="space-y-5">
-                                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-                                                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg">
-                                                    <Mic size={18} />
-                                                </div>
-                                                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Vocais</h4>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                {isEditing ? (
-                                                    <>
-                                                        {[0, 1, 2].map((idx) => {
-                                                            const singerId = editState.singers[idx] || '';
-                                                            const isLeader = singerId && editState.worshipLeaderId === singerId;
-
-                                                            return (
-                                                                <div key={idx} className="flex items-end gap-2">
-                                                                    <div className="flex-1">
-                                                                        <MemberSelect
-                                                                            label={`Vocal ${idx + 1}`}
-                                                                            value={singerId}
-                                                                            options={allMembers.filter(m => m.role === 'singer')}
-                                                                            onChange={(newVal) => updateSinger(idx, newVal)}
-                                                                        />
-                                                                    </div>
-                                                                    {singerId && (
-                                                                        <button
-                                                                            onClick={() => setEditState(prev => ({...prev, worshipLeaderId: isLeader ? null : singerId }))}
-                                                                            className={`mb-[10px] p-2.5 rounded-xl border transition-all ${isLeader ? 'bg-amber-100 border-amber-300 text-amber-600 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-300 hover:text-amber-500 hover:border-amber-200'}`}
-                                                                            title={isLeader ? "Remover Ministro" : "Definir como Ministro"}
-                                                                        >
-                                                                            <Crown size={16} fill={isLeader ? "currentColor" : "none"} />
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                        
-                                                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                                                            <MemberSelect 
-                                                                label="Cantor Reserva" 
-                                                                value={editState.backupSingerId || ''} 
-                                                                options={allMembers.filter(m => m.role === 'singer')} 
-                                                                onChange={(newVal) => setEditState(prev => ({...prev, backupSingerId: newVal}))}
-                                                                icon={<Shield size={10} />}
-                                                            />
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    // VIEW MODE SINGERS
-                                                    <>
-                                                        {viewItem.singers.length > 0 ? viewItem.singers.map(s => {
-                                                            const isLeader = s.id === viewItem.worshipLeaderId;
-                                                            return (
-                                                                <div key={s.id} className={`flex items-center gap-4 p-3 rounded-2xl transition-all ${isLeader ? 'bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
-                                                                    <div className="relative shrink-0">
-                                                                        {s.photoUrl ? (
-                                                                            <img src={s.photoUrl} className="w-12 h-12 rounded-xl object-cover shadow-sm" />
-                                                                        ) : (
-                                                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black shadow-lg ${isLeader ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-purple-500 text-white shadow-purple-500/20'}`}>
-                                                                                {getInitials(s.name)}
-                                                                            </div>
-                                                                        )}
-                                                                        {isLeader && (
-                                                                            <div className="absolute -top-2 -right-2 bg-amber-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-900 shadow-sm">
-                                                                                <Crown size={10} fill="currentColor" />
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="min-w-0">
-                                                                        <p className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2 truncate">
-                                                                            {s.name}
-                                                                        </p>
-                                                                        <p className="text-xs text-slate-400 mt-0.5 truncate">{isLeader ? 'Ministro de Louvor' : 'Vocal'}</p>
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        }) : <p className="text-sm text-slate-400 italic">Nenhum vocal escalado.</p>}
-
-                                                        {viewItem.backupSinger && (
-                                                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                                                                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                                                                    <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 shrink-0">
-                                                                        <Shield size={16} />
-                                                                    </div>
-                                                                    <div className="min-w-0">
-                                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Reserva</p>
-                                                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">{viewItem.backupSinger.name}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Songs Section */}
-                                    <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-lg">
-                                                    <Music2 size={18} />
-                                                </div>
-                                                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Repertório</h4>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            {isEditing ? (
-                                                <div className="space-y-3">
-                                                    {editState.songs.map((songId, idx) => {
-                                                        const song = allSongs.find(s => s.id === songId);
-                                                        return (
-                                                            <div key={idx} className="flex items-center gap-2">
-                                                                <span className="text-xs font-black text-slate-300 w-4">{idx + 1}</span>
-                                                                <div className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 flex items-center justify-between">
-                                                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{song?.title}</span>
-                                                                    <button 
-                                                                        onClick={() => {
-                                                                            const newSongs = [...editState.songs];
-                                                                            newSongs.splice(idx, 1);
-                                                                            setEditState(prev => ({...prev, songs: newSongs}));
-                                                                        }}
-                                                                        className="text-slate-400 hover:text-red-500 p-1"
-                                                                    >
-                                                                        <X size={14} />
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                    <div className="pl-6">
-                                                        <SongSelect 
-                                                            songs={allSongs} 
-                                                            excludeIds={editState.songs} 
-                                                            onSelect={(id) => setEditState(prev => ({...prev, songs: [...prev.songs, id]}))}
-                                                        />
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            {/* Musicians Column */}
+                                            <div className="space-y-5">
+                                                <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                                                    <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-lg">
+                                                        <Music size={18} />
                                                     </div>
+                                                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Instrumentistas</h4>
                                                 </div>
-                                            ) : (
-                                                viewItem.songs && viewItem.songs.length > 0 ? (
-                                                    <div className="grid grid-cols-1 gap-3">
-                                                        {viewItem.songs.map((songId, idx) => {
-                                                            const song = allSongs.find(s => s.id === songId);
-                                                            if (!song) return null;
-                                                            const videoId = getYoutubeId(song.youtubeLink || '');
-                                                            const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
-                                                            return (
-                                                                <div key={songId} className="group flex items-center gap-4 p-3 bg-white dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-2xl hover:border-pink-500/50 transition-all duration-500 shadow-sm hover:shadow-md">
-                                                                    {/* Numbering */}
-                                                                    <div className="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-600 text-white font-black rounded-xl text-xs shadow-lg shadow-pink-500/30 ring-2 ring-white dark:ring-slate-800">
-                                                                        {idx + 1}
-                                                                    </div>
 
-                                                                    {/* Small Thumbnail */}
-                                                                    <div className="shrink-0 w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 relative shadow-inner">
-                                                                        {thumbUrl ? (
-                                                                            <img 
-                                                                                src={thumbUrl} 
-                                                                                alt="" 
-                                                                                className="w-full h-full object-cover scale-[1.4] transform group-hover:scale-[1.5] transition-transform duration-700" 
+                                                <div className="space-y-4">
+                                                    {isEditing ? (
+                                                        ['Teclado', 'Baixo', 'Bateria', 'Guitarra', 'Violão'].map((inst, idx) => (
+                                                            <MemberSelect
+                                                                key={inst}
+                                                                label={inst}
+                                                                value={editState.musicians[idx] || ''}
+                                                                options={allMembers.filter(m => m.role === 'musician' && m.instruments?.includes(inst))}
+                                                                onChange={(newVal) => updateMusician(idx, newVal)}
+                                                            />
+                                                        ))
+                                                    ) : (
+                                                        viewItem.musicians.length > 0 ? viewItem.musicians.map(m => (
+                                                            <div key={m.id} className="flex items-center gap-4 group/item p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
+                                                                <div className="relative shrink-0">
+                                                                    {m.photoUrl ? (
+                                                                        <img src={m.photoUrl} className="w-12 h-12 rounded-xl object-cover shadow-sm" />
+                                                                    ) : (
+                                                                        <div className="w-12 h-12 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-indigo-500/20">
+                                                                            {getInitials(m.name)}
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-800 text-[9px] font-black text-slate-500 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                                        {m.instruments?.[0]?.substring(0,3).toUpperCase()}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="min-w-0">
+                                                                    <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{m.name}</p>
+                                                                    <p className="text-xs text-slate-400 mt-0.5 group-hover/item:text-indigo-500 transition-colors truncate">{m.instruments?.join(', ')}</p>
+                                                                </div>
+                                                            </div>
+                                                        )) : <p className="text-sm text-slate-400 italic">Nenhum músico escalado.</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Singers Column */}
+                                            <div className="space-y-5">
+                                                <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                                                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg">
+                                                        <Mic size={18} />
+                                                    </div>
+                                                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Vocais</h4>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    {isEditing ? (
+                                                        <>
+                                                            {[0, 1, 2].map((idx) => {
+                                                                const singerId = editState.singers[idx] || '';
+                                                                const isLeader = singerId && editState.worshipLeaderId === singerId;
+
+                                                                return (
+                                                                    <div key={idx} className="flex items-end gap-2">
+                                                                        <div className="flex-1">
+                                                                            <MemberSelect
+                                                                                label={`Vocal ${idx + 1}`}
+                                                                                value={singerId}
+                                                                                options={allMembers.filter(m => m.role === 'singer')}
+                                                                                onChange={(newVal) => updateSinger(idx, newVal)}
                                                                             />
-                                                                        ) : (
-                                                                            <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
-                                                                                <Music2 size={24} />
-                                                                            </div>
+                                                                        </div>
+                                                                        {singerId && (
+                                                                            <button
+                                                                                onClick={() => setEditState(prev => ({...prev, worshipLeaderId: isLeader ? null : singerId }))}
+                                                                                className={`mb-[10px] p-2.5 rounded-xl border transition-all ${isLeader ? 'bg-amber-100 border-amber-300 text-amber-600 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-300 hover:text-amber-500 hover:border-amber-200'}`}
+                                                                                title={isLeader ? "Remover Ministro" : "Definir como Ministro"}
+                                                                            >
+                                                                                <Crown size={16} fill={isLeader ? "currentColor" : "none"} />
+                                                                            </button>
                                                                         )}
-                                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                                                     </div>
-
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <div className="flex items-center justify-between gap-2">
-                                                                            <p className="text-sm sm:text-base font-black text-slate-800 dark:text-white truncate group-hover:text-pink-500 transition-colors">{song.title}</p>
-                                                                            {(song.youtubeLink || song.lyricsLink) && (
-                                                                                <div className="flex gap-2 shrink-0">
-                                                                                    {song.youtubeLink && (
-                                                                                        <a href={song.youtubeLink} target="_blank" rel="noreferrer" className="p-1.5 bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all active:scale-90">
-                                                                                            <Youtube size={14} />
-                                                                                        </a>
-                                                                                    )}
-                                                                                    {song.lyricsLink && (
-                                                                                        <a href={song.lyricsLink} target="_blank" rel="noreferrer" className="p-1.5 bg-orange-50 dark:bg-orange-900/20 text-orange-500 hover:bg-orange-500 hover:text-white rounded-lg transition-all active:scale-90">
-                                                                                            <FileText size={14} />
-                                                                                        </a>
-                                                                                    )}
+                                                                );
+                                                            })}
+                                                            
+                                                            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                                                                <MemberSelect 
+                                                                    label="Cantor Reserva" 
+                                                                    value={editState.backupSingerId || ''} 
+                                                                    options={allMembers.filter(m => m.role === 'singer')} 
+                                                                    onChange={(newVal) => setEditState(prev => ({...prev, backupSingerId: newVal}))}
+                                                                    icon={<Shield size={10} />}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        // VIEW MODE SINGERS
+                                                        <>
+                                                            {viewItem.singers.length > 0 ? viewItem.singers.map(s => {
+                                                                const isLeader = s.id === viewItem.worshipLeaderId;
+                                                                return (
+                                                                    <div key={s.id} className={`flex items-center gap-4 p-3 rounded-2xl transition-all ${isLeader ? 'bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
+                                                                        <div className="relative shrink-0">
+                                                                            {s.photoUrl ? (
+                                                                                <img src={s.photoUrl} className="w-12 h-12 rounded-xl object-cover shadow-sm" />
+                                                                            ) : (
+                                                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black shadow-lg ${isLeader ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-purple-500 text-white shadow-purple-500/20'}`}>
+                                                                                    {getInitials(s.name)}
+                                                                                </div>
+                                                                            )}
+                                                                            {isLeader && (
+                                                                                <div className="absolute -top-2 -right-2 bg-amber-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-900 shadow-sm">
+                                                                                    <Crown size={10} fill="currentColor" />
                                                                                 </div>
                                                                             )}
                                                                         </div>
-                                                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest truncate mt-0.5">
-                                                                            {song.artist} 
-                                                                            {song.key && <span className="text-pink-500 font-black ml-2 px-1.5 py-0.5 bg-pink-50 dark:bg-pink-900/30 rounded-md border border-pink-100 dark:border-pink-800/50">{song.key}</span>}
-                                                                        </p>
+                                                                        <div className="min-w-0">
+                                                                            <p className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2 truncate">
+                                                                                {s.name}
+                                                                            </p>
+                                                                            <p className="text-xs text-slate-400 mt-0.5 truncate">{isLeader ? 'Ministro de Louvor' : 'Vocal'}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            }) : <p className="text-sm text-slate-400 italic">Nenhum vocal escalado.</p>}
+
+                                                            {viewItem.backupSinger && (
+                                                                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                                                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                                                                        <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                                                                            <Shield size={16} />
+                                                                        </div>
+                                                                        <div className="min-w-0">
+                                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Reserva</p>
+                                                                            <p className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">{viewItem.backupSinger.name}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Songs Section */}
+                                    {!isSpecial && (
+                                        <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-2 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-lg">
+                                                        <Music2 size={18} />
+                                                    </div>
+                                                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Repertório</h4>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {isEditing ? (
+                                                    <div className="space-y-3">
+                                                        {editState.songs.map((songId, idx) => {
+                                                            const song = allSongs.find(s => s.id === songId);
+                                                            return (
+                                                                <div key={idx} className="flex items-center gap-2">
+                                                                    <span className="text-xs font-black text-slate-300 w-4">{idx + 1}</span>
+                                                                    <div className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 flex items-center justify-between">
+                                                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{song?.title}</span>
+                                                                        <button 
+                                                                            onClick={() => {
+                                                                                const newSongs = [...editState.songs];
+                                                                                newSongs.splice(idx, 1);
+                                                                                setEditState(prev => ({...prev, songs: newSongs}));
+                                                                            }}
+                                                                            className="text-slate-400 hover:text-red-500 p-1"
+                                                                        >
+                                                                            <X size={14} />
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             );
                                                         })}
+                                                        <div className="pl-6">
+                                                            <SongSelect 
+                                                                songs={allSongs} 
+                                                                excludeIds={editState.songs} 
+                                                                onSelect={(id) => setEditState(prev => ({...prev, songs: [...prev.songs, id]}))}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                ) : <p className="text-sm text-slate-400 italic">Nenhum louvor definido.</p>
-                                            )}
-                                        </div>
-                                    </div>
+                                                ) : (
+                                                    viewItem.songs && viewItem.songs.length > 0 ? (
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            {viewItem.songs.map((songId, idx) => {
+                                                                const song = allSongs.find(s => s.id === songId);
+                                                                if (!song) return null;
+                                                                const videoId = getYoutubeId(song.youtubeLink || '');
+                                                                const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+                                                                return (
+                                                                    <div key={songId} className="group flex items-center gap-4 p-3 bg-white dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-2xl hover:border-pink-500/50 transition-all duration-500 shadow-sm hover:shadow-md">
+                                                                        {/* Numbering */}
+                                                                        <div className="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-600 text-white font-black rounded-xl text-xs shadow-lg shadow-pink-500/30 ring-2 ring-white dark:ring-slate-800">
+                                                                            {idx + 1}
+                                                                        </div>
 
+                                                                        {/* Small Thumbnail */}
+                                                                        <div className="shrink-0 w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 relative shadow-inner">
+                                                                            {thumbUrl ? (
+                                                                                <img 
+                                                                                    src={thumbUrl} 
+                                                                                    alt="" 
+                                                                                    className="w-full h-full object-cover scale-[1.4] transform group-hover:scale-[1.5] transition-transform duration-700" 
+                                                                                />
+                                                                            ) : (
+                                                                                <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
+                                                                                    <Music2 size={24} />
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                                                        </div>
+
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="flex items-center justify-between gap-2">
+                                                                                <p className="text-sm sm:text-base font-black text-slate-800 dark:text-white truncate group-hover:text-pink-500 transition-colors">{song.title}</p>
+                                                                                {(song.youtubeLink || song.lyricsLink) && (
+                                                                                    <div className="flex gap-2 shrink-0">
+                                                                                        {song.youtubeLink && (
+                                                                                            <a href={song.youtubeLink} target="_blank" rel="noreferrer" className="p-1.5 bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all active:scale-90">
+                                                                                                <Youtube size={14} />
+                                                                                            </a>
+                                                                                        )}
+                                                                                        {song.lyricsLink && (
+                                                                                            <a href={song.lyricsLink} target="_blank" rel="noreferrer" className="p-1.5 bg-orange-50 dark:bg-orange-900/20 text-orange-500 hover:bg-orange-500 hover:text-white rounded-lg transition-all active:scale-90">
+                                                                                                <FileText size={14} />
+                                                                                            </a>
+                                                                                        )}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest truncate mt-0.5">
+                                                                                {song.artist} 
+                                                                                {song.key && <span className="text-pink-500 font-black ml-2 px-1.5 py-0.5 bg-pink-50 dark:bg-pink-900/30 rounded-md border border-pink-100 dark:border-pink-800/50">{song.key}</span>}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    ) : <p className="text-sm text-slate-400 italic">Nenhum louvor definido.</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                           );

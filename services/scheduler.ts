@@ -8,13 +8,18 @@ interface RotationState {
 }
 
 export const generateFullSchedule = (
-  dates: string[],
+  dates: (string | { date: string, isSpecial: boolean, specialName: string })[],
   members: Member[]
 ): ScheduleItem[] => {
   const activeMembers = members.filter(m => !m.isSuspended);
   if (activeMembers.length === 0) return [];
 
-  const sortedDates = [...dates].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  const sortedDates = [...dates].sort((a, b) => {
+    const dateA = typeof a === 'string' ? a : a.date;
+    const dateB = typeof b === 'string' ? b : b.date;
+    return new Date(dateA).getTime() - new Date(dateB).getTime();
+  });
+
   const state: RotationState = {
     usageMap: Object.fromEntries(activeMembers.map(m => [m.id, 0])),
     lastPlayedOnDay: Object.fromEntries(activeMembers.map(m => [m.id, {}])),
@@ -23,13 +28,30 @@ export const generateFullSchedule = (
 
   const schedule: ScheduleItem[] = [];
 
-  for (const dateStr of sortedDates) {
+  for (const dateItem of sortedDates) {
+    const dateStr = typeof dateItem === 'string' ? dateItem : dateItem.date;
+    const isSpecial = typeof dateItem === 'string' ? false : dateItem.isSpecial;
+    const specialName = typeof dateItem === 'string' ? undefined : dateItem.specialName;
+
     const date = new Date(dateStr);
     const dayOfWeek = date.getDay();
     const startOfYear = new Date(date.getFullYear(), 0, 1);
     const weekIndex = Math.floor((date.getTime() - startOfYear.getTime()) / (7 * 24 * 60 * 60 * 1000));
     
     if (!state.scheduledThisWeek[weekIndex]) state.scheduledThisWeek[weekIndex] = new Set();
+
+    if (isSpecial) {
+      schedule.push({
+        id: crypto.randomUUID(),
+        date: dateStr,
+        musicians: [],
+        singers: [],
+        isSpecial: true,
+        specialName: specialName,
+        songs: []
+      });
+      continue;
+    }
 
     const selectedMusicians: Member[] = [];
     
@@ -132,7 +154,8 @@ const pickMember = (pool: Member[], state: RotationState, date: Date, weekIndex:
 
 export const regenerateDay = (item: ScheduleItem, members: Member[]): ScheduleItem => {
   // Gera uma escala totalmente nova para aquele dia seguindo as mesmas regras
-  const singleDayResult = generateFullSchedule([item.date], members);
+  const dateParam = item.isSpecial ? { date: item.date, isSpecial: true, specialName: item.specialName || '' } : item.date;
+  const singleDayResult = generateFullSchedule([dateParam], members);
   if (singleDayResult.length > 0) {
     return { ...singleDayResult[0], id: item.id, songs: item.songs };
   }

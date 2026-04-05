@@ -280,216 +280,257 @@ const PublicCalendar: React.FC<PublicCalendarProps> = ({ schedule, songs, member
               {filteredSchedule.map((item, index) => {
                 const dateInfo = formatCardDate(item.date);
                 const isNext = index === nextEventIndex;
+                const isSpecial = item.isSpecial;
                 
                 return (
-                  <div key={item.id} className={`group relative flex flex-col shrink-0 snap-center w-[88vw] sm:w-[420px] md:w-auto bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 transition-all duration-700 ${isNext ? 'border-indigo-500 shadow-2xl shadow-indigo-500/20 scale-[1.02]' : 'border-slate-50 dark:border-slate-800 hover:shadow-2xl hover:border-indigo-100 dark:hover:border-indigo-900/30'}`}>
-                    {isNext && (
-                        <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] py-2 px-6 rounded-bl-[2rem] z-10 flex items-center gap-2 shadow-xl shadow-indigo-500/30">
-                            <Sparkles size={12} className="text-yellow-300 animate-pulse" /> Próximo Culto
+                  <div key={item.id} className={`group relative flex flex-col shrink-0 snap-center w-[88vw] sm:w-[420px] md:w-auto bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 transition-all duration-700 ${
+                      isSpecial 
+                      ? 'border-amber-500 shadow-2xl shadow-amber-500/20 scale-[1.02]' 
+                      : isNext 
+                        ? 'border-indigo-500 shadow-2xl shadow-indigo-500/20 scale-[1.02]' 
+                        : 'border-slate-50 dark:border-slate-800 hover:shadow-2xl hover:border-indigo-100 dark:hover:border-indigo-900/30'
+                  }`}>
+                    {(isSpecial || isNext) && (
+                        <div className={`absolute top-0 right-0 text-white text-[10px] font-black uppercase tracking-[0.2em] py-2 px-6 rounded-bl-[2rem] z-10 flex items-center gap-2 shadow-xl ${
+                            isSpecial ? 'bg-amber-500 shadow-amber-500/30' : 'bg-indigo-600 shadow-indigo-500/30'
+                        }`}>
+                            <Sparkles size={12} className={`${isSpecial ? 'text-white' : 'text-yellow-300'} animate-pulse`} /> 
+                            {isSpecial ? 'Evento Especial' : 'Próximo Culto'}
                         </div>
                     )}
 
                     {/* Cabeçalho do Card */}
-                    <div className={`p-8 sm:p-10 flex items-center justify-between border-b-2 ${isNext ? 'bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30' : 'bg-slate-50/30 dark:bg-slate-800/20 border-slate-50 dark:border-slate-800'}`}>
+                    <div className={`p-8 sm:p-10 flex items-center justify-between border-b-2 ${
+                        isSpecial 
+                        ? 'bg-amber-50/30 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/30' 
+                        : isNext 
+                            ? 'bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30' 
+                            : 'bg-slate-50/30 dark:bg-slate-800/20 border-slate-50 dark:border-slate-800'
+                    }`}>
                       <div className="flex items-center gap-6">
-                        <div className={`flex flex-col items-center justify-center w-16 h-16 rounded-2xl shadow-xl border-2 transition-all group-hover:scale-110 duration-500 ${isNext ? 'bg-indigo-600 border-indigo-400' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}>
-                          <span className={`text-[10px] font-black uppercase tracking-tighter ${isNext ? 'text-indigo-200' : 'text-indigo-500'}`}>{dateInfo.month}</span>
-                          <span className={`text-3xl font-black leading-none ${isNext ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{dateInfo.day}</span>
+                        <div className={`flex flex-col items-center justify-center w-16 h-16 rounded-2xl shadow-xl border-2 transition-all group-hover:scale-110 duration-500 ${
+                            isSpecial 
+                            ? 'bg-amber-500 border-amber-400' 
+                            : isNext 
+                                ? 'bg-indigo-600 border-indigo-400' 
+                                : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'
+                        }`}>
+                          <span className={`text-[10px] font-black uppercase tracking-tighter ${isSpecial || isNext ? 'text-amber-100 dark:text-indigo-200' : 'text-indigo-500'}`}>{dateInfo.month}</span>
+                          <span className={`text-3xl font-black leading-none ${isSpecial || isNext ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{dateInfo.day}</span>
                         </div>
                         <div className="space-y-1">
                           <p className="text-xl font-black text-slate-900 dark:text-white capitalize leading-none tracking-tight">{dateInfo.weekday}</p>
                           <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 shadow-inner">
-                                <Clock size={12} className="text-slate-500 dark:text-slate-400" />
+                            <div className={`p-1.5 rounded-lg shadow-inner ${isSpecial ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                                <Clock size={12} className={isSpecial ? 'text-amber-600' : 'text-slate-500 dark:text-slate-400'} />
                             </div>
-                            <p className="text-sm font-black text-slate-500 dark:text-slate-400 tracking-tight">{dateInfo.time}</p>
+                            <p className={`text-sm font-black tracking-tight ${isSpecial ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}`}>{dateInfo.time}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="p-8 sm:p-10 space-y-8 flex-1 flex flex-col">
-                      {/* Instrumentistas */}
-                      <div className="flex-1">
-                        <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
-                          <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shadow-sm">
-                            <Music size={12} className="text-indigo-500" />
-                          </div>
-                          Instrumentistas
-                        </h4>
-                        {item.musicians.length > 0 ? (
-                          <div className="grid grid-cols-1 gap-4">
-                            {item.musicians.map(musician => (
-                              <div key={musician.id} className="flex items-center gap-4 group/member">
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-xs font-black text-indigo-600 border-2 border-indigo-100 dark:border-indigo-800/30 shrink-0 shadow-xl shadow-indigo-500/5 overflow-hidden group-hover/member:scale-110 transition-all duration-500">
-                                  {musician.photoUrl ? (
-                                    <img src={musician.photoUrl} alt="" className="w-full h-full object-cover" />
-                                  ) : getInitials(musician.name)}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-base font-black text-slate-800 dark:text-slate-100 truncate leading-tight tracking-tight">{musician.name}</p>
-                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase truncate tracking-widest mt-1">{musician.instruments?.join(' • ')}</p>
-                                </div>
+                      {isSpecial ? (
+                          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+                              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center text-amber-600 shadow-xl shadow-amber-500/10">
+                                  <Sparkles size={40} />
                               </div>
-                            ))}
+                              <div className="space-y-2">
+                                  <h3 className="text-2xl font-black text-amber-800 dark:text-amber-200 tracking-tight">
+                                      {item.specialName || 'Evento Especial'}
+                                  </h3>
+                                  <p className="text-amber-600/70 dark:text-amber-400/70 font-bold uppercase text-[10px] tracking-[0.3em]">Participação de toda a igreja</p>
+                              </div>
+                              <p className="text-sm text-amber-700/60 dark:text-amber-300/60 max-w-xs mx-auto font-medium">
+                                  Este evento não possui escala musical definida. Todos os membros e músicos participam livremente.
+                              </p>
                           </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Escala em definição</p>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="h-px bg-gradient-to-r from-transparent via-slate-100 dark:via-slate-800 to-transparent w-full"></div>
-
-                      {/* Vocal com Destaque para Ministro */}
-                      <div className="flex-1">
-                        <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
-                          <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center shadow-sm">
-                            <Mic size={12} className="text-purple-500" />
-                          </div>
-                          Equipe Vocal
-                        </h4>
-                        {item.singers.length > 0 ? (
-                          <div className="grid grid-cols-1 gap-4">
-                            {item.singers.map(singer => {
-                                const isLeader = singer.id === item.worshipLeaderId;
-                                return (
-                                  <div key={singer.id} className={`flex items-center gap-4 p-3 rounded-2xl transition-all duration-500 ${isLeader ? 'bg-amber-50/50 dark:bg-amber-900/10 border-2 border-amber-100 dark:border-amber-900/30 shadow-xl shadow-amber-500/5' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
-                                    <div className="relative shrink-0">
-                                        <div className={`w-12 h-12 rounded-2xl ${isLeader ? 'bg-amber-500' : 'bg-purple-50 dark:bg-purple-900/20'} flex items-center justify-center text-xs font-black ${isLeader ? 'text-white' : 'text-purple-600'} border-2 ${isLeader ? 'border-amber-400' : 'border-purple-100 dark:border-purple-800/30'} shadow-xl overflow-hidden transition-transform duration-500 group-hover:scale-110`}>
-                                            {singer.photoUrl ? (
-                                                <img src={singer.photoUrl} alt="" className="w-full h-full object-cover" />
-                                            ) : getInitials(singer.name)}
-                                        </div>
-                                        {isLeader && (
-                                            <div className="absolute -top-2 -right-2 bg-amber-400 text-white rounded-xl p-1.5 border-2 border-white dark:border-slate-900 shadow-xl animate-bounce" title="Ministro de Louvor">
-                                                <Crown size={12} fill="currentColor" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="text-base font-black text-slate-800 dark:text-slate-100 truncate leading-tight tracking-tight">
-                                          {singer.name}
-                                      </p>
-                                      {isLeader && <p className="text-[9px] font-black uppercase text-amber-600 dark:text-amber-400 tracking-[0.2em] mt-1.5">Ministro de Louvor</p>}
-                                    </div>
-                                  </div>
-                                );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Escala em definição</p>
-                          </div>
-                        )}
-
-                        {item.backupSinger && (
-                           <div className="mt-6 pt-6 border-t-2 border-slate-50 dark:border-slate-800 flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-300 flex items-center justify-center shadow-inner border border-slate-100 dark:border-slate-700">
-                                    <Shield size={18} />
+                      ) : (
+                          <>
+                            {/* Instrumentistas */}
+                            <div className="flex-1">
+                                <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
+                                <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shadow-sm">
+                                    <Music size={12} className="text-indigo-500" />
                                 </div>
-                                <div className="min-w-0">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1.5">Reserva Vocal</p>
-                                    <p className="text-sm font-black text-slate-600 dark:text-slate-300 truncate tracking-tight">{item.backupSinger.name}</p>
-                                </div>
-                           </div>
-                        )}
-                      </div>
-
-                      {/* Louvores (Com Thumbnails Pequenas e Key) */}
-                      {item.songs && item.songs.length > 0 && (
-                          <div className="mt-auto pt-8 border-t-2 border-slate-50 dark:border-slate-800">
-                            <div className="space-y-5">
-                                <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-                                    <div className="w-6 h-6 rounded-lg bg-pink-50 dark:bg-pink-900/30 flex items-center justify-center shadow-sm">
-                                        <Music2 size={12} className="text-pink-500" />
-                                    </div>
-                                    Repertório do Culto
+                                Instrumentistas
                                 </h4>
-                                <div className="space-y-3">
-                                  {item.songs.map((songId, sIndex) => {
-                                    const song = songs.find(s => s.id === songId);
-                                    if (!song) return null;
-                                    
-                                    const songSinger = members.find(m => m.id === song.singerId);
-                                    const Wrapper = (song.youtubeLink || song.lyricsLink) ? 'a' : 'div';
-                                    const props = (song.youtubeLink || song.lyricsLink)
-                                      ? { 
-                                          href: song.youtubeLink || song.lyricsLink, 
-                                          target: "_blank", 
-                                          rel: "noopener noreferrer"
-                                        }
-                                      : {};
-                                    
-                                    const videoId = getYoutubeId(song.youtubeLink || '');
-
-                                    return (
-                                      <Wrapper
-                                        key={songId}
-                                        {...props}
-                                        className={`flex items-center gap-4 p-3 rounded-2xl border-2 transition-all duration-500 group/song relative
-                                            bg-white dark:bg-slate-800 border-slate-50 dark:border-slate-700
-                                            ${(song.youtubeLink || song.lyricsLink) 
-                                                ? 'hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 cursor-pointer active:scale-[0.98]' 
-                                                : ''
-                                            }
-                                        `}
-                                      >
-                                        {/* Numbering */}
-                                        <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-600 text-white font-black rounded-xl text-xs shadow-xl shadow-pink-500/30 ring-4 ring-white dark:ring-slate-800 z-10">
-                                            {sIndex + 1}
+                                {item.musicians.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-4">
+                                    {item.musicians.map(musician => (
+                                    <div key={musician.id} className="flex items-center gap-4 group/member">
+                                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-xs font-black text-indigo-600 border-2 border-indigo-100 dark:border-indigo-800/30 shrink-0 shadow-xl shadow-indigo-500/5 overflow-hidden group-hover/member:scale-110 transition-all duration-500">
+                                        {musician.photoUrl ? (
+                                            <img src={musician.photoUrl} alt="" className="w-full h-full object-cover" />
+                                        ) : getInitials(musician.name)}
                                         </div>
+                                        <div className="min-w-0">
+                                        <p className="text-base font-black text-slate-800 dark:text-slate-100 truncate leading-tight tracking-tight">{musician.name}</p>
+                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase truncate tracking-widest mt-1">{musician.instruments?.join(' • ')}</p>
+                                        </div>
+                                    </div>
+                                    ))}
+                                </div>
+                                ) : (
+                                <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Escala em definição</p>
+                                </div>
+                                )}
+                            </div>
 
-                                        <SongThumb 
-                                            videoId={videoId} 
-                                            title={song.title} 
-                                            size="shrink-0 w-16 h-16 rounded-xl" 
-                                            iconSize={20} 
-                                        />
+                            <div className="h-px bg-gradient-to-r from-transparent via-slate-100 dark:via-slate-800 to-transparent w-full"></div>
 
-                                        <div className="min-w-0 flex-1 flex flex-col justify-center">
-                                            <div className="flex justify-between items-start w-full gap-3">
-                                                <div className="min-w-0 flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="text-base font-black text-slate-900 dark:text-slate-100 truncate group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-400 transition-colors leading-tight tracking-tight">
-                                                            {song.title}
-                                                        </p>
-                                                        {(song.youtubeLink || song.lyricsLink) && <ExternalLink size={14} className="text-slate-200 group-hover/song:text-indigo-500 shrink-0 transition-colors" />}
-                                                    </div>
-                                                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 truncate mt-1.5 uppercase tracking-widest">{song.artist}</p>
+                            {/* Vocal com Destaque para Ministro */}
+                            <div className="flex-1">
+                                <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
+                                <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center shadow-sm">
+                                    <Mic size={12} className="text-purple-500" />
+                                </div>
+                                Equipe Vocal
+                                </h4>
+                                {item.singers.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-4">
+                                    {item.singers.map(singer => {
+                                        const isLeader = singer.id === item.worshipLeaderId;
+                                        return (
+                                        <div key={singer.id} className={`flex items-center gap-4 p-3 rounded-2xl transition-all duration-500 ${isLeader ? 'bg-amber-50/50 dark:bg-amber-900/10 border-2 border-amber-100 dark:border-amber-900/30 shadow-xl shadow-amber-500/5' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
+                                            <div className="relative shrink-0">
+                                                <div className={`w-12 h-12 rounded-2xl ${isLeader ? 'bg-amber-500' : 'bg-purple-50 dark:bg-purple-900/20'} flex items-center justify-center text-xs font-black ${isLeader ? 'text-white' : 'text-purple-600'} border-2 ${isLeader ? 'border-amber-400' : 'border-purple-100 dark:border-purple-800/30'} shadow-xl overflow-hidden transition-transform duration-500 group-hover:scale-110`}>
+                                                    {singer.photoUrl ? (
+                                                        <img src={singer.photoUrl} alt="" className="w-full h-full object-cover" />
+                                                    ) : getInitials(singer.name)}
                                                 </div>
-                                                
-                                                {song.key && (
-                                                    <div className="shrink-0 flex items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-700 border-2 border-slate-100 dark:border-slate-600 text-[10px] font-black text-slate-600 dark:text-slate-300 group-hover/song:bg-pink-500 group-hover/song:text-white group-hover/song:border-pink-400 transition-all shadow-xl shadow-slate-200/10 min-w-[32px]">
-                                                        {song.key}
+                                                {isLeader && (
+                                                    <div className="absolute -top-2 -right-2 bg-amber-400 text-white rounded-xl p-1.5 border-2 border-white dark:border-slate-900 shadow-xl animate-bounce" title="Ministro de Louvor">
+                                                        <Crown size={12} fill="currentColor" />
                                                     </div>
                                                 )}
                                             </div>
+                                            <div className="min-w-0">
+                                            <p className="text-base font-black text-slate-800 dark:text-slate-100 truncate leading-tight tracking-tight">
+                                                {singer.name}
+                                            </p>
+                                            {isLeader && <p className="text-[9px] font-black uppercase text-amber-600 dark:text-amber-400 tracking-[0.2em] mt-1.5">Ministro de Louvor</p>}
+                                            </div>
+                                        </div>
+                                        );
+                                    })}
+                                </div>
+                                ) : (
+                                <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Escala em definição</p>
+                                </div>
+                                )}
 
-                                            {songSinger && (
-                                                <div className="flex items-center gap-2.5 mt-3">
-                                                    <div className="w-6 h-6 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden shrink-0 border-2 border-white dark:border-slate-600 shadow-xl">
-                                                        {songSinger.photoUrl ? (
-                                                            <img src={songSinger.photoUrl} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-[8px] font-black text-slate-500">
-                                                                {getInitials(songSinger.name)}
+                                {item.backupSinger && (
+                                <div className="mt-6 pt-6 border-t-2 border-slate-50 dark:border-slate-800 flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-300 flex items-center justify-center shadow-inner border border-slate-100 dark:border-slate-700">
+                                            <Shield size={18} />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1.5">Reserva Vocal</p>
+                                            <p className="text-sm font-black text-slate-600 dark:text-slate-300 truncate tracking-tight">{item.backupSinger.name}</p>
+                                        </div>
+                                </div>
+                                )}
+                            </div>
+
+                            {/* Louvores (Com Thumbnails Pequenas e Key) */}
+                            {item.songs && item.songs.length > 0 && (
+                                <div className="mt-auto pt-8 border-t-2 border-slate-50 dark:border-slate-800">
+                                    <div className="space-y-5">
+                                        <h4 className="flex items-center gap-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                                            <div className="w-6 h-6 rounded-lg bg-pink-50 dark:bg-pink-900/30 flex items-center justify-center shadow-sm">
+                                                <Music2 size={12} className="text-pink-500" />
+                                            </div>
+                                            Repertório do Culto
+                                        </h4>
+                                        <div className="space-y-3">
+                                        {item.songs.map((songId, sIndex) => {
+                                            const song = songs.find(s => s.id === songId);
+                                            if (!song) return null;
+                                            
+                                            const songSinger = members.find(m => m.id === song.singerId);
+                                            const Wrapper = (song.youtubeLink || song.lyricsLink) ? 'a' : 'div';
+                                            const props = (song.youtubeLink || song.lyricsLink)
+                                            ? { 
+                                                href: song.youtubeLink || song.lyricsLink, 
+                                                target: "_blank", 
+                                                rel: "noopener noreferrer"
+                                                }
+                                            : {};
+                                            
+                                            const videoId = getYoutubeId(song.youtubeLink || '');
+
+                                            return (
+                                            <Wrapper
+                                                key={songId}
+                                                {...props}
+                                                className={`flex items-center gap-4 p-3 rounded-2xl border-2 transition-all duration-500 group/song relative
+                                                    bg-white dark:bg-slate-800 border-slate-50 dark:border-slate-700
+                                                    ${(song.youtubeLink || song.lyricsLink) 
+                                                        ? 'hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 cursor-pointer active:scale-[0.98]' 
+                                                        : ''
+                                                    }
+                                                `}
+                                            >
+                                                {/* Numbering */}
+                                                <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-600 text-white font-black rounded-xl text-xs shadow-xl shadow-pink-500/30 ring-4 ring-white dark:ring-slate-800 z-10">
+                                                    {sIndex + 1}
+                                                </div>
+
+                                                <SongThumb 
+                                                    videoId={videoId} 
+                                                    title={song.title} 
+                                                    size="shrink-0 w-16 h-16 rounded-xl" 
+                                                    iconSize={20} 
+                                                />
+
+                                                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                                    <div className="flex justify-between items-start w-full gap-3">
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="text-base font-black text-slate-900 dark:text-slate-100 truncate group-hover/song:text-indigo-600 dark:group-hover/song:text-indigo-400 transition-colors leading-tight tracking-tight">
+                                                                    {song.title}
+                                                                </p>
+                                                                {(song.youtubeLink || song.lyricsLink) && <ExternalLink size={14} className="text-slate-200 group-hover/song:text-indigo-500 shrink-0 transition-colors" />}
+                                                            </div>
+                                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 truncate mt-1.5 uppercase tracking-widest">{song.artist}</p>
+                                                        </div>
+                                                        
+                                                        {song.key && (
+                                                            <div className="shrink-0 flex items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-700 border-2 border-slate-100 dark:border-slate-600 text-[10px] font-black text-slate-600 dark:text-slate-300 group-hover/song:bg-pink-500 group-hover/song:text-white group-hover/song:border-pink-400 transition-all shadow-xl shadow-slate-200/10 min-w-[32px]">
+                                                                {song.key}
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 truncate max-w-[160px] uppercase tracking-tight">
-                                                        {songSinger.name.split(' ')[0]}
-                                                    </span>
+
+                                                    {songSinger && (
+                                                        <div className="flex items-center gap-2.5 mt-3">
+                                                            <div className="w-6 h-6 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden shrink-0 border-2 border-white dark:border-slate-600 shadow-xl">
+                                                                {songSinger.photoUrl ? (
+                                                                    <img src={songSinger.photoUrl} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center text-[8px] font-black text-slate-500">
+                                                                        {getInitials(songSinger.name)}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 truncate max-w-[160px] uppercase tracking-tight">
+                                                                {songSinger.name.split(' ')[0]}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </Wrapper>
+                                            );
+                                        })}
                                         </div>
-                                      </Wrapper>
-                                    );
-                                  })}
+                                    </div>
                                 </div>
-                            </div>
-                          </div>
+                            )}
+                          </>
                       )}
                     </div>
                   </div>
