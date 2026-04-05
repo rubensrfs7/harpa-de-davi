@@ -32,10 +32,11 @@ const getYoutubeId = (url: string) => {
 // Subcomponente para Card de Música
 const SongCard: React.FC<{ 
     song: Song; 
+    index: number;
     singer?: Member; 
     onEdit: (song: Song) => void; 
     onRemove: (id: string) => void; 
-}> = ({ song, singer, onEdit, onRemove }) => {
+}> = ({ song, index, singer, onEdit, onRemove }) => {
     const videoId = getYoutubeId(song.youtubeLink || '');
     const [imgSrc, setImgSrc] = useState(videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
     const [isLowQuality, setIsLowQuality] = useState(false);
@@ -48,14 +49,91 @@ const SongCard: React.FC<{
     };
 
     return (
-        <div className="group relative bg-[#0f172a] rounded-xl border border-slate-800 hover:border-pink-500/50 transition-all duration-300 shadow-lg shadow-black/20 overflow-hidden h-[220px] flex flex-col justify-between isolate">
+        <div className="group relative bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-pink-500/50 transition-all duration-300 shadow-sm hover:shadow-md overflow-hidden flex items-center p-3 gap-4">
             
-            {/* Action Buttons (Top Right) - High Z-Index & Clickable */}
-            <div className="absolute top-4 right-4 flex gap-2 z-30 pointer-events-auto">
+            {/* Numbering & Thumb Container */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+                {/* Numbering */}
+                <div className="w-8 h-8 flex items-center justify-center bg-pink-500 text-white font-black rounded-lg text-sm shadow-lg shadow-pink-500/20">
+                    {index + 1}
+                </div>
+
+                {/* Square Thumb */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 relative">
+                    {imgSrc ? (
+                        <img 
+                            src={imgSrc} 
+                            alt={song.title} 
+                            onError={handleImgError}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
+                            <Music2 size={32} />
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                <div>
+                    <h4 className="font-bold text-slate-800 dark:text-white truncate text-base sm:text-lg leading-tight" title={song.title}>{song.title}</h4>
+                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 truncate">{song.artist}</p>
+                </div>
+                
+                <div className="flex items-center gap-2 mt-2">
+                    {song.key && (
+                        <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-[10px] font-black rounded border border-pink-200 dark:border-pink-800/50">
+                            {song.key}
+                        </span>
+                    )}
+                    {singer && (
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
+                            <div className="w-4 h-4 rounded-full bg-purple-500/20 flex items-center justify-center overflow-hidden">
+                                {singer.photoUrl ? (
+                                    <img src={singer.photoUrl} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-[6px] font-bold text-purple-500">{getInitials(singer.name)}</span>
+                                )}
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 truncate max-w-[80px]">
+                                {singer.name.split(' ')[0]}
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex gap-3 mt-2">
+                    {song.lyricsLink && (
+                        <a 
+                            href={song.lyricsLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-orange-500 hover:text-orange-600 transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-tighter"
+                        >
+                            <FileText size={14} /> Letra
+                        </a>
+                    )}
+                    {song.youtubeLink && (
+                        <a 
+                            href={song.youtubeLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-red-500 hover:text-red-600 transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-tighter"
+                        >
+                            <Youtube size={14} /> Vídeo
+                        </a>
+                    )}
+                </div>
+            </div>
+
+            {/* Actions (Vertical) */}
+            <div className="flex flex-col gap-1 border-l border-slate-100 dark:border-slate-800 pl-2">
                 <button 
                     type="button"
                     onClick={(e) => { e.stopPropagation(); onEdit(song); }}
-                    className="p-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-lg text-slate-200 hover:text-white border border-white/10 transition-all shadow-lg hover:scale-105 active:scale-95"
+                    className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all"
                     title="Editar"
                 >
                     <Edit size={18} />
@@ -63,93 +141,11 @@ const SongCard: React.FC<{
                 <button 
                     type="button"
                     onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
-                    className="p-2.5 bg-black/40 hover:bg-red-500/90 backdrop-blur-md rounded-lg text-slate-200 hover:text-white border border-white/10 transition-all shadow-lg hover:scale-105 active:scale-95"
-                    title="Excluir (Deletar do Banco)"
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                    title="Excluir"
                 >
                     <Trash2 size={18} />
                 </button>
-            </div>
-
-            {/* Background Image Layer */}
-            {imgSrc ? (
-                <>
-                    <div className="absolute inset-0 z-0 bg-slate-900 overflow-hidden">
-                        <img 
-                            src={imgSrc} 
-                            alt={song.title} 
-                            onError={handleImgError}
-                            className={`w-full h-full object-cover bg-center transition-transform duration-700 opacity-60 group-hover:opacity-100 ${isLowQuality ? 'scale-[1.35]' : 'group-hover:scale-110'}`} 
-                        />
-                    </div>
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"></div>
-                </>
-            ) : (
-                <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-900 to-slate-950"></div>
-            )}
-
-            {/* Content Container */}
-            <div className="relative z-10 p-5 flex flex-col h-full justify-between pointer-events-none">
-                
-                {/* Header Content */}
-                <div className="pr-20 pt-1">
-                    <h4 className="font-bold text-white line-clamp-2 text-xl drop-shadow-lg leading-tight" title={song.title}>{song.title}</h4>
-                    <p className="text-xs font-bold text-slate-300 uppercase tracking-wide mt-1 drop-shadow-md">{song.artist}</p>
-                </div>
-                
-                {/* Body Content (Bottom) */}
-                <div className="mt-auto space-y-4 pointer-events-auto">
-                    {/* Info Badges Row */}
-                    <div className="flex items-center gap-3">
-                        {/* Key Badge */}
-                        {song.key && (
-                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-pink-500 text-white font-black text-sm shadow-lg shadow-pink-500/30" title={`Tom: ${song.key}`}>
-                                {song.key}
-                            </div>
-                        )}
-                        
-                        {/* Singer Badge */}
-                        {singer && (
-                            <div className="flex items-center gap-2 pl-1 pr-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
-                                <div className="w-7 h-7 rounded-full bg-purple-900/50 overflow-hidden flex items-center justify-center border border-purple-500/30">
-                                    {singer.photoUrl ? (
-                                        <img src={singer.photoUrl} alt={singer.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-[9px] font-bold text-purple-300">{getInitials(singer.name)}</span>
-                                    )}
-                                </div>
-                                <span className="text-sm font-bold text-slate-200 truncate max-w-[100px]">
-                                    {singer.name.split(' ')[0]}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                    
-                    {/* Buttons */}
-                    <div className="flex gap-3">
-                        {song.lyricsLink ? (
-                            <a 
-                                href={song.lyricsLink} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-black/60 backdrop-blur-sm text-orange-400 hover:bg-orange-900/40 hover:text-orange-300 transition-colors border border-orange-500/30 hover:border-orange-500/50"
-                            >
-                                <FileText size={16} /> Letra
-                            </a>
-                        ) : <div className="flex-1"></div>}
-                        
-                        {song.youtubeLink ? (
-                            <a 
-                                href={song.youtubeLink} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-black/60 backdrop-blur-sm text-red-400 hover:bg-red-900/40 hover:text-red-300 transition-colors border border-red-500/30 hover:border-red-500/50"
-                            >
-                                <Youtube size={16} /> Vídeo
-                            </a>
-                        ) : <div className="flex-1"></div>}
-                    </div>
-                </div>
             </div>
         </div>
     );
@@ -177,7 +173,11 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
 
       setIsDetectingKey(true);
       try {
-          const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+          const apiKey = process.env.GEMINI_API_KEY;
+          if (!apiKey) {
+              throw new Error("GEMINI_API_KEY is not defined");
+          }
+          const ai = new GoogleGenAI({ apiKey });
           const response = await ai.models.generateContent({
               model: 'gemini-3-flash-preview',
               contents: `Identify the original musical key of the song "${title}" by "${artist}". 
@@ -565,12 +565,13 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
                                     <p className="text-sm font-medium">Nenhuma música encontrada.</p>
                                 </div>
                             ) : (
-                                filteredSongs.map(song => {
+                                filteredSongs.map((song, index) => {
                                     const singer = members.find(m => m.id === song.singerId);
                                     return (
                                         <SongCard 
                                             key={song.id} 
                                             song={song} 
+                                            index={index}
                                             singer={singer} 
                                             onEdit={startEditing} 
                                             onRemove={handleRemoveClick} 

@@ -32,6 +32,12 @@ const formatDateTime = (dateString: string) => {
 
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
+const getYoutubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+};
+
 // --- COMPONENTE CUSTOM SELECT PARA MEMBROS ---
 interface MemberSelectProps {
   label: string;
@@ -742,9 +748,26 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                         {viewItem.songs.map((songId, idx) => {
                                                             const song = allSongs.find(s => s.id === songId);
                                                             if (!song) return null;
+                                                            const videoId = getYoutubeId(song.youtubeLink || '');
+                                                            const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
                                                             return (
-                                                                <div key={songId} className="group flex items-center gap-4 p-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg hover:border-pink-200 dark:hover:border-pink-900/50 transition-colors">
-                                                                    <span className="text-xs font-black text-slate-300 w-4">{idx + 1}</span>
+                                                                <div key={songId} className="group flex items-center gap-4 p-2.5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg hover:border-pink-200 dark:hover:border-pink-900/50 transition-colors">
+                                                                    {/* Numbering */}
+                                                                    <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center bg-pink-500 text-white font-black rounded text-[10px] shadow-sm">
+                                                                        {idx + 1}
+                                                                    </div>
+
+                                                                    {/* Small Thumbnail */}
+                                                                    <div className="shrink-0 w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-600 relative">
+                                                                        {thumbUrl ? (
+                                                                            <img src={thumbUrl} alt="" className="w-full h-full object-cover scale-[1.35] transform group-hover:scale-[1.45] transition-transform" />
+                                                                        ) : (
+                                                                            <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
+                                                                                <Music2 size={16} />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+
                                                                     <div className="flex-1 min-w-0">
                                                                         <div className="flex items-center gap-2">
                                                                             <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{song.title}</p>
@@ -755,7 +778,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
                                                                                 </div>
                                                                             )}
                                                                         </div>
-                                                                        <p className="text-xs text-slate-400 uppercase tracking-wide truncate">{song.artist} {song.key && <span className="text-pink-500">• {song.key}</span>}</p>
+                                                                        <p className="text-xs text-slate-400 uppercase tracking-wide truncate">{song.artist} {song.key && <span className="text-pink-500 font-bold">• {song.key}</span>}</p>
                                                                     </div>
                                                                 </div>
                                                             );
