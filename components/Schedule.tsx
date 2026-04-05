@@ -288,7 +288,7 @@ const Schedule: React.FC<ScheduleProps> = ({ schedule, allMembers, allSongs, onD
     // Garante que o ministro esteja entre os cantores (se o usuário removeu o ministro da lista de vocal, limpa)
     let finalLeaderId = editState.worshipLeaderId;
     if (finalLeaderId && !editState.singers.includes(finalLeaderId)) {
-        finalLeaderId = undefined; // Reset if invalid
+        finalLeaderId = null; // Reset if invalid
     }
 
     const updatedBackupSinger = editState.backupSingerId ? allMembers.find(m => m.id === editState.backupSingerId) : undefined;

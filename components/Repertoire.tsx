@@ -177,7 +177,7 @@ const Repertoire: React.FC<RepertoireProps> = ({ songs, members, onAddSong, onUp
 
       setIsDetectingKey(true);
       try {
-          const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+          const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
           const response = await ai.models.generateContent({
               model: 'gemini-3-flash-preview',
               contents: `Identify the original musical key of the song "${title}" by "${artist}". 
